@@ -54,7 +54,7 @@ namespace godot {
 	}
 
 	void FmodGeometry::setup(FMOD::Geometry* p_geometry) {
-		ERR_FAIL_COND_MSG(!p_geometry, "DSP pointer is null");
+		ERR_FAIL_COND_MSG(!p_geometry, "Geometry pointer is null");
 
 		if (geometry) {
 			geometry->setUserData(nullptr);

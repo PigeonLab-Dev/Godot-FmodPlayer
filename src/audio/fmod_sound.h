@@ -89,6 +89,11 @@ namespace godot {
 			FMOD_OPEN_STATE_MAX
 		};
 
+	private:
+		Callable _pcmread_callback;
+		Callable _pcmsetpos_callback;
+		Callable _nonblock_callback;
+
 	protected:
 		static void _bind_methods();
 
@@ -101,6 +106,11 @@ namespace godot {
 		String file_path;
 
 		static Ref<FmodSound> load_from_file(const String& p_path);
+
+		bool sound_is_valid() const;									// 检查声音是否有效
+		bool sound_is_null() const;										// 检查声音是否无效
+
+		void setup(FMOD::Sound* p_sound);
 
 		// 格式信息
 		String get_name() const;										// 获取一个声音的名称
@@ -138,6 +148,21 @@ namespace godot {
 			FmodSystem::FmodTimeUnit time_unit = FmodSystem::FMOD_TIME_UNIT_MS
 		) const;														// 获取嵌入同步点上的信息
 		int get_num_sub_sounds() const;									// 获取一个声音内的子声音数量
+
+		// PCM 读取回调 - 用于用户创建的声音或拦截解码器
+		void set_pcmread_callback(const Callable &p_callback);
+		Callable get_pcmread_callback() const;
+		FMOD_RESULT _handle_pcmread_callback(void *data, unsigned int datalen) const;
+
+		// PCM 设置位置回调 - 用于用户创建的声音或拦截 setPosition
+		void set_pcmsetpos_callback(const Callable &p_callback);
+		Callable get_pcmsetpos_callback() const;
+		FMOD_RESULT _handle_pcmsetpos_callback(int subsound, unsigned int position, FMOD_TIMEUNIT postype) const;
+
+		// 非阻塞加载完成回调
+		void set_nonblock_callback(const Callable &p_callback);
+		Callable get_nonblock_callback() const;
+		FMOD_RESULT _handle_nonblock_callback(FMOD_RESULT result) const;
 	};
 }
 
@@ -146,5 +171,29 @@ VARIANT_ENUM_CAST(FmodSound::FmodSoundFormat);
 VARIANT_ENUM_CAST(FmodSound::FmodTagType);
 VARIANT_ENUM_CAST(FmodSound::FmodTagDataType);
 VARIANT_ENUM_CAST(FmodSound::FmodOpenState);
+
+extern "C" {
+	/*
+	* Godot FMOD Sound 回调函数
+	* 注意: 这些名字加了 gd 前缀以避免与 FMOD 头文件中的 typedef 冲突
+	*/
+	FMOD_RESULT F_CALL GD_FMOD_SOUND_PCMREAD_CALLBACK(
+		FMOD_SOUND* sound,
+		void* data,
+		unsigned int datalen
+	);																	// 读取回调，用于用户创建的声音，或在正常声音开启时拦截 FMOD 解码器
+
+	FMOD_RESULT F_CALL GD_FMOD_SOUND_PCMSETPOS_CALLBACK(
+		FMOD_SOUND* sound,
+		int subsound,
+		unsigned int position,
+		FMOD_TIMEUNIT postype
+	);																	// 为用户创建的声音设置位置回调，或在 API setPositon 调用中拦截 FMOD 解码器
+
+	FMOD_RESULT F_CALL GD_FMOD_SOUND_NONBLOCK_CALLBACK(
+		FMOD_SOUND* sound,
+		FMOD_RESULT result
+	);																	// 回调应在声音加载完成或非阻挡寻道时调用
+}
 
 #endif // !FMOD_SOUND_H

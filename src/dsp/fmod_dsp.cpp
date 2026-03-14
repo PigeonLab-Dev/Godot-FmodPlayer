@@ -96,6 +96,38 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_info"), &FmodDSP::get_info);
 		ClassDB::bind_method(D_METHOD("get_cpu_usage"), &FmodDSP::get_cpu_usage);
 		ClassDB::bind_method(D_METHOD("get_system_object"), &FmodDSP::get_system_object);
+
+		// DSP 回调绑定
+		ClassDB::bind_method(D_METHOD("set_create_callback", "callback"), &FmodDSP::set_create_callback);
+		ClassDB::bind_method(D_METHOD("get_create_callback"), &FmodDSP::get_create_callback);
+		ClassDB::bind_method(D_METHOD("set_release_callback", "callback"), &FmodDSP::set_release_callback);
+		ClassDB::bind_method(D_METHOD("get_release_callback"), &FmodDSP::get_release_callback);
+		ClassDB::bind_method(D_METHOD("set_reset_callback", "callback"), &FmodDSP::set_reset_callback);
+		ClassDB::bind_method(D_METHOD("get_reset_callback"), &FmodDSP::get_reset_callback);
+		ClassDB::bind_method(D_METHOD("set_read_callback", "callback"), &FmodDSP::set_read_callback);
+		ClassDB::bind_method(D_METHOD("get_read_callback"), &FmodDSP::get_read_callback);
+		ClassDB::bind_method(D_METHOD("set_process_callback", "callback"), &FmodDSP::set_process_callback);
+		ClassDB::bind_method(D_METHOD("get_process_callback"), &FmodDSP::get_process_callback);
+		ClassDB::bind_method(D_METHOD("set_setposition_callback", "callback"), &FmodDSP::set_setposition_callback);
+		ClassDB::bind_method(D_METHOD("get_setposition_callback"), &FmodDSP::get_setposition_callback);
+		ClassDB::bind_method(D_METHOD("set_setparam_float_callback", "callback"), &FmodDSP::set_setparam_float_callback);
+		ClassDB::bind_method(D_METHOD("get_setparam_float_callback"), &FmodDSP::get_setparam_float_callback);
+		ClassDB::bind_method(D_METHOD("set_setparam_int_callback", "callback"), &FmodDSP::set_setparam_int_callback);
+		ClassDB::bind_method(D_METHOD("get_setparam_int_callback"), &FmodDSP::get_setparam_int_callback);
+		ClassDB::bind_method(D_METHOD("set_setparam_bool_callback", "callback"), &FmodDSP::set_setparam_bool_callback);
+		ClassDB::bind_method(D_METHOD("get_setparam_bool_callback"), &FmodDSP::get_setparam_bool_callback);
+		ClassDB::bind_method(D_METHOD("set_setparam_data_callback", "callback"), &FmodDSP::set_setparam_data_callback);
+		ClassDB::bind_method(D_METHOD("get_setparam_data_callback"), &FmodDSP::get_setparam_data_callback);
+		ClassDB::bind_method(D_METHOD("set_getparam_float_callback", "callback"), &FmodDSP::set_getparam_float_callback);
+		ClassDB::bind_method(D_METHOD("get_getparam_float_callback"), &FmodDSP::get_getparam_float_callback);
+		ClassDB::bind_method(D_METHOD("set_getparam_int_callback", "callback"), &FmodDSP::set_getparam_int_callback);
+		ClassDB::bind_method(D_METHOD("get_getparam_int_callback"), &FmodDSP::get_getparam_int_callback);
+		ClassDB::bind_method(D_METHOD("set_getparam_bool_callback", "callback"), &FmodDSP::set_getparam_bool_callback);
+		ClassDB::bind_method(D_METHOD("get_getparam_bool_callback"), &FmodDSP::get_getparam_bool_callback);
+		ClassDB::bind_method(D_METHOD("set_getparam_data_callback", "callback"), &FmodDSP::set_getparam_data_callback);
+		ClassDB::bind_method(D_METHOD("get_getparam_data_callback"), &FmodDSP::get_getparam_data_callback);
+		ClassDB::bind_method(D_METHOD("set_shouldiprocess_callback", "callback"), &FmodDSP::set_shouldiprocess_callback);
+		ClassDB::bind_method(D_METHOD("get_shouldiprocess_callback"), &FmodDSP::get_shouldiprocess_callback);
 	}
 
 	FmodDSP::FmodDSP() {
@@ -107,9 +139,14 @@ namespace godot {
 			dsp->setCallback(nullptr);
 			dsp = nullptr;
 		}
+		// 释放自定义 DSP 描述符
+		if (dsp_description) {
+			memdelete(dsp_description);
+			dsp_description = nullptr;
+		}
 	}
 
-	void FmodDSP::setup(FMOD::DSP* p_dsp) {
+	void FmodDSP::setup(FMOD::DSP* p_dsp, FMOD_DSP_DESCRIPTION* p_desc) {
 		ERR_FAIL_COND_MSG(!p_dsp, "DSP pointer is null");
 
 		// 如果已经有 DSP，先清理旧的
@@ -121,11 +158,17 @@ namespace godot {
 		}
 		dsp = p_dsp;
 		dsp->setUserData(this);
+		
+		// 保存描述符指针（如果是自定义 DSP）
+		if (p_desc) {
+			dsp_description = p_desc;
+		}
+		
 		FMOD_DSP_TYPE dsp_type;
 		if (dsp->getType(&dsp_type) == FMOD_OK) {
 			if (dsp_type == FMOD_DSP_TYPE_UNKNOWN) {
-				// 可能是自定义 DSP，需要设置回调
-				dsp->setCallback(fmod_dsp_callback);  // 需要定义这个回调
+				// 可能是自定义 DSP，需要设置通用回调
+				dsp->setCallback(GD_FMOD_DSP_CALLBACK);
 				callbacks_set = true;
 			}
 		}
@@ -631,46 +674,492 @@ namespace godot {
 		system->system = system_ptr;
 		return system;
 	}
+
+	// GDScript 回调设置方法实现
+	void FmodDSP::set_create_callback(const Callable &p_callback) {
+		_create_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_create_callback() const {
+		return _create_callback;
+	}
+
+	void FmodDSP::set_release_callback(const Callable &p_callback) {
+		_release_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_release_callback() const {
+		return _release_callback;
+	}
+
+	void FmodDSP::set_reset_callback(const Callable &p_callback) {
+		_reset_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_reset_callback() const {
+		return _reset_callback;
+	}
+
+	void FmodDSP::set_read_callback(const Callable &p_callback) {
+		_read_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_read_callback() const {
+		return _read_callback;
+	}
+
+	void FmodDSP::set_process_callback(const Callable &p_callback) {
+		_process_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_process_callback() const {
+		return _process_callback;
+	}
+
+	void FmodDSP::set_setposition_callback(const Callable &p_callback) {
+		_setposition_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_setposition_callback() const {
+		return _setposition_callback;
+	}
+
+	void FmodDSP::set_setparam_float_callback(const Callable &p_callback) {
+		_setparam_float_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_setparam_float_callback() const {
+		return _setparam_float_callback;
+	}
+
+	void FmodDSP::set_setparam_int_callback(const Callable &p_callback) {
+		_setparam_int_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_setparam_int_callback() const {
+		return _setparam_int_callback;
+	}
+
+	void FmodDSP::set_setparam_bool_callback(const Callable &p_callback) {
+		_setparam_bool_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_setparam_bool_callback() const {
+		return _setparam_bool_callback;
+	}
+
+	void FmodDSP::set_setparam_data_callback(const Callable &p_callback) {
+		_setparam_data_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_setparam_data_callback() const {
+		return _setparam_data_callback;
+	}
+
+	void FmodDSP::set_getparam_float_callback(const Callable &p_callback) {
+		_getparam_float_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_getparam_float_callback() const {
+		return _getparam_float_callback;
+	}
+
+	void FmodDSP::set_getparam_int_callback(const Callable &p_callback) {
+		_getparam_int_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_getparam_int_callback() const {
+		return _getparam_int_callback;
+	}
+
+	void FmodDSP::set_getparam_bool_callback(const Callable &p_callback) {
+		_getparam_bool_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_getparam_bool_callback() const {
+		return _getparam_bool_callback;
+	}
+
+	void FmodDSP::set_getparam_data_callback(const Callable &p_callback) {
+		_getparam_data_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_getparam_data_callback() const {
+		return _getparam_data_callback;
+	}
+
+	void FmodDSP::set_shouldiprocess_callback(const Callable &p_callback) {
+		_shouldiprocess_callback = p_callback;
+	}
+
+	Callable FmodDSP::get_shouldiprocess_callback() const {
+		return _shouldiprocess_callback;
+	}
+
+	// 回调处理函数实现
+	FMOD_RESULT FmodDSP::_handle_create(FMOD_DSP_STATE* dsp_state) {
+		// 分配状态内存
+		MyDSPState* state = (MyDSPState*)FMOD_DSP_ALLOC(dsp_state, sizeof(MyDSPState));
+		if (!state) return FMOD_ERR_MEMORY;
+
+		// 初始化默认值
+		state->gain = 1.0f;
+		state->bypass = false;
+		state->sample_rate = 0;
+
+		// 存储状态指针
+		dsp_state->instance = (void*)state;
+
+		if (_create_callback.is_valid()) {
+			const Variant ret = _create_callback.call();
+			if (ret.get_type() == Variant::INT) {
+				return static_cast<FMOD_RESULT>(int(ret));
+			}
+		}
+		return FMOD_OK;
+	}
+
+	FMOD_RESULT FmodDSP::_handle_release(FMOD_DSP_STATE* dsp_state) {
+		if (_release_callback.is_valid()) {
+			const Variant ret = _release_callback.call();
+			if (ret.get_type() == Variant::INT) {
+				return static_cast<FMOD_RESULT>(int(ret));
+			}
+		}
+		if (dsp_state && dsp_state->instance) {
+			FMOD_DSP_FREE(dsp_state, dsp_state->instance);
+			dsp_state->instance = nullptr;
+		}
+		return FMOD_OK;
+	}
+
+	FMOD_RESULT FmodDSP::_handle_reset(FMOD_DSP_STATE* dsp_state) {
+		if (_reset_callback.is_valid()) {
+			const Variant ret = _reset_callback.call();
+			if (ret.get_type() == Variant::INT) {
+				return static_cast<FMOD_RESULT>(int(ret));
+			}
+		}
+		return FMOD_OK;
+	}
+
+	FMOD_RESULT FmodDSP::_handle_read(FMOD_DSP_STATE* dsp_state, float* inbuffer, float* outbuffer, unsigned int length, int inchannels, int* outchannels) {
+		if (_read_callback.is_valid()) {
+			// 将输入缓冲区转为 PackedFloat32Array
+			PackedFloat32Array in_array;
+			in_array.resize(length * inchannels);
+			memcpy(in_array.ptrw(), inbuffer, length * inchannels * sizeof(float));
+
+			const Variant ret = _read_callback.call(in_array, length, inchannels);
+			if (ret.get_type() == Variant::DICTIONARY) {
+				Dictionary result = ret;
+				if (result.has("output")) {
+					PackedFloat32Array out_array = result["output"];
+					memcpy(outbuffer, out_array.ptr(), out_array.size() * sizeof(float));
+				}
+				if (result.has("outchannels")) {
+					*outchannels = result["outchannels"];
+				}
+				if (result.has("result")) {
+					return static_cast<FMOD_RESULT>(int(result["result"]));
+				}
+			}
+		}
+		// 默认：直接复制
+		memcpy(outbuffer, inbuffer, length * inchannels * sizeof(float));
+		*outchannels = inchannels;
+		return FMOD_OK;
+	}
+
+	FMOD_RESULT FmodDSP::_handle_process(FMOD_DSP_STATE* dsp_state, unsigned int length, const FMOD_DSP_BUFFER_ARRAY* inbufferarray, FMOD_DSP_BUFFER_ARRAY* outbufferarray, FMOD_BOOL inputsidle, FMOD_DSP_PROCESS_OPERATION op) {
+		if (_process_callback.is_valid()) {
+			Dictionary in_buffers;
+			for (int i = 0; i < inbufferarray->numbuffers; i++) {
+				PackedFloat32Array arr;
+				arr.resize(length * inbufferarray->buffernumchannels[i]);
+				memcpy(arr.ptrw(), inbufferarray->buffers[i], length * inbufferarray->buffernumchannels[i] * sizeof(float));
+				in_buffers[i] = arr;
+			}
+
+			const Variant ret = _process_callback.call(length, in_buffers, inputsidle != 0, op);
+			if (ret.get_type() == Variant::DICTIONARY) {
+				Dictionary result = ret;
+				if (result.has("outbuffers")) {
+					Dictionary out_buffers = result["outbuffers"];
+					for (int i = 0; i < outbufferarray->numbuffers; i++) {
+						if (out_buffers.has(i)) {
+							PackedFloat32Array arr = out_buffers[i];
+							memcpy(outbufferarray->buffers[i], arr.ptr(), arr.size() * sizeof(float));
+						}
+					}
+				}
+				if (result.has("outchannels")) {
+					Array channels = result["outchannels"];
+					for (int i = 0; i < channels.size() && i < outbufferarray->numbuffers; i++) {
+						outbufferarray->buffernumchannels[i] = channels[i];
+					}
+				}
+				if (result.has("result")) {
+					return static_cast<FMOD_RESULT>(int(result["result"]));
+				}
+			}
+		}
+		return FMOD_OK;
+	}
+
+	FMOD_RESULT FmodDSP::_handle_setposition(FMOD_DSP_STATE* dsp_state, unsigned int pos) {
+		if (_setposition_callback.is_valid()) {
+			const Variant ret = _setposition_callback.call(pos);
+			if (ret.get_type() == Variant::INT) {
+				return static_cast<FMOD_RESULT>(int(ret));
+			}
+		}
+		return FMOD_OK;
+	}
+
+	FMOD_RESULT FmodDSP::_handle_setparam_float(FMOD_DSP_STATE* dsp_state, int index, float value) {
+		if (_setparam_float_callback.is_valid()) {
+			const Variant ret = _setparam_float_callback.call(index, value);
+			if (ret.get_type() == Variant::INT) {
+				return static_cast<FMOD_RESULT>(int(ret));
+			}
+		}
+		return FMOD_OK;
+	}
+
+	FMOD_RESULT FmodDSP::_handle_setparam_int(FMOD_DSP_STATE* dsp_state, int index, int value) {
+		if (_setparam_int_callback.is_valid()) {
+			const Variant ret = _setparam_int_callback.call(index, value);
+			if (ret.get_type() == Variant::INT) {
+				return static_cast<FMOD_RESULT>(int(ret));
+			}
+		}
+		return FMOD_OK;
+	}
+
+	FMOD_RESULT FmodDSP::_handle_setparam_bool(FMOD_DSP_STATE* dsp_state, int index, FMOD_BOOL value) {
+		if (_setparam_bool_callback.is_valid()) {
+			const Variant ret = _setparam_bool_callback.call(index, value != 0);
+			if (ret.get_type() == Variant::INT) {
+				return static_cast<FMOD_RESULT>(int(ret));
+			}
+		}
+		return FMOD_OK;
+	}
+
+	FMOD_RESULT FmodDSP::_handle_setparam_data(FMOD_DSP_STATE* dsp_state, int index, void* data, unsigned int length) {
+		if (_setparam_data_callback.is_valid()) {
+			PackedByteArray arr;
+			arr.resize(length);
+			memcpy(arr.ptrw(), data, length);
+			const Variant ret = _setparam_data_callback.call(index, arr);
+			if (ret.get_type() == Variant::INT) {
+				return static_cast<FMOD_RESULT>(int(ret));
+			}
+		}
+		return FMOD_OK;
+	}
+
+	FMOD_RESULT FmodDSP::_handle_getparam_float(FMOD_DSP_STATE* dsp_state, int index, float* value, char* valuestr) {
+		if (_getparam_float_callback.is_valid()) {
+			const Variant ret = _getparam_float_callback.call(index);
+			if (ret.get_type() == Variant::DICTIONARY) {
+				Dictionary result = ret;
+				if (result.has("value")) {
+					*value = result["value"];
+				}
+				if (result.has("valuestr")) {
+					String str = result["valuestr"];
+					memcpy(valuestr, str.utf8().get_data(), str.length() + 1);
+				}
+				if (result.has("result")) {
+					return static_cast<FMOD_RESULT>(int(result["result"]));
+				}
+			}
+		}
+		return FMOD_OK;
+	}
+
+	FMOD_RESULT FmodDSP::_handle_getparam_int(FMOD_DSP_STATE* dsp_state, int index, int* value, char* valuestr) {
+		if (_getparam_int_callback.is_valid()) {
+			const Variant ret = _getparam_int_callback.call(index);
+			if (ret.get_type() == Variant::DICTIONARY) {
+				Dictionary result = ret;
+				if (result.has("value")) {
+					*value = result["value"];
+				}
+				if (result.has("valuestr")) {
+					String str = result["valuestr"];
+					memcpy(valuestr, str.utf8().get_data(), str.length() + 1);
+				}
+				if (result.has("result")) {
+					return static_cast<FMOD_RESULT>(int(result["result"]));
+				}
+			}
+		}
+		return FMOD_OK;
+	}
+
+	FMOD_RESULT FmodDSP::_handle_getparam_bool(FMOD_DSP_STATE* dsp_state, int index, FMOD_BOOL* value, char* valuestr) {
+		if (_getparam_bool_callback.is_valid()) {
+			const Variant ret = _getparam_bool_callback.call(index);
+			if (ret.get_type() == Variant::DICTIONARY) {
+				Dictionary result = ret;
+				if (result.has("value")) {
+					*value = bool(result["value"]) ? 1 : 0;
+				}
+				if (result.has("valuestr")) {
+					String str = result["valuestr"];
+					memcpy(valuestr, str.utf8().get_data(), str.length() + 1);
+				}
+				if (result.has("result")) {
+					return static_cast<FMOD_RESULT>(int(result["result"]));
+				}
+			}
+		}
+		return FMOD_OK;
+	}
+
+	FMOD_RESULT FmodDSP::_handle_getparam_data(FMOD_DSP_STATE* dsp_state, int index, void** data, unsigned int* length, char* valuestr) {
+		if (_getparam_data_callback.is_valid()) {
+			const Variant ret = _getparam_data_callback.call(index);
+			if (ret.get_type() == Variant::DICTIONARY) {
+				Dictionary result = ret;
+				if (result.has("data")) {
+					PackedByteArray arr = result["data"];
+					*length = arr.size();
+					// 注意：这里只是返回指针，需要确保数据生命周期
+					*data = arr.ptrw();
+				}
+				if (result.has("valuestr")) {
+					String str = result["valuestr"];
+					memcpy(valuestr, str.utf8().get_data(), str.length() + 1);
+				}
+				if (result.has("result")) {
+					return static_cast<FMOD_RESULT>(int(result["result"]));
+				}
+			}
+		}
+		return FMOD_OK;
+	}
+
+	FMOD_RESULT FmodDSP::_handle_shouldiprocess(FMOD_DSP_STATE* dsp_state, FMOD_BOOL inputsidle, unsigned int length, FMOD_CHANNELMASK inmask, int inchannels, FMOD_SPEAKERMODE speakermode) {
+		if (_shouldiprocess_callback.is_valid()) {
+			const Variant ret = _shouldiprocess_callback.call(inputsidle != 0, length, inmask, inchannels, speakermode);
+			if (ret.get_type() == Variant::INT) {
+				return static_cast<FMOD_RESULT>(int(ret));
+			}
+		}
+		return FMOD_OK;
+	}
 }
 
-// 回调函数实现
-FMOD_RESULT F_CALL fmod_dsp_callback(
+// Helper function to get FmodDSP from DSP state
+godot::FmodDSP* get_dsp_from_state(FMOD_DSP_STATE* dsp_state) {
+	if (!dsp_state) return nullptr;
+	void* user_data = nullptr;
+	FMOD_RESULT result = FMOD_DSP_GETUSERDATA(dsp_state, &user_data);
+	if (result != FMOD_OK || !user_data) return nullptr;
+	return static_cast<godot::FmodDSP*>(user_data);
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_CALLBACK(
 	FMOD_DSP* dsp,
 	FMOD_DSP_CALLBACK_TYPE type,
 	void* data
 ) {
-	return FMOD_OK;
+	// 通用回调分发
+	if (!dsp) return FMOD_ERR_INVALID_PARAM;
+	
+	void* user_data = nullptr;
+	FMOD::DSP* dsp_cpp = reinterpret_cast<FMOD::DSP*>(dsp);
+	FMOD_RESULT result = dsp_cpp->getUserData(&user_data);
+	if (result != FMOD_OK || !user_data) return FMOD_OK;
+	
+	godot::FmodDSP* fmod_dsp = static_cast<godot::FmodDSP*>(user_data);
+	
+	// FMOD_DSP_CALLBACK_TYPE 只包含 DATAPARAMETERRELEASE 类型
+	// CREATE/RELEASE 等回调是通过 DSP 描述符中的独立函数指针设置的
+	switch (type) {
+		case FMOD_DSP_CALLBACK_DATAPARAMETERRELEASE:
+			// 数据参数释放回调
+			return FMOD_OK;
+		default:
+			return FMOD_OK;
+	}
 }
 
-FMOD_RESULT F_CALL fmod_dsp_create_callback(FMOD_DSP_STATE* dsp_state) {
-	// 分配状态内存
+FMOD_RESULT F_CALL GD_FMOD_DSP_CREATE_CALLBACK(FMOD_DSP_STATE* dsp_state) {
+	// CREATE 回调在 DSP 创建时调用，此时 UserData 还未设置
+	// 所以使用默认实现
 	MyDSPState* state = (MyDSPState*)FMOD_DSP_ALLOC(dsp_state, sizeof(MyDSPState));
 	if (!state) return FMOD_ERR_MEMORY;
 
-	// 初始化默认值
 	state->gain = 1.0f;
 	state->bypass = false;
-	state->sample_rate = 0; // 会在 process 中获取
+	state->sample_rate = 0;
 
-	// 存储状态指针
 	dsp_state->instance = (void*)state;
-
-	godot::UtilityFunctions::print("DSP Created");
 	return FMOD_OK;
 }
 
-FMOD_RESULT F_CALL fmod_dsp_process_callback(
+FMOD_RESULT F_CALL GD_FMOD_DSP_RELEASE_CALLBACK(FMOD_DSP_STATE* dsp_state) {
+	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
+	if (dsp) {
+		return dsp->_handle_release(dsp_state);
+	}
+	// 默认清理
+	if (dsp_state && dsp_state->instance) {
+		FMOD_DSP_FREE(dsp_state, dsp_state->instance);
+		dsp_state->instance = nullptr;
+	}
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_RESET_CALLBACK(
+	FMOD_DSP_STATE* dsp_state
+) {
+	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
+	if (dsp) {
+		return dsp->_handle_reset(dsp_state);
+	}
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_READ_CALLBACK(
+	FMOD_DSP_STATE* dsp_state,
+	float* inbuffer,
+	float* outbuffer,
+	unsigned int length,
+	int inchannels,
+	int* outchannels
+) {
+	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
+	if (dsp) {
+		return dsp->_handle_read(dsp_state, inbuffer, outbuffer, length, inchannels, outchannels);
+	}
+	// 默认：直接复制
+	if (inbuffer && outbuffer) {
+		memcpy(outbuffer, inbuffer, length * inchannels * sizeof(float));
+	}
+	*outchannels = inchannels;
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_PROCESS_CALLBACK(
 	FMOD_DSP_STATE* dsp_state,
 	unsigned int length,
 	const FMOD_DSP_BUFFER_ARRAY* inbufferarray,
 	FMOD_DSP_BUFFER_ARRAY* outbufferarray,
 	FMOD_BOOL inputsidle,
 	FMOD_DSP_PROCESS_OPERATION op) {
-
-	// 获取状态数据
-	MyDSPState* state = (MyDSPState*)dsp_state->instance;
-
-	// 如果是 QUERY 阶段，只需要设置输出格式
+	
+	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
+	if (dsp) {
+		return dsp->_handle_process(dsp_state, length, inbufferarray, outbufferarray, inputsidle, op);
+	}
+	
+	// 默认处理
 	if (op == FMOD_DSP_PROCESS_QUERY) {
 		outbufferarray->buffernumchannels[0] = inbufferarray->buffernumchannels[0];
 		outbufferarray->bufferchannelmask[0] = inbufferarray->bufferchannelmask[0];
@@ -678,36 +1167,161 @@ FMOD_RESULT F_CALL fmod_dsp_process_callback(
 		return FMOD_OK;
 	}
 
-	// PERFORM 阶段，实际处理音频
 	if (op == FMOD_DSP_PROCESS_PERFORM) {
-		// 如果旁路，直接拷贝数据
-		if (state->bypass) {
-			memcpy(outbufferarray->buffers[0], inbufferarray->buffers[0],
-				length * inbufferarray->buffernumchannels[0] * sizeof(float));
-			return FMOD_OK;
-		}
-
-		// 获取输入输出指针
-		float* in = (float*)inbufferarray->buffers[0];
-		float* out = (float*)outbufferarray->buffers[0];
-		int num_channels = inbufferarray->buffernumchannels[0];
-
-		// 应用增益
-		for (unsigned int i = 0; i < length * num_channels; i++) {
-			out[i] = in[i] * state->gain;
-		}
-
+		memcpy(outbufferarray->buffers[0], inbufferarray->buffers[0],
+			length * inbufferarray->buffernumchannels[0] * sizeof(float));
 		return FMOD_OK;
 	}
 
 	return FMOD_OK;
 }
 
-FMOD_RESULT F_CALL fmod_dsp_release_callback(FMOD_DSP_STATE* dsp_state) {
-	if (dsp_state && dsp_state->instance) {
-		FMOD_DSP_FREE(dsp_state, dsp_state->instance);
-		dsp_state->instance = nullptr;
+FMOD_RESULT F_CALL GD_FMOD_DSP_SETPOSITION_CALLBACK(
+	FMOD_DSP_STATE* dsp_state,
+	unsigned int pos
+) {
+	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
+	if (dsp) {
+		return dsp->_handle_setposition(dsp_state, pos);
 	}
-	godot::UtilityFunctions::print("DSP Released");
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_SETPARAM_FLOAT_CALLBACK(
+	FMOD_DSP_STATE* dsp_state,
+	int index,
+	float value
+) {
+	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
+	if (dsp) {
+		return dsp->_handle_setparam_float(dsp_state, index, value);
+	}
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_SETPARAM_INT_CALLBACK(
+	FMOD_DSP_STATE* dsp_state,
+	int index,
+	int value
+) {
+	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
+	if (dsp) {
+		return dsp->_handle_setparam_int(dsp_state, index, value);
+	}
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_SETPARAM_BOOL_CALLBACK(
+	FMOD_DSP_STATE* dsp_state,
+	int index,
+	FMOD_BOOL value
+) {
+	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
+	if (dsp) {
+		return dsp->_handle_setparam_bool(dsp_state, index, value);
+	}
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_SETPARAM_DATA_CALLBACK(
+	FMOD_DSP_STATE* dsp_state,
+	int index,
+	void* data,
+	unsigned int length
+) {
+	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
+	if (dsp) {
+		return dsp->_handle_setparam_data(dsp_state, index, data, length);
+	}
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_GETPARAM_FLOAT_CALLBACK(
+	FMOD_DSP_STATE* dsp_state,
+	int index,
+	float* value,
+	char* valuestr
+) {
+	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
+	if (dsp) {
+		return dsp->_handle_getparam_float(dsp_state, index, value, valuestr);
+	}
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_GETPARAM_INT_CALLBACK(
+	FMOD_DSP_STATE* dsp_state,
+	int index,
+	int* value,
+	char* valuestr
+) {
+	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
+	if (dsp) {
+		return dsp->_handle_getparam_int(dsp_state, index, value, valuestr);
+	}
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_GETPARAM_BOOL_CALLBACK(
+	FMOD_DSP_STATE* dsp_state,
+	int index,
+	FMOD_BOOL* value,
+	char* valuestr
+) {
+	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
+	if (dsp) {
+		return dsp->_handle_getparam_bool(dsp_state, index, value, valuestr);
+	}
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_GETPARAM_DATA_CALLBACK(
+	FMOD_DSP_STATE* dsp_state,
+	int index,
+	void** data,
+	unsigned int* length,
+	char* valuestr
+) {
+	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
+	if (dsp) {
+		return dsp->_handle_getparam_data(dsp_state, index, data, length, valuestr);
+	}
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_SHOULDIPROCESS_CALLBACK(
+	FMOD_DSP_STATE* dsp_state,
+	FMOD_BOOL inputsidle,
+	unsigned int length,
+	FMOD_CHANNELMASK inmask,
+	int inchannels,
+	FMOD_SPEAKERMODE speakermode
+) {
+	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
+	if (dsp) {
+		return dsp->_handle_shouldiprocess(dsp_state, inputsidle, length, inmask, inchannels, speakermode);
+	}
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_SYSTEM_REGISTER_CALLBACK(
+	FMOD_DSP_STATE* dsp_state
+) {
+	// 系统级回调，不通过 FmodDSP 实例处理
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_SYSTEM_DEREGISTER_CALLBACK(
+	FMOD_DSP_STATE* dsp_state
+) {
+	// 系统级回调，不通过 FmodDSP 实例处理
+	return FMOD_OK;
+}
+
+FMOD_RESULT F_CALL GD_FMOD_DSP_SYSTEM_MIX_CALLBACK(
+	FMOD_DSP_STATE* dsp_state,
+	int stage
+) {
+	// 系统级混音回调，不通过 FmodDSP 实例处理
 	return FMOD_OK;
 }

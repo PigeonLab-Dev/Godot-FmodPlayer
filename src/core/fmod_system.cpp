@@ -762,14 +762,14 @@ namespace godot {
 		FMOD_ERR_CHECK_V(system->getVersion(&version, &buildnumber), Dictionary());
 		Dictionary result;
 		unsigned int product = 0, major = 0, minor = 0;
-		product = (version >> 16) & 0xFFFF;		// 产品版本号(高16位)
-		major = (version >> 8) & 0xFF;			// 主要版本号(中间8位)
-		minor = version & 0xFF;					// 次要版本号(低8位)
+		product = (version >> 16) & 0xFFFF;									// 产品版本号 (高 16 位)
+		major = (version >> 8) & 0xFF;										// 主要版本号 (中间 8 位)
+		minor = version & 0xFF;												// 次要版本号 (低 8 位)
 		String version_str = vformat("%x.%x.%x", product, major, minor);
 		result["version"] = version_str;
-		product = (buildnumber >> 16) & 0xFFFF; // 产品版本号(高16位)
-		major = (buildnumber >> 8) & 0xFF;      // 主要版本号(中间8位)
-		minor = buildnumber & 0xFF;             // 次要版本号(低8位)
+		product = (buildnumber >> 16) & 0xFFFF;								// 产品版本号 (高 16 位)
+		major = (buildnumber >> 8) & 0xFF;									// 主要版本号 (中间 8 位)
+		minor = buildnumber & 0xFF;											// 次要版本号 (低 8 位)
 		String buildnumber_str = vformat("%x.%x.%x", product, major, minor);
 		result["build_number"] = buildnumber_str;
 		return result;
@@ -835,7 +835,7 @@ namespace godot {
 		FMOD_ERR_CHECK_V(system->getSpeakerModeChannels(fmod_target, &target_channels), PackedFloat32Array());
 		int needed_size = source_channels * target_channels;
 
-		// 若用户指定array_length，使用需要的尺寸
+		// 若用户指定 array_length，使用需要的尺寸
 		if (arr_len <= 0) {
 			arr_len = needed_size;
 		}
@@ -864,7 +864,7 @@ namespace godot {
 			return PackedFloat32Array();
 		}
 
-		// 转换为PackedFloat32Array
+		// 转换为 PackedFloat32Array
 		PackedFloat32Array mix_matrix;
 
 		// 只复制实际需要的数据
@@ -908,13 +908,14 @@ namespace godot {
 
 		Ref<FmodSound> fmod_sound;
 		fmod_sound.instantiate();
-		fmod_sound->sound = sound_ptr;
+		fmod_sound->setup(sound_ptr);
 		return fmod_sound;
 	}
 
 	Ref<FmodSound> FmodSystem::create_sound_from_memory(const PackedByteArray& data, unsigned int mode) {
 		ERR_FAIL_COND_V(!system || data.is_empty(), Ref<FmodSound>());
 
+		FMOD::Sound* sound_ptr = nullptr;
 		Ref<FmodSound> sound;
 		sound.instantiate();
 		sound->data = data;
@@ -926,9 +927,10 @@ namespace godot {
 			(const char*)sound->data.ptr(),
 			mode,
 			&exinfo,
-			&sound->sound
+			&sound_ptr
 		), Ref<FmodSound>());
 
+		sound->setup(sound_ptr);
 		return sound;
 	}
 
@@ -971,25 +973,46 @@ namespace godot {
 	Ref<FmodDSP> FmodSystem::create_dsp(const String& name) const {
 		ERR_FAIL_COND_V(!system, Ref<FmodDSP>());
 
-		// 创建动态 DSP 描述结构 (需保持有效，因为 FMOD 内部会引用)
-		static FMOD_DSP_DESCRIPTION desc = {};
-		desc.pluginsdkversion = FMOD_PLUGIN_SDK_VERSION;
-		strcpy(desc.name, name.utf8().get_data());
-		desc.numinputbuffers = 1;
-		desc.numoutputbuffers = 1;
-		desc.create = fmod_dsp_create_callback;
-		desc.process = fmod_dsp_process_callback;
-		desc.release = fmod_dsp_release_callback;
+		// 创建动态 DSP 描述结构
+		// 注意：FMOD 会保留指向此描述的指针，因此它必须在 DSP 生命周期内保持有效
+		// 我们将描述存储在 FmodDSP 对象中，以便自动管理生命周期
+		FMOD_DSP_DESCRIPTION* desc = memnew(FMOD_DSP_DESCRIPTION);
+		memset(desc, 0, sizeof(FMOD_DSP_DESCRIPTION));
+		
+		desc->pluginsdkversion = FMOD_PLUGIN_SDK_VERSION;
+		strncpy(desc->name, name.utf8().get_data(), sizeof(desc->name) - 1);
+		desc->numinputbuffers = 1;
+		desc->numoutputbuffers = 1;
+		
+		// 使用 fmod_dsp.cpp 中定义的回调函数
+		// 这些回调会通过 userdata 找到 FmodDSP 实例并调用 GDScript Callable
+		desc->create = GD_FMOD_DSP_CREATE_CALLBACK;
+		desc->release = GD_FMOD_DSP_RELEASE_CALLBACK;
+		desc->reset = GD_FMOD_DSP_RESET_CALLBACK;
+		desc->read = GD_FMOD_DSP_READ_CALLBACK;
+		desc->process = GD_FMOD_DSP_PROCESS_CALLBACK;
+		desc->setposition = GD_FMOD_DSP_SETPOSITION_CALLBACK;
+		desc->setparameterfloat = GD_FMOD_DSP_SETPARAM_FLOAT_CALLBACK;
+		desc->setparameterint = GD_FMOD_DSP_SETPARAM_INT_CALLBACK;
+		desc->setparameterbool = GD_FMOD_DSP_SETPARAM_BOOL_CALLBACK;
+		desc->setparameterdata = GD_FMOD_DSP_SETPARAM_DATA_CALLBACK;
+		desc->getparameterfloat = GD_FMOD_DSP_GETPARAM_FLOAT_CALLBACK;
+		desc->getparameterint = GD_FMOD_DSP_GETPARAM_INT_CALLBACK;
+		desc->getparameterbool = GD_FMOD_DSP_GETPARAM_BOOL_CALLBACK;
+		desc->getparameterdata = GD_FMOD_DSP_GETPARAM_DATA_CALLBACK;
+		desc->shouldiprocess = GD_FMOD_DSP_SHOULDIPROCESS_CALLBACK;
 
 		FMOD::DSP* dsp_ptr = nullptr;
-		FMOD_ERR_CHECK_V(system->createDSP(
-			&desc,
-			&dsp_ptr
-		), Ref<FmodDSP>());
+		FMOD_RESULT result = system->createDSP(desc, &dsp_ptr);
+		if (result != FMOD_OK) {
+			memdelete(desc);
+			FMOD_ERR_CHECK(result);
+			return Ref<FmodDSP>();
+		}
 
 		Ref<FmodDSP> dsp;
 		dsp.instantiate();
-		dsp->setup(dsp_ptr);
+		dsp->setup(dsp_ptr, desc);  // 传递描述符以便管理生命周期
 		return dsp;
 	}
 

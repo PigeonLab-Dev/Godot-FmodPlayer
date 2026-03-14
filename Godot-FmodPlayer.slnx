@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="Godot-FmodStreamPlayer.vcxproj" Id="6228e52d-1648-414c-99e4-7f84c6ec79b3" />
+  <Project Path="Godot-FmodPlayer.vcxproj" Id="6228e52d-1648-414c-99e4-7f84c6ec79b3" />
 </Solution>

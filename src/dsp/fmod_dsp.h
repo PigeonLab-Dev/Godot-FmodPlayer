@@ -3,6 +3,7 @@
 
 #include "core/fmod_system.h"
 #include <godot_cpp/classes/ref_counted.hpp>
+#include <fmod_dsp.h>  // FMOD DSP 头文件
 
 namespace godot {
 	class FmodDSPConnection;
@@ -12,6 +13,23 @@ namespace godot {
 
 	private:
 		bool callbacks_set = false;                                                     // 记录是否设置了回调
+
+		// GDScript 回调
+		Callable _create_callback;
+		Callable _release_callback;
+		Callable _reset_callback;
+		Callable _read_callback;
+		Callable _process_callback;
+		Callable _setposition_callback;
+		Callable _setparam_float_callback;
+		Callable _setparam_int_callback;
+		Callable _setparam_bool_callback;
+		Callable _setparam_data_callback;
+		Callable _getparam_float_callback;
+		Callable _getparam_int_callback;
+		Callable _getparam_bool_callback;
+		Callable _getparam_data_callback;
+		Callable _shouldiprocess_callback;
 
 	protected:
 		static void _bind_methods();
@@ -73,8 +91,9 @@ namespace godot {
 		};
 
 		FMOD::DSP* dsp = nullptr;
+		FMOD_DSP_DESCRIPTION* dsp_description = nullptr;  // 用于自定义 DSP，管理描述符生命周期
 
-		void setup(FMOD::DSP* p_dsp);
+		void setup(FMOD::DSP* p_dsp, FMOD_DSP_DESCRIPTION* p_desc = nullptr);
 
 		// 连接
 		Ref<FmodDSPConnection> add_input(
@@ -138,6 +157,69 @@ namespace godot {
 		Dictionary get_info() const;                                                    // 获取 DSP 单元的信息
 		Dictionary get_cpu_usage() const;                                               // 获取该设备混合线程 CPU 使用率的统计数据
 		FmodSystem* get_system_object() const;                                          // 获取父系统对象
+
+		// DSP 回调设置
+		void set_create_callback(const Callable &p_callback);
+		Callable get_create_callback() const;
+
+		void set_release_callback(const Callable &p_callback);
+		Callable get_release_callback() const;
+
+		void set_reset_callback(const Callable &p_callback);
+		Callable get_reset_callback() const;
+
+		void set_read_callback(const Callable &p_callback);
+		Callable get_read_callback() const;
+
+		void set_process_callback(const Callable &p_callback);
+		Callable get_process_callback() const;
+
+		void set_setposition_callback(const Callable &p_callback);
+		Callable get_setposition_callback() const;
+
+		void set_setparam_float_callback(const Callable &p_callback);
+		Callable get_setparam_float_callback() const;
+
+		void set_setparam_int_callback(const Callable &p_callback);
+		Callable get_setparam_int_callback() const;
+
+		void set_setparam_bool_callback(const Callable &p_callback);
+		Callable get_setparam_bool_callback() const;
+
+		void set_setparam_data_callback(const Callable &p_callback);
+		Callable get_setparam_data_callback() const;
+
+		void set_getparam_float_callback(const Callable &p_callback);
+		Callable get_getparam_float_callback() const;
+
+		void set_getparam_int_callback(const Callable &p_callback);
+		Callable get_getparam_int_callback() const;
+
+		void set_getparam_bool_callback(const Callable &p_callback);
+		Callable get_getparam_bool_callback() const;
+
+		void set_getparam_data_callback(const Callable &p_callback);
+		Callable get_getparam_data_callback() const;
+
+		void set_shouldiprocess_callback(const Callable &p_callback);
+		Callable get_shouldiprocess_callback() const;
+
+		// 内部处理函数
+		FMOD_RESULT _handle_create(FMOD_DSP_STATE* dsp_state);
+		FMOD_RESULT _handle_release(FMOD_DSP_STATE* dsp_state);
+		FMOD_RESULT _handle_reset(FMOD_DSP_STATE* dsp_state);
+		FMOD_RESULT _handle_read(FMOD_DSP_STATE* dsp_state, float* inbuffer, float* outbuffer, unsigned int length, int inchannels, int* outchannels);
+		FMOD_RESULT _handle_process(FMOD_DSP_STATE* dsp_state, unsigned int length, const FMOD_DSP_BUFFER_ARRAY* inbufferarray, FMOD_DSP_BUFFER_ARRAY* outbufferarray, FMOD_BOOL inputsidle, FMOD_DSP_PROCESS_OPERATION op);
+		FMOD_RESULT _handle_setposition(FMOD_DSP_STATE* dsp_state, unsigned int pos);
+		FMOD_RESULT _handle_setparam_float(FMOD_DSP_STATE* dsp_state, int index, float value);
+		FMOD_RESULT _handle_setparam_int(FMOD_DSP_STATE* dsp_state, int index, int value);
+		FMOD_RESULT _handle_setparam_bool(FMOD_DSP_STATE* dsp_state, int index, FMOD_BOOL value);
+		FMOD_RESULT _handle_setparam_data(FMOD_DSP_STATE* dsp_state, int index, void* data, unsigned int length);
+		FMOD_RESULT _handle_getparam_float(FMOD_DSP_STATE* dsp_state, int index, float* value, char* valuestr);
+		FMOD_RESULT _handle_getparam_int(FMOD_DSP_STATE* dsp_state, int index, int* value, char* valuestr);
+		FMOD_RESULT _handle_getparam_bool(FMOD_DSP_STATE* dsp_state, int index, FMOD_BOOL* value, char* valuestr);
+		FMOD_RESULT _handle_getparam_data(FMOD_DSP_STATE* dsp_state, int index, void** data, unsigned int* length, char* valuestr);
+		FMOD_RESULT _handle_shouldiprocess(FMOD_DSP_STATE* dsp_state, FMOD_BOOL inputsidle, unsigned int length, FMOD_CHANNELMASK inmask, int inchannels, FMOD_SPEAKERMODE speakermode);
 	};
 }
 
@@ -149,17 +231,34 @@ extern "C" {
 		float sample_rate;							                                    // 采样率
 	};
 
-	FMOD_RESULT F_CALL fmod_dsp_callback(
+	FMOD_RESULT F_CALL GD_FMOD_DSP_CALLBACK(
 		FMOD_DSP* dsp,
 		FMOD_DSP_CALLBACK_TYPE type,
 		void* data
 	);
 
-	FMOD_RESULT F_CALL fmod_dsp_create_callback(
+	FMOD_RESULT F_CALL GD_FMOD_DSP_CREATE_CALLBACK(
 		FMOD_DSP_STATE* dsp_state
 	);
 
-	FMOD_RESULT F_CALL fmod_dsp_process_callback(
+	FMOD_RESULT F_CALL GD_FMOD_DSP_RELEASE_CALLBACK(
+		FMOD_DSP_STATE* dsp_state
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_RESET_CALLBACK(
+		FMOD_DSP_STATE* dsp_state
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_READ_CALLBACK(
+		FMOD_DSP_STATE* dsp_state,
+		float* inbuffer,
+		float* outbuffer,
+		unsigned int length,
+		int inchannels,
+		int* outchannels
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_PROCESS_CALLBACK(
 		FMOD_DSP_STATE* dsp_state,                                                      // DSP 状态指针
 		unsigned int length,                                                            // 本次要处理的采样帧数
 		const FMOD_DSP_BUFFER_ARRAY* inbufferarray,                                     // 输入缓冲区数组
@@ -168,8 +267,85 @@ extern "C" {
 		FMOD_DSP_PROCESS_OPERATION op
 	);
 
-	FMOD_RESULT F_CALL fmod_dsp_release_callback(
+	FMOD_RESULT F_CALL GD_FMOD_DSP_SETPOSITION_CALLBACK(
+		FMOD_DSP_STATE* dsp_state,
+		unsigned int pos
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_SETPARAM_FLOAT_CALLBACK(
+		FMOD_DSP_STATE* dsp_state,
+		int index,
+		float value
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_SETPARAM_INT_CALLBACK(
+		FMOD_DSP_STATE* dsp_state,
+		int index,
+		int value
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_SETPARAM_BOOL_CALLBACK(
+		FMOD_DSP_STATE* dsp_state,
+		int index,
+		FMOD_BOOL value
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_SETPARAM_DATA_CALLBACK(
+		FMOD_DSP_STATE* dsp_state,
+		int index,
+		void* data,
+		unsigned int length
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_GETPARAM_FLOAT_CALLBACK(
+		FMOD_DSP_STATE* dsp_state,
+		int index,
+		float* value,
+		char* valuestr
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_GETPARAM_INT_CALLBACK(
+		FMOD_DSP_STATE* dsp_state,
+		int index,
+		int* value,
+		char* valuestr
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_GETPARAM_BOOL_CALLBACK(
+		FMOD_DSP_STATE* dsp_state,
+		int index,
+		FMOD_BOOL* value,
+		char* valuestr
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_GETPARAM_DATA_CALLBACK(
+		FMOD_DSP_STATE* dsp_state,
+		int index,
+		void** data,
+		unsigned int* length,
+		char* valuestr
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_SHOULDIPROCESS_CALLBACK(
+		FMOD_DSP_STATE* dsp_state,
+		FMOD_BOOL inputsidle,
+		unsigned int length,
+		FMOD_CHANNELMASK inmask,
+		int inchannels,
+		FMOD_SPEAKERMODE speakermode
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_SYSTEM_REGISTER_CALLBACK(
 		FMOD_DSP_STATE* dsp_state
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_SYSTEM_DEREGISTER_CALLBACK(
+		FMOD_DSP_STATE* dsp_state
+	);
+
+	FMOD_RESULT F_CALL GD_FMOD_DSP_SYSTEM_MIX_CALLBACK(
+		FMOD_DSP_STATE* dsp_state,
+		int stage
 	);
 }
 
