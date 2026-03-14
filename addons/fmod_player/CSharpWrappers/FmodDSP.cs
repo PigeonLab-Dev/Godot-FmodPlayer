@@ -166,6 +166,37 @@ public partial class FmodDSP : RefCounted
 		public new static readonly StringName GetInfo = "get_info";
 		public new static readonly StringName GetCpuUsage = "get_cpu_usage";
 		public new static readonly StringName GetSystemObject = "get_system_object";
+		// DSP 回调方法
+		public new static readonly StringName SetCreateCallback = "set_create_callback";
+		public new static readonly StringName GetCreateCallback = "get_create_callback";
+		public new static readonly StringName SetReleaseCallback = "set_release_callback";
+		public new static readonly StringName GetReleaseCallback = "get_release_callback";
+		public new static readonly StringName SetResetCallback = "set_reset_callback";
+		public new static readonly StringName GetResetCallback = "get_reset_callback";
+		public new static readonly StringName SetReadCallback = "set_read_callback";
+		public new static readonly StringName GetReadCallback = "get_read_callback";
+		public new static readonly StringName SetProcessCallback = "set_process_callback";
+		public new static readonly StringName GetProcessCallback = "get_process_callback";
+		public new static readonly StringName SetSetpositionCallback = "set_setposition_callback";
+		public new static readonly StringName GetSetpositionCallback = "get_setposition_callback";
+		public new static readonly StringName SetSetparamFloatCallback = "set_setparam_float_callback";
+		public new static readonly StringName GetSetparamFloatCallback = "get_setparam_float_callback";
+		public new static readonly StringName SetSetparamIntCallback = "set_setparam_int_callback";
+		public new static readonly StringName GetSetparamIntCallback = "get_setparam_int_callback";
+		public new static readonly StringName SetSetparamBoolCallback = "set_setparam_bool_callback";
+		public new static readonly StringName GetSetparamBoolCallback = "get_setparam_bool_callback";
+		public new static readonly StringName SetSetparamDataCallback = "set_setparam_data_callback";
+		public new static readonly StringName GetSetparamDataCallback = "get_setparam_data_callback";
+		public new static readonly StringName SetGetparamFloatCallback = "set_getparam_float_callback";
+		public new static readonly StringName GetGetparamFloatCallback = "get_getparam_float_callback";
+		public new static readonly StringName SetGetparamIntCallback = "set_getparam_int_callback";
+		public new static readonly StringName GetGetparamIntCallback = "get_getparam_int_callback";
+		public new static readonly StringName SetGetparamBoolCallback = "set_getparam_bool_callback";
+		public new static readonly StringName GetGetparamBoolCallback = "get_getparam_bool_callback";
+		public new static readonly StringName SetGetparamDataCallback = "set_getparam_data_callback";
+		public new static readonly StringName GetGetparamDataCallback = "get_getparam_data_callback";
+		public new static readonly StringName SetShouldiprocessCallback = "set_shouldiprocess_callback";
+		public new static readonly StringName GetShouldiprocessCallback = "get_shouldiprocess_callback";
 	}
 
 	public new FmodDSPConnection AddInput(FmodDSP targetDsp, long type = 0) => 
@@ -266,5 +297,96 @@ public partial class FmodDSP : RefCounted
 
 	public new FmodSystem GetSystemObject() => 
 		FmodSystem.Bind(Call(GDExtensionMethodName.GetSystemObject, []).As<GodotObject>());
+
+	// DSP 回调方法
+	public new void SetCreateCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetCreateCallback, [callback]);
+
+	public new Callable GetCreateCallback() => 
+		Call(GDExtensionMethodName.GetCreateCallback, []).As<Callable>();
+
+	public new void SetReleaseCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetReleaseCallback, [callback]);
+
+	public new Callable GetReleaseCallback() => 
+		Call(GDExtensionMethodName.GetReleaseCallback, []).As<Callable>();
+
+	public new void SetResetCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetResetCallback, [callback]);
+
+	public new Callable GetResetCallback() => 
+		Call(GDExtensionMethodName.GetResetCallback, []).As<Callable>();
+
+	public new void SetReadCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetReadCallback, [callback]);
+
+	public new Callable GetReadCallback() => 
+		Call(GDExtensionMethodName.GetReadCallback, []).As<Callable>();
+
+	public new void SetProcessCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetProcessCallback, [callback]);
+
+	public new Callable GetProcessCallback() => 
+		Call(GDExtensionMethodName.GetProcessCallback, []).As<Callable>();
+
+	public new void SetSetpositionCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetSetpositionCallback, [callback]);
+
+	public new Callable GetSetpositionCallback() => 
+		Call(GDExtensionMethodName.GetSetpositionCallback, []).As<Callable>();
+
+	public new void SetSetparamFloatCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetSetparamFloatCallback, [callback]);
+
+	public new Callable GetSetparamFloatCallback() => 
+		Call(GDExtensionMethodName.GetSetparamFloatCallback, []).As<Callable>();
+
+	public new void SetSetparamIntCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetSetparamIntCallback, [callback]);
+
+	public new Callable GetSetparamIntCallback() => 
+		Call(GDExtensionMethodName.GetSetparamIntCallback, []).As<Callable>();
+
+	public new void SetSetparamBoolCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetSetparamBoolCallback, [callback]);
+
+	public new Callable GetSetparamBoolCallback() => 
+		Call(GDExtensionMethodName.GetSetparamBoolCallback, []).As<Callable>();
+
+	public new void SetSetparamDataCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetSetparamDataCallback, [callback]);
+
+	public new Callable GetSetparamDataCallback() => 
+		Call(GDExtensionMethodName.GetSetparamDataCallback, []).As<Callable>();
+
+	public new void SetGetparamFloatCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetGetparamFloatCallback, [callback]);
+
+	public new Callable GetGetparamFloatCallback() => 
+		Call(GDExtensionMethodName.GetGetparamFloatCallback, []).As<Callable>();
+
+	public new void SetGetparamIntCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetGetparamIntCallback, [callback]);
+
+	public new Callable GetGetparamIntCallback() => 
+		Call(GDExtensionMethodName.GetGetparamIntCallback, []).As<Callable>();
+
+	public new void SetGetparamBoolCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetGetparamBoolCallback, [callback]);
+
+	public new Callable GetGetparamBoolCallback() => 
+		Call(GDExtensionMethodName.GetGetparamBoolCallback, []).As<Callable>();
+
+	public new void SetGetparamDataCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetGetparamDataCallback, [callback]);
+
+	public new Callable GetGetparamDataCallback() => 
+		Call(GDExtensionMethodName.GetGetparamDataCallback, []).As<Callable>();
+
+	public new void SetShouldiprocessCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetShouldiprocessCallback, [callback]);
+
+	public new Callable GetShouldiprocessCallback() => 
+		Call(GDExtensionMethodName.GetShouldiprocessCallback, []).As<Callable>();
 
 }
