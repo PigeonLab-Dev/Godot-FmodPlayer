@@ -104,7 +104,7 @@ After building, go to `Project > Project Settings > Plugins` in Godot Editor, fi
 
 ## Documentation
 
-**Full documentation available at:** [https://godot-fmodplayerdocs.readthedocs.io/zh-cn/latest/](https://godot-fmodplayerdocs.readthedocs.io/zh-cn/latest/)
+**Full documentation available at:** [Documentation](https://godot-fmodplayerdocs.readthedocs.io/en/latest/)
 
 The documentation includes detailed usage guides, API reference, code examples, and platform-specific instructions.
 
