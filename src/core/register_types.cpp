@@ -28,11 +28,14 @@
 #include "editor/fmod_audio_importer.h"
 #include "editor/fmod_audio_preview_inspector.h"
 #include "editor/fmod_audio_preview_property.h"
+#include "editor/fmod_audio_stream_player_3d_gizmo_plugin.h"
 #include "geometry/geometry.h"
 #include "mixer/fmod_audio_bus.h"
 #include "mixer/fmod_audio_bus_layout.h"
 #include "nodes/fmod_audio_sample_emitter.h"
 #include "nodes/fmod_audio_stream_player.h"
+#include "nodes/fmod_audio_stream_player_3d.h"
+#include "nodes/fmod_geometry_instance_3d.h"
 #include "playback/fmod_channel.h"
 #include "playback/fmod_channel_control.h"
 #include "playback/fmod_channel_group.h"
@@ -96,6 +99,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 		GDREGISTER_CLASS(AudioImporterFmod);
 		GDREGISTER_CLASS(FmodAudioPreviewInspector);
 		GDREGISTER_CLASS(FmodAudioPreviewProperty);
+		GDREGISTER_CLASS(FmodAudioStreamPlayer3DGizmoPlugin);
 		return;
 	}
 	
@@ -152,7 +156,9 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 
 	// 音频播放器类
 	GDREGISTER_CLASS(FmodAudioStreamPlayer);
+	GDREGISTER_CLASS(FmodAudioStreamPlayer3D);
 	GDREGISTER_CLASS(FmodAudioSampleEmitter);
+	GDREGISTER_CLASS(FmodGeometryInstance3D);
 
 	// FmodServer 注册和添加单例
 	GDREGISTER_CLASS(FmodServer);

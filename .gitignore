@@ -379,3 +379,4 @@ src/**/.sconsign.dblite
 addons/bin/fmod.dll
 src/thirdparty/fmod/
 .vscode/
+compile_commands.json

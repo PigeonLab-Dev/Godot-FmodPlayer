@@ -59,8 +59,7 @@ namespace godot {
 			const float direct_occlusion,
 			const float reverb_occlusion,
 			const bool double_dided,
-			const int num_vertices,
-			const Vector3 vertices
+			const PackedVector3Array& vertices
 		) const;														// 添加一个多边形
 
 		void set_active(const bool active);								// 设置物体是否被几何引擎处理

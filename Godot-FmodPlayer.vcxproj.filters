@@ -185,6 +185,15 @@
     <ClInclude Include="src\spatial\fmod_reverb_3d.h">
       <Filter>Header Files\spatial</Filter>
     </ClInclude>
+    <ClInclude Include="src\nodes\fmod_geometry_instance_3d.h">
+      <Filter>Header Files\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nodes\fmod_audio_stream_player_3d.h">
+      <Filter>Header Files\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\editor\fmod_audio_stream_player_3d_gizmo_plugin.h">
+      <Filter>Header Files\editor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\fmod_server.cpp">
@@ -303,6 +312,15 @@
     </ClCompile>
     <ClCompile Include="src\spatial\fmod_reverb_3d.cpp">
       <Filter>Source Files\spatial</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nodes\fmod_geometry_instance_3d.cpp">
+      <Filter>Source Files\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nodes\fmod_audio_stream_player_3d.cpp">
+      <Filter>Source Files\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editor\fmod_audio_stream_player_3d_gizmo_plugin.cpp">
+      <Filter>Source Files\editor</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

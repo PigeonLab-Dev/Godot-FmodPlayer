@@ -6,6 +6,7 @@ extends EditorPlugin
 
 var importer
 var inspector
+var fmod_audio_stream_player_3d_gizom_plugin
 var _editor_interface: EditorInterface
 
 func set_editor_interface(iface: EditorInterface):
@@ -26,6 +27,10 @@ func _enter_tree():
 	if ClassDB.class_exists("FmodAudioPreviewInspector"):
 		inspector = ClassDB.instantiate("FmodAudioPreviewInspector")
 		add_inspector_plugin(inspector)
+	
+	if ClassDB.class_exists("FmodAudioStreamPlayer3DGizmoPlugin"):
+		fmod_audio_stream_player_3d_gizom_plugin = ClassDB.instantiate("FmodAudioStreamPlayer3DGizmoPlugin")
+		add_node_3d_gizmo_plugin(fmod_audio_stream_player_3d_gizom_plugin)
 
 func _exit_tree():
 	if importer:
@@ -34,3 +39,6 @@ func _exit_tree():
 	if inspector:
 		remove_inspector_plugin(inspector)
 		inspector = null
+	if fmod_audio_stream_player_3d_gizom_plugin:
+		remove_node_3d_gizmo_plugin(fmod_audio_stream_player_3d_gizom_plugin)
+		fmod_audio_stream_player_3d_gizom_plugin = null

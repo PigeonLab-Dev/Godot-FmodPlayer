@@ -277,6 +277,27 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_master_channel_group"), &FmodSystem::get_master_channel_group);
 		ClassDB::bind_method(D_METHOD("get_master_sound_group"), &FmodSystem::get_master_sound_group);
 
+		ClassDB::bind_method(D_METHOD("set_3d_listener_attributes", "listener_index", "position", "velocity", "forward", "up"), &FmodSystem::set_3d_listener_attributes);
+		ClassDB::bind_method(D_METHOD("get_3d_listener_attributes", "listener_index"), &FmodSystem::get_3d_listener_attributes);
+		ClassDB::bind_method(D_METHOD("set_reverb_porioerties",
+			"instance",
+			"decay_time",
+			"early_time",
+			"late_delay",
+			"hf_reference",
+			"hf_decay_ratio",
+			"diffusion",
+			"dennsity",
+			"low_shelf_frequency",
+			"low_shelf_gain",
+			"high_cut",
+			"early_late_mix",
+			"wet_level"
+		), &FmodSystem::set_reverb_porioerties);
+		ClassDB::bind_method(D_METHOD("get_reverb_properties", "instance"), &FmodSystem::get_reverb_properties);
+		ClassDB::bind_method(D_METHOD("attach_channel_group_to_port", "channel_group", "prot_type", "port_index", "pass_thru"), &FmodSystem::attach_channel_group_to_port, DEFVAL(false), DEFVAL(FMOD_PORT_INDEX_NONE));
+		ClassDB::bind_method(D_METHOD("detach_channel_group_from_port", "channel_group"), &FmodSystem::detach_channel_group_from_port);
+
 		ClassDB::bind_method(D_METHOD("get_record_num_drivers"), &FmodSystem::get_record_num_drivers);
 		ClassDB::bind_method(D_METHOD("get_record_driver_info", "id"), &FmodSystem::get_record_driver_info);
 		ClassDB::bind_method(D_METHOD("get_record_position", "id"), &FmodSystem::get_record_position);
@@ -1164,6 +1185,103 @@ namespace godot {
 		sound_group.instantiate();
 		sound_group->setup(sound_group_ptr);
 		return sound_group;
+	}
+
+	void FmodSystem::set_3d_listener_attributes(
+		const int listener,
+		const Vector3 position,
+		const Vector3 velocity,
+		const Vector3 forward,
+		const Vector3 up
+	) {
+		ERR_FAIL_COND(!system);
+		ERR_FAIL_COND(listener < 0 || listener >= 8);										// FMOD 支持最多 8 个监听者
+		FMOD_VECTOR fmod_pos = { position.x, position.y, position.z };
+		FMOD_VECTOR fmod_vel = { velocity.x, velocity.y, velocity.z };
+		FMOD_VECTOR fmod_fwd = { forward.x, forward.y, forward.z };
+		FMOD_VECTOR fmod_up = { up.x, up.y, up.z };
+		FMOD_ERR_CHECK(system->set3DListenerAttributes(listener, &fmod_pos, &fmod_vel, &fmod_fwd, &fmod_up));
+	}
+
+	Dictionary FmodSystem::get_3d_listener_attributes(const int listener) const {
+		ERR_FAIL_COND_V(!system || listener < 0 || listener >= 8, Dictionary());
+		FMOD_VECTOR pos, vel, fwd, up;
+		FMOD_ERR_CHECK_V(system->get3DListenerAttributes(listener, &pos, &vel, &fwd, &up), Dictionary());
+		Dictionary result;
+		result["position"] = Vector3(pos.x, pos.y, pos.z);
+		result["velocity"] = Vector3(vel.x, vel.y, vel.z);
+		result["forward"] = Vector3(fwd.x, fwd.y, fwd.z);
+		result["up"] = Vector3(up.x, up.y, up.z);
+		return result;
+	}
+
+	void FmodSystem::set_reverb_porioerties(
+		const int instance,
+		const float decay_time,
+		const float early_delay,
+		const float late_delay,
+		const float hf_reference,
+		const float hf_decay_ratio,
+		const float diffusion,
+		const float density,
+		const float low_shelf_frequency,
+		const float low_shelf_gain,
+		const float high_cut,
+		const float early_late_mix,
+		const float wet_level
+	) {
+		ERR_FAIL_COND(!system);
+		const FMOD_REVERB_PROPERTIES prop = {
+			decay_time,
+			early_delay,
+			late_delay,
+			hf_reference,
+			hf_decay_ratio,
+			diffusion,
+			density,
+			low_shelf_frequency,
+			low_shelf_gain,
+			high_cut,
+			early_late_mix,
+			wet_level
+		};
+		FMOD_ERR_CHECK(system->setReverbProperties(instance, &prop));
+	}
+
+	Dictionary FmodSystem::get_reverb_properties(const int instance) const {
+		ERR_FAIL_COND_V(!system, Dictionary());
+		FMOD_REVERB_PROPERTIES prop;
+		FMOD_ERR_CHECK_V(system->getReverbProperties(instance, &prop), Dictionary());
+		Dictionary result;
+		result["decay_time"] = prop.DecayTime;
+		result["early_delay"] = prop.EarlyDelay;
+		result["late_delay"] = prop.LateDelay;
+		result["hf_reference"] = prop.HFReference;
+		result["hf_decay_ratio"] = prop.HFDecayRatio;
+		result["diffusion"] = prop.Diffusion;
+		result["density"] = prop.Density;
+		result["low_shelf_frequency"] = prop.LowShelfFrequency;
+		result["low_shelf_gain"] = prop.LowShelfGain;
+		result["high_cut"] = prop.HighCut;
+		result["early_late_mix"] = prop.EarlyLateMix;
+		result["wet_level"] = prop.WetLevel;
+		return result;
+	}
+
+	void FmodSystem::attach_channel_group_to_port(
+		Ref<FmodChannelGroup> channel_group,
+		const FmodPortType prot_type,
+		const uint64_t port_index,
+		const bool pass_thru
+	) {
+		ERR_FAIL_COND(!system || channel_group.is_null() || channel_group->channel_control_is_null());
+		FMOD_PORT_TYPE fmod_port_type = static_cast<FMOD_PORT_TYPE>(prot_type);
+		FMOD_ERR_CHECK(system->attachChannelGroupToPort(fmod_port_type, (FMOD_PORT_INDEX)port_index, channel_group->channel_group, pass_thru));
+	}
+
+	void FmodSystem::detach_channel_group_from_port(Ref<FmodChannelGroup> channel_group) {
+		ERR_FAIL_COND(!system || channel_group.is_null() || channel_group->channel_control_is_null());
+		FMOD_ERR_CHECK(system->detachChannelGroupFromPort(channel_group->channel_group));
 	}
 
 	Dictionary FmodSystem::get_record_num_drivers() const {

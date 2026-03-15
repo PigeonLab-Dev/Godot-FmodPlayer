@@ -178,6 +178,20 @@ namespace godot {
 			FMOD_RESAMPLER_FORCEINT = 65536
 		};
 
+		// 可用于音频路由的端口类型
+		enum FmodPortType {
+			FMOD_PORT_TYPE_MUSIC,																// 背景音乐，把 FMOD_PORT_INDEX_NONE 传递成端口索引
+			FMOD_PORT_TYPE_COPYRIGHT_MUSIC,														// 背景音乐版权所有，FMOD_PORT_INDEX_NONE 作为移植索引
+			FMOD_PORT_TYPE_VOICE,																// 语音聊天，通过目标用户的平台特定用户 ID 作为端口索引
+			FMOD_PORT_TYPE_CONTROLLER,															// 控制器扬声器，通过目标用户的平台特定用户 ID 作为端口索引
+			FMOD_PORT_TYPE_PERSONAL,															// 个人音频设备，通过目标用户的平台特定用户 ID 作为端口索引
+			FMOD_PORT_TYPE_VIBRATION,															// 控制器振动，通过目标用户的特定平台用户 ID 作为端口索引
+			FMOD_PORT_TYPE_AUX,																	// 辅助输出端口，FMOD_PORT_INDEX_NONE 端口索引
+			FMOD_PORT_TYPE_PASSTHROUGH,															// 直通输出端口，FMOD_PORT_INDEX_NONE 作为端口索引通过
+			FMOD_PORT_TYPE_VR_VIBRATION,														// VR 控制器振动，通过目标用户的平台特定用户 ID 作为端口索引
+			FMOD_PORT_TYPE_MAX																	// 支持的最大端口类型数
+		};
+
 		FMOD::System* system = nullptr;
 
 		bool system_is_valid() const;															// 检查 FMOD System 是否有效
@@ -341,6 +355,39 @@ namespace godot {
 		Ref<FmodChannelGroup> get_master_channel_group() const;									// 获取所有声音最终路由到的主通道组
 		Ref<FmodSoundGroup> get_master_sound_group() const;										// 获取默认的 SoundGroup，所有声音在创建时放置的位置
 
+		// 运行控制
+		void set_3d_listener_attributes(
+			const int listener,
+			const Vector3 position,
+			const Vector3 velocity,
+			const Vector3 forward,
+			const Vector3 up
+		);																						// 设置指定三维声音听者的位置、力度和方向
+		Dictionary get_3d_listener_attributes(const int listener) const;						// 获取指定三维声音听者的位置、力度和方向
+		void set_reverb_porioerties(
+			const int instance,
+			const float decay_time,
+			const float early_delay,
+			const float late_delay,
+			const float hf_reference,
+			const float hf_decay_ratio,
+			const float diffusion,
+			const float density,
+			const float low_shelf_frequency,
+			const float low_shelf_gain,
+			const float high_cut,
+			const float early_late_mix,
+			const float wet_level
+		);																						// 设置指定混响实例当前的混响环境
+		Dictionary get_reverb_properties(const int instance) const;								// 获取指定混响实例当前的混响环境
+		void attach_channel_group_to_port(
+			Ref<FmodChannelGroup> channel_group,
+			const FmodPortType prot_type,
+			const uint64_t port_index = FMOD_PORT_INDEX_NONE,
+			const bool pass_thru = false
+		);																						// 将指定的 ChannelGroup 输出连接到输出驱动上的音频端口
+		void detach_channel_group_from_port(Ref<FmodChannelGroup> channel_group);				// 将指定ChannelGroup的输出从输出驱动上的音频端口断开
+
 		// 录音
 		Dictionary get_record_num_drivers() const;												// 获取该输出模式下可用的录音设备数量
 		Dictionary get_record_driver_info(const int id) const;									// 获取音频设备的识别信息，这些信息由其索引指定，且针对输出模式
@@ -378,6 +425,7 @@ VARIANT_ENUM_CAST(FmodSystem::FmodSpeakerMode);
 VARIANT_ENUM_CAST(FmodSystem::FmodMode);
 VARIANT_ENUM_CAST(FmodSystem::FmodTimeUnit);
 VARIANT_ENUM_CAST(FmodSystem::FmodResamplerMethod);
+VARIANT_ENUM_CAST(FmodSystem::FmodPortType);
 
 extern "C" {
 	// Godot FMOD 3D 衰减回调实现

@@ -204,7 +204,6 @@ namespace godot {
 
 	bool FmodAudioStreamPlayer::is_playing() const {
 		if (internal_channel.is_null() || internal_channel->channel_is_null()) return false;
-		// 同时检查内部标志和 FMOD channel 的真实播放状态
 		return playing && internal_channel->is_playing();
 	}
 

@@ -12,6 +12,8 @@
 #include <godot_cpp/classes/theme.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
+#include <godot_cpp/classes/translation_server.hpp>
+#include <godot_cpp/classes/translation_domain.hpp>
 
 #define FMOD_ERR_CHECK(result)                                                  \
     do {                                                                        \

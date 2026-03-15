@@ -23,7 +23,7 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_scale"), &FmodGeometry::get_scale);
 		ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "scale", PROPERTY_HINT_LINK, "", PROPERTY_USAGE_EDITOR), "set_scale", "get_scale");
 	
-		ClassDB::bind_method(D_METHOD("add_polygon", "direct_occlusion", "reverb_occlusion", "double_dided", "num_vertices", "vertices"), &FmodGeometry::add_polygon);
+		ClassDB::bind_method(D_METHOD("add_polygon", "direct_occlusion", "reverb_occlusion", "double_dided", "vertices"), &FmodGeometry::add_polygon);
 		
 		ClassDB::bind_method(D_METHOD("set_active", "active"), &FmodGeometry::set_active);
 		ClassDB::bind_method(D_METHOD("get_active"), &FmodGeometry::get_scale);
@@ -162,18 +162,26 @@ namespace godot {
 		const float direct_occlusion,
 		const float reverb_occlusion,
 		const bool double_dided,
-		const int num_vertices,
-		const Vector3 vertices
+		const PackedVector3Array& vertices
 	) const {
 		ERR_FAIL_COND_V(!geometry, -1);
-		FMOD_VECTOR fmod_vector = { vertices.x, vertices.y, vertices.z };
+		ERR_FAIL_COND_V(vertices.size() < 3, -1);
+		
+		// 转换 Godot 顶点数组为 FMOD 顶点数组
+		LocalVector<FMOD_VECTOR> fmod_vertices;
+		fmod_vertices.resize(vertices.size());
+		
+		for (int i = 0; i < vertices.size(); i++) {
+			fmod_vertices[i] = { vertices[i].x, vertices[i].y, vertices[i].z };
+		}
+		
 		int polygonindex = -1;
 		FMOD_ERR_CHECK_V(geometry->addPolygon(
 			direct_occlusion,
 			reverb_occlusion,
 			double_dided,
-			num_vertices,
-			&fmod_vector,
+			vertices.size(),
+			fmod_vertices.ptr(),
 			&polygonindex
 		), -1);
 		return polygonindex;
