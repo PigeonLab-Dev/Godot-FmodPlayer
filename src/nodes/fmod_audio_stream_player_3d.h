@@ -46,6 +46,23 @@ namespace godot {
 		Vector3 current_velocity;
 		uint64_t last_process_time = 0;
 
+		// 距离衰减
+		float max_distance = 100.0f;										// 最大可听距离
+		float min_distance = 1.0f;											// 最小距离（开始衰减）
+		float unit_size = 10.0f;											// 单位大小（与 Godot 一致）
+		AttenuationModel attenuation_model = ATTENUATION_INVERSE_DISTANCE;
+
+		// 声音锥（定向声音）
+		bool emission_angle_enabled = false;								// 是否启用发射角度限制
+		float emission_angle = 45.0f;										// 内锥角（全音量）
+		float emission_angle_filter_attenuation_db = -12.0f;				// 外锥衰减
+
+		// 多普勒
+		DopplerTracking doppler_tracking = DOPPLER_TRACKING_DISABLED;
+
+		// 区域遮罩
+		uint32_t area_mask = 1;
+
 		void _create_internal_channel(Ref<FmodAudioStream> stream);
 		void _on_internal_channel_ended();
 		void _update_3d_attributes();
@@ -54,8 +71,8 @@ namespace godot {
 
 	protected:
 		static void _bind_methods();
-		void _validate_property(PropertyInfo& p_property) const;
 		void _notification(int p_what);
+		void _validate_property(PropertyInfo& p_property) const;
 
 	public:
 		FmodAudioStreamPlayer3D();
@@ -88,23 +105,6 @@ namespace godot {
 		void set_bus(const StringName& p_bus);
 		StringName get_bus() const;
 		
-		// 距离衰减
-		float max_distance = 100.0f;										// 最大可听距离
-		float min_distance = 1.0f;											// 最小距离（开始衰减）
-		float unit_size = 10.0f;											// 单位大小（与 Godot 一致）
-		AttenuationModel attenuation_model = ATTENUATION_INVERSE_DISTANCE;
-		
-		// 声音锥（定向声音）
-		bool emission_angle_enabled = false;								// 是否启用发射角度限制
-		float emission_angle = 45.0f;										// 内锥角（全音量）
-		float emission_angle_filter_attenuation_db = -12.0f;				// 外锥衰减
-		
-		// 多普勒
-		DopplerTracking doppler_tracking = DOPPLER_TRACKING_DISABLED;
-		
-		// 区域遮罩
-		uint32_t area_mask = 1;
-
 		void set_max_distance(const float p_distance);
 		float get_max_distance() const;
 
