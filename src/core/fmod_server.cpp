@@ -6,6 +6,10 @@
 #include "mixer/fmod_audio_bus_layout.h"
 #include "dsp/fmod_audio_effect.h"
 
+#include <godot_cpp/classes/viewport.hpp>
+#include <godot_cpp/classes/camera3d.hpp>
+#include <godot_cpp/classes/window.hpp>
+
 namespace godot {
 	FmodServer* FmodServer::singleton = nullptr;
 	FmodSystem* FmodServer::main_system = nullptr;
@@ -145,6 +149,31 @@ namespace godot {
 
 	void FmodServer::_update_fmod() {
 		if (!singleton || !main_system) return;
+		
+		// 更新 3D 监听者位置
+		SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop());
+		if (tree) {
+			Viewport* viewport = tree->get_root();
+			if (viewport) {
+				Camera3D* camera = viewport->get_camera_3d();
+				if (camera) {
+					// 获取相机的位置和方向
+					Vector3 position = camera->get_global_position();
+					Vector3 forward = -camera->get_global_transform().get_basis().get_column(2).normalized();
+					Vector3 up = camera->get_global_transform().get_basis().get_column(1).normalized();
+					
+					// 设置 FMOD 监听者属性
+					main_system->set_3d_listener_attributes(
+						0,                          // listener index
+						position,                   // position
+						Vector3(0, 0, 0),          	// velocity (可以后续添加速度追踪)
+						forward,                    // forward
+						up                          // up
+					);
+				}
+			}
+		}
+		
 		main_system->update();
 	}
 

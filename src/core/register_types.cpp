@@ -29,7 +29,7 @@
 #include "editor/fmod_audio_preview_inspector.h"
 #include "editor/fmod_audio_preview_property.h"
 #include "editor/fmod_audio_stream_player_3d_gizmo_plugin.h"
-#include "geometry/geometry.h"
+#include "geometry/fmod_geometry.h"
 #include "mixer/fmod_audio_bus.h"
 #include "mixer/fmod_audio_bus_layout.h"
 #include "nodes/fmod_audio_sample_emitter.h"

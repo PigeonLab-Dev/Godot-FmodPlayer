@@ -14,7 +14,6 @@ namespace godot {
 		GDCLASS(FmodAudioStreamPlayer3D, Node3D)
 
 	public:
-		// 衰减模型
 		enum AttenuationModel {
 			ATTENUATION_INVERSE_DISTANCE,
 			ATTENUATION_INVERSE_SQUARE_DISTANCE,
@@ -22,7 +21,6 @@ namespace godot {
 			ATTENUATION_DISABLED
 		};
 
-		// 多普勒追踪模式
 		enum DopplerTracking {
 			DOPPLER_TRACKING_DISABLED,
 			DOPPLER_TRACKING_IDLE_STEP,
@@ -41,26 +39,23 @@ namespace godot {
 		bool auto_play = false;
 		StringName bus;
 
-		// 3D 位置/速度缓存（用于多普勒计算）
 		Vector3 last_position;
 		Vector3 current_velocity;
 		uint64_t last_process_time = 0;
 
-		// 距离衰减
-		float max_distance = 100.0f;										// 最大可听距离
-		float min_distance = 1.0f;											// 最小距离（开始衰减）
-		float unit_size = 10.0f;											// 单位大小（与 Godot 一致）
-		AttenuationModel attenuation_model = ATTENUATION_INVERSE_DISTANCE;
+		float max_distance = 10.0f;
+		float unit_size = 1.0f;
+		AttenuationModel attenuation_model = ATTENUATION_LOGARITHMIC;
 
-		// 声音锥（定向声音）
-		bool emission_angle_enabled = false;								// 是否启用发射角度限制
-		float emission_angle = 45.0f;										// 内锥角（全音量）
-		float emission_angle_filter_attenuation_db = -12.0f;				// 外锥衰减
+		float attenuation_filter_cutoff_hz = 5000.0f;
+		float attenuation_filter_db = 0.0f;
 
-		// 多普勒
+		bool emission_angle_enabled = false;
+		float emission_angle = 45.0f;
+		float emission_angle_filter_attenuation_db = -12.0f;
+
 		DopplerTracking doppler_tracking = DOPPLER_TRACKING_DISABLED;
 
-		// 区域遮罩
 		uint32_t area_mask = 1;
 
 		void _create_internal_channel(Ref<FmodAudioStream> stream);
@@ -108,9 +103,6 @@ namespace godot {
 		void set_max_distance(const float p_distance);
 		float get_max_distance() const;
 
-		void set_min_distance(const float p_distance);
-		float get_min_distance() const;
-
 		void set_unit_size(const float p_size);
 		float get_unit_size() const;
 
@@ -126,6 +118,12 @@ namespace godot {
 		void set_emission_angle_filter_attenuation_db(const float p_db);
 		float get_emission_angle_filter_attenuation_db() const;
 
+		void set_attenuation_filter_cutoff_hz(const float p_freq);
+		float get_attenuation_filter_cutoff_hz() const;
+
+		void set_attenuation_filter_db(const float p_db);
+		float get_attenuation_filter_db() const;
+
 		void set_doppler_tracking(const DopplerTracking p_tracking);
 		DopplerTracking get_doppler_tracking() const;
 
@@ -139,4 +137,4 @@ namespace godot {
 VARIANT_ENUM_CAST(FmodAudioStreamPlayer3D::AttenuationModel)
 VARIANT_ENUM_CAST(FmodAudioStreamPlayer3D::DopplerTracking)
 
-#endif // FMOD_AUDIO_STREAM_PLAYER_3D_H
+#endif

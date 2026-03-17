@@ -1,4 +1,4 @@
-#include "geometry/geometry.h"
+#include "geometry/fmod_geometry.h"
 
 namespace godot {
 	void FmodGeometry::_bind_methods() {

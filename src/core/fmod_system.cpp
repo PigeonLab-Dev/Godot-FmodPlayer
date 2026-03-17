@@ -3,7 +3,7 @@
 #include "playback/fmod_channel.h"
 #include "playback/fmod_channel_group.h"
 #include "playback/fmod_sound_group.h"
-#include "geometry/geometry.h"
+#include "geometry/fmod_geometry.h"
 #include "dsp/fmod_dsp.h"
 #include "spatial/fmod_reverb_3d.h"
 
@@ -1134,10 +1134,8 @@ namespace godot {
 
 	Ref<FmodChannel> FmodSystem::get_channel(const int id) const {
 		ERR_FAIL_COND_V(!system, Ref<FmodChannel>());
-
 		FMOD::Channel* fmod_channel = nullptr;
 		FMOD_ERR_CHECK_V(system->getChannel(id, &fmod_channel), Ref<FmodChannel>());
-
 		Ref<FmodChannel> channel;
 		channel.instantiate();
 		channel->setup(fmod_channel);

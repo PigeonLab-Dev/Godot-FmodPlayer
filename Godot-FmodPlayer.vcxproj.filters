@@ -179,7 +179,7 @@
     <ClInclude Include="src\playback\fmod_sound_group.h">
       <Filter>Header Files\playback</Filter>
     </ClInclude>
-    <ClInclude Include="src\geometry\geometry.h">
+    <ClInclude Include="src\geometry\fmod_geometry.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
     <ClInclude Include="src\spatial\fmod_reverb_3d.h">
@@ -307,7 +307,7 @@
     <ClCompile Include="src\playback\fmod_sound_group.cpp">
       <Filter>Source Files\playback</Filter>
     </ClCompile>
-    <ClCompile Include="src\geometry\geometry.cpp">
+    <ClCompile Include="src\geometry\fmod_geometry.cpp">
       <Filter>Source Files\geometry</Filter>
     </ClCompile>
     <ClCompile Include="src\spatial\fmod_reverb_3d.cpp">

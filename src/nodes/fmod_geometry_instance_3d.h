@@ -2,7 +2,7 @@
 #define FMOD_GEOMETRY_INSTANCE_3D_H
 
 #include "core/fmod_utils.hpp"
-#include "geometry/geometry.h"
+#include "geometry/fmod_geometry.h"
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/classes/collision_shape3d.hpp>
