@@ -34,6 +34,7 @@
 #include "mixer/fmod_audio_bus_layout.h"
 #include "nodes/fmod_audio_sample_emitter.h"
 #include "nodes/fmod_audio_stream_player.h"
+#include "nodes/fmod_audio_stream_player_2d.h"
 #include "nodes/fmod_audio_stream_player_3d.h"
 #include "nodes/fmod_geometry_instance_3d.h"
 #include "playback/fmod_channel.h"
@@ -156,6 +157,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 
 	// 音频播放器类
 	GDREGISTER_CLASS(FmodAudioStreamPlayer);
+	GDREGISTER_CLASS(FmodAudioStreamPlayer2D);
 	GDREGISTER_CLASS(FmodAudioStreamPlayer3D);
 	GDREGISTER_CLASS(FmodAudioSampleEmitter);
 	GDREGISTER_CLASS(FmodGeometryInstance3D);

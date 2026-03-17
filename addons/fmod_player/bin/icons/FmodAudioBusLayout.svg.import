@@ -3,15 +3,16 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b77mn40diu1fe"
-path="res://.godot/imported/FmodAudioBusLayout.svg-d1356ddec862adc581f32e58742ecdad.ctex"
+path="res://.godot/imported/FmodAudioBusLayout.svg-ac313bf4ff0386363957e0efd3834a45.ctex"
 metadata={
+"has_editor_variant": true,
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://bin/icons/FmodAudioBusLayout.svg"
-dest_files=["res://.godot/imported/FmodAudioBusLayout.svg-d1356ddec862adc581f32e58742ecdad.ctex"]
+source_file="res://addons/fmod_player/bin/icons/FmodAudioBusLayout.svg"
+dest_files=["res://.godot/imported/FmodAudioBusLayout.svg-ac313bf4ff0386363957e0efd3834a45.ctex"]
 
 [params]
 
@@ -40,4 +41,4 @@ process/size_limit=0
 detect_3d/compress_to=1
 svg/scale=1.0
 editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false
+editor/convert_colors_with_editor_theme=true

@@ -234,7 +234,7 @@ namespace godot {
 		if (emission_angle_enabled) {
 			internal_channel->set_3d_cone_settings(
 				emission_angle,
-				emission_angle * 2.0f,  // 外锥角为内锥的两倍
+				emission_angle * 2.0f,										// 外锥角为内锥的两倍
 				emission_angle_filter_attenuation_db
 			);
 		} else {

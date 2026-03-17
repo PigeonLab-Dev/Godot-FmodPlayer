@@ -3,15 +3,16 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d3dcc3tjd3rqt"
-path="res://.godot/imported/FmodAudioSampleEmitter.svg-e03fb471b92cfc5cff7955784c6b73fe.ctex"
+path="res://.godot/imported/FmodAudioSampleEmitter.svg-51eeca6ae180b8ba47a06c2fb1af4ad0.ctex"
 metadata={
+"has_editor_variant": true,
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://bin/icons/FmodAudioSampleEmitter.svg"
-dest_files=["res://.godot/imported/FmodAudioSampleEmitter.svg-e03fb471b92cfc5cff7955784c6b73fe.ctex"]
+source_file="res://addons/fmod_player/bin/icons/FmodAudioSampleEmitter.svg"
+dest_files=["res://.godot/imported/FmodAudioSampleEmitter.svg-51eeca6ae180b8ba47a06c2fb1af4ad0.ctex"]
 
 [params]
 
@@ -40,4 +41,4 @@ process/size_limit=0
 detect_3d/compress_to=1
 svg/scale=1.0
 editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false
+editor/convert_colors_with_editor_theme=true

@@ -129,8 +129,6 @@ namespace godot {
 
 		void set_area_mask(const uint32_t p_mask);
 		uint32_t get_area_mask() const;
-
-		Ref<FmodChannel> get_channel() const { return internal_channel; }
 	};
 }
 

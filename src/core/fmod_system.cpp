@@ -1409,7 +1409,7 @@ namespace godot {
 		if (p_callback.is_valid()) {
 			// 设置当前实例为回调目标
 			current_callback_system = this;
-			FMOD_ERR_CHECK(system->set3DRolloffCallback(GodotFMOD3DRolloffCallback));
+			FMOD_ERR_CHECK(system->set3DRolloffCallback(GD_3D_ROLLOFF_CALLBACK));
 		} else {
 			// 如果当前实例是回调目标，则移除回调
 			if (current_callback_system == this) {
@@ -1436,13 +1436,7 @@ namespace godot {
 	}
 }
 
-// C 回调函数实现
-float F_CALL GodotFMOD3DRolloffCallback(FMOD_CHANNELCONTROL* channel_control, float distance) {
-	// 如果当前没有启用的回调系统，返回默认的线性衰减
-	if (!godot::FmodSystem::current_callback_system) {
-		return 1.0f;
-	}
-
-	// 调用成员函数处理回调
+float F_CALL GD_3D_ROLLOFF_CALLBACK(FMOD_CHANNELCONTROL* channel_control, float distance) {
+	if (!godot::FmodSystem::current_callback_system) return 1.0f;
 	return godot::FmodSystem::current_callback_system->_handle_3d_rolloff_callback(distance);
 }

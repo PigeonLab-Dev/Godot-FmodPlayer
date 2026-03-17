@@ -18,6 +18,8 @@ namespace godot {
 			MODE_SAMPLE = 1 << 1,       // 样本模式（加载到内存）
 			MODE_LOOP = 1 << 2,         // 循环播放
 			MODE_LOOP_BIDI = 1 << 3,    // 双向循环
+			MODE_2D = 1 << 4,           // 强制 2D 模式（禁用 3D 处理）
+			MODE_3D = 1 << 5,           // 强制 3D 模式
 		};
 
 	protected:
@@ -63,6 +65,9 @@ namespace godot {
 
 		// 清理资源
 		void clear();
+		
+		// 仅使 sound 缓存失效（保留数据），下次 get_sound() 会重新创建
+		void invalidate_sound();
 	};
 }
 

@@ -111,7 +111,9 @@ namespace godot {
 	}
 
 	void FmodAudioStreamPlayer::_on_internal_channel_ended() {
-		internal_channel->disconnect("ended", callable_mp(this, &FmodAudioStreamPlayer::_on_internal_channel_ended));
+		if (internal_channel.is_valid()) {
+			internal_channel->disconnect("ended", callable_mp(this, &FmodAudioStreamPlayer::_on_internal_channel_ended));
+		}
 		internal_channel.unref();
 
 		// stop 会提前设置 playing 为 false，所以判断是否还在播放就行

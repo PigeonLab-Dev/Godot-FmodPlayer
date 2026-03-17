@@ -428,8 +428,8 @@ VARIANT_ENUM_CAST(FmodSystem::FmodResamplerMethod);
 VARIANT_ENUM_CAST(FmodSystem::FmodPortType);
 
 extern "C" {
-	// Godot FMOD 3D 衰减回调实现
-	float F_CALL GodotFMOD3DRolloffCallback(
+	// 衰减回调
+	float F_CALL GD_3D_ROLLOFF_CALLBACK(
 		FMOD_CHANNELCONTROL* channel_control,
 		float distance
 	);
