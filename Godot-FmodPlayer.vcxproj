@@ -164,6 +164,7 @@
     <ClInclude Include="src\mixer\fmod_audio_bus_layout.h" />
     <ClInclude Include="src\dsp\fmod_dsp_connection.h" />
     <ClInclude Include="src\audio\fmod_audio_stream.h" />
+    <ClInclude Include="src\nodes\fmod_audio_stream_player_2d.h" />
     <ClInclude Include="src\nodes\fmod_audio_stream_player_3d.h" />
     <ClInclude Include="src\nodes\fmod_geometry_instance_3d.h" />
     <ClInclude Include="src\playback\fmod_channel.h" />
@@ -209,6 +210,7 @@
     <ClCompile Include="src\mixer\fmod_audio_bus_layout.cpp" />
     <ClCompile Include="src\dsp\fmod_dsp_connection.cpp" />
     <ClCompile Include="src\audio\fmod_audio_stream.cpp" />
+    <ClCompile Include="src\nodes\fmod_audio_stream_player_2d.cpp" />
     <ClCompile Include="src\nodes\fmod_audio_stream_player_3d.cpp" />
     <ClCompile Include="src\nodes\fmod_geometry_instance_3d.cpp" />
     <ClCompile Include="src\playback\fmod_channel.cpp" />

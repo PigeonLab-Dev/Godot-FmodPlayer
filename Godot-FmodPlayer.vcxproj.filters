@@ -194,6 +194,9 @@
     <ClInclude Include="src\editor\fmod_audio_stream_player_3d_gizmo_plugin.h">
       <Filter>Header Files\editor</Filter>
     </ClInclude>
+    <ClInclude Include="src\nodes\fmod_audio_stream_player_2d.h">
+      <Filter>Header Files\nodes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\fmod_server.cpp">
@@ -321,6 +324,9 @@
     </ClCompile>
     <ClCompile Include="src\editor\fmod_audio_stream_player_3d_gizmo_plugin.cpp">
       <Filter>Source Files\editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nodes\fmod_audio_stream_player_2d.cpp">
+      <Filter>Source Files\nodes</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
