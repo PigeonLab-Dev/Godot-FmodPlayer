@@ -139,7 +139,7 @@ namespace godot {
 				}
 			} break;
 
-			case NOTIFICATION_PREDELETE: {
+			case NOTIFICATION_EXIT_TREE: {
 				if (internal_channel.is_valid()) {
 					internal_channel->stop();
 					internal_channel.unref();
@@ -208,7 +208,7 @@ namespace godot {
 	}
 
 	void FmodAudioStreamPlayer3D::_on_internal_channel_ended() {
-		if (internal_channel.is_valid()) {
+		if (internal_channel.is_valid() && internal_channel->channel_is_valid()) {
 			internal_channel->disconnect("ended", callable_mp(this, &FmodAudioStreamPlayer3D::_on_internal_channel_ended));
 		}
 		internal_channel.unref();
@@ -221,7 +221,7 @@ namespace godot {
 	}
 
 	void FmodAudioStreamPlayer3D::_update_3d_attributes() {
-		if (!internal_channel.is_valid() || !internal_channel->is_playing() || !is_inside_tree()) {
+		if (!internal_channel.is_valid() || !internal_channel->channel_control_is_valid() || !is_inside_tree()) {
 			return;
 		}
 
@@ -254,7 +254,8 @@ namespace godot {
 	}
 
 	void FmodAudioStreamPlayer3D::_apply_attenuation_settings() {
-		if (!internal_channel.is_valid()) {
+		// 检查底层 FMOD ChannelControl 是否有效
+		if (!internal_channel.is_valid() || !internal_channel->channel_control_is_valid()) {
 			return;
 		}
 
@@ -297,7 +298,7 @@ namespace godot {
 	}
 
 	void FmodAudioStreamPlayer3D::set_stream(Ref<FmodAudioStream> new_stream) {
-		if (internal_channel.is_valid() && internal_channel->is_playing()) {
+		if (internal_channel.is_valid() && internal_channel->channel_is_valid() && internal_channel->is_playing()) {
 			internal_channel->stop();
 		}
 		stream = new_stream;
@@ -334,7 +335,7 @@ namespace godot {
 
 		if (stream.is_valid()) {
 			_create_internal_channel(stream);
-			if (internal_channel.is_valid()) {
+			if (internal_channel.is_valid() && internal_channel->channel_is_valid()) {
 				if (from_position > 0.0f) {
 					internal_channel->set_position(int(from_position * 1000));
 				}
@@ -345,12 +346,12 @@ namespace godot {
 	}
 
 	void FmodAudioStreamPlayer3D::seek(const float to_position) {
-		ERR_FAIL_COND(!internal_channel.is_valid());
+		ERR_FAIL_COND(!internal_channel.is_valid() || !internal_channel->channel_is_valid());
 		internal_channel->set_position(int(to_position * 1000));
 	}
 
 	void FmodAudioStreamPlayer3D::stop() {
-		if (internal_channel.is_valid()) {
+		if (internal_channel.is_valid() && internal_channel->channel_is_valid()) {
 			playing = false;
 			stream_paused = false;
 			internal_channel->stop();
@@ -366,7 +367,7 @@ namespace godot {
 	}
 
 	bool FmodAudioStreamPlayer3D::is_playing() const {
-		if (internal_channel.is_null()) return false;
+		if (!internal_channel.is_valid() || !internal_channel->channel_is_valid()) return false;
 		return playing && internal_channel->is_playing();
 	}
 
@@ -385,13 +386,13 @@ namespace godot {
 	}
 
 	float FmodAudioStreamPlayer3D::get_playback_position() const {
-		if (internal_channel.is_null()) return 0.0f;
+		if (!internal_channel.is_valid() || !internal_channel->channel_is_valid()) return 0.0f;
 		return internal_channel->get_position() / 1000.0f;
 	}
 
 	void FmodAudioStreamPlayer3D::set_volume_db(const float new_volume_db) {
 		volume_db = new_volume_db;
-		if (internal_channel.is_valid()) {
+		if (internal_channel.is_valid() && internal_channel->channel_control_is_valid()) {
 			internal_channel->set_volume_db(volume_db);
 		}
 	}
@@ -402,7 +403,7 @@ namespace godot {
 
 	void FmodAudioStreamPlayer3D::set_pitch(const float new_pitch) {
 		pitch = new_pitch;
-		if (internal_channel.is_valid()) {
+		if (internal_channel.is_valid() && internal_channel->channel_control_is_valid()) {
 			internal_channel->set_pitch(pitch);
 		}
 	}
@@ -465,7 +466,7 @@ namespace godot {
 
 	void FmodAudioStreamPlayer3D::set_emission_angle_enabled(const bool p_enabled) {
 		emission_angle_enabled = p_enabled;
-		if (internal_channel.is_valid()) {
+		if (internal_channel.is_valid() && internal_channel->channel_control_is_valid()) {
 			_update_3d_attributes();
 		}
 	}
@@ -476,7 +477,7 @@ namespace godot {
 
 	void FmodAudioStreamPlayer3D::set_emission_angle(const float p_angle) {
 		emission_angle = Math::clamp(p_angle, 0.0f, 90.0f);
-		if (internal_channel.is_valid() && emission_angle_enabled) {
+		if (internal_channel.is_valid() && internal_channel->channel_control_is_valid() && emission_angle_enabled) {
 			_update_3d_attributes();
 		}
 	}
@@ -487,7 +488,7 @@ namespace godot {
 
 	void FmodAudioStreamPlayer3D::set_emission_angle_filter_attenuation_db(const float p_db) {
 		emission_angle_filter_attenuation_db = Math::clamp(p_db, -80.0f, 0.0f);
-		if (internal_channel.is_valid() && emission_angle_enabled) {
+		if (internal_channel.is_valid() && internal_channel->channel_control_is_valid() && emission_angle_enabled) {
 			_update_3d_attributes();
 		}
 	}
@@ -498,7 +499,7 @@ namespace godot {
 
 	void FmodAudioStreamPlayer3D::set_attenuation_filter_cutoff_hz(const float p_freq) {
 		attenuation_filter_cutoff_hz = Math::clamp(p_freq, 10.0f, 22050.0f);
-		if (internal_channel.is_valid()) {
+		if (internal_channel.is_valid() && internal_channel->channel_control_is_valid()) {
 			internal_channel->set_3d_distance_filter(true, attenuation_filter_db, attenuation_filter_cutoff_hz);
 		}
 	}
@@ -509,7 +510,7 @@ namespace godot {
 
 	void FmodAudioStreamPlayer3D::set_attenuation_filter_db(const float p_db) {
 		attenuation_filter_db = Math::clamp(p_db, -80.0f, 0.0f);
-		if (internal_channel.is_valid()) {
+		if (internal_channel.is_valid() && internal_channel->channel_control_is_valid()) {
 			internal_channel->set_3d_distance_filter(true, attenuation_filter_db, attenuation_filter_cutoff_hz);
 		}
 	}
@@ -524,7 +525,7 @@ namespace godot {
 		set_physics_process(doppler_tracking == DOPPLER_TRACKING_PHYSICS_STEP);
 		
 		// 立即更新多普勒级别
-		if (internal_channel.is_valid()) {
+		if (internal_channel.is_valid() && internal_channel->channel_control_is_valid()) {
 			internal_channel->set_3d_doppler_level(
 				doppler_tracking == DOPPLER_TRACKING_DISABLED ? 0.0f : 1.0f
 			);

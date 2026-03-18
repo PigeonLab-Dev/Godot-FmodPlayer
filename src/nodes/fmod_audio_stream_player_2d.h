@@ -49,8 +49,6 @@ namespace godot {
 		void _create_internal_channel(Ref<FmodAudioStream> stream);
 		void _on_internal_channel_ended();
 		void _update_panning();
-		void _set_playing(bool p_enable);
-		StringName _get_actual_bus();
 
 		static void _listener_changed_callback(void *self) {
 			reinterpret_cast<FmodAudioStreamPlayer2D *>(self)->force_update_panning = true;

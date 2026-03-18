@@ -16,6 +16,6 @@ namespace godot {
 		virtual bool _can_handle(Object* object) const override;
 		virtual void _parse_begin(Object* object) override;
 	};
-} // namespace godot
+}
 
 #endif // !FMOD_AUDIO_PREVIEW_INSPECTOR_H

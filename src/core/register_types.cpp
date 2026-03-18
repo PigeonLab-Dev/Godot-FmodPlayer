@@ -29,6 +29,7 @@
 #include "editor/fmod_audio_preview_inspector.h"
 #include "editor/fmod_audio_preview_property.h"
 #include "editor/fmod_audio_stream_player_3d_gizmo_plugin.h"
+#include "editor/modify_android_build_template_plugin.h"
 #include "geometry/fmod_geometry.h"
 #include "mixer/fmod_audio_bus.h"
 #include "mixer/fmod_audio_bus_layout.h"
@@ -101,6 +102,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 		GDREGISTER_CLASS(FmodAudioPreviewInspector);
 		GDREGISTER_CLASS(FmodAudioPreviewProperty);
 		GDREGISTER_CLASS(FmodAudioStreamPlayer3DGizmoPlugin);
+		GDREGISTER_CLASS(ModifyAndroidBuildTemplatePlugin);
 		return;
 	}
 	
