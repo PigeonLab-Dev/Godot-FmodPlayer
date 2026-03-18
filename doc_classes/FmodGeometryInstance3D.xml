@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="FmodGeometryInstance3D" inherits="Node3D" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		A 3D node that automatically creates FMOD geometry for audio occlusion from MeshInstance3D or CollisionShape3D parents.
+	</brief_description>
+	<description>
+		FmodGeometryInstance3D is a helper node that automatically generates [FmodGeometry] objects for 3D audio occlusion. When attached as a child of a [MeshInstance3D] or [CollisionShape3D], it creates collision geometry that blocks or attenuates sound between sources and listeners.
+		Key features:
+		- Automatic geometry generation from mesh or collision shape
+		- Configurable occlusion parameters (direct and reverb occlusion)
+		- Double-sided polygon support
+		- Auto-rebuild on mesh changes (editor mode)
+		- Debug gizmo visualization
+		- Runtime geometry updates
+		Usage:
+		1. Add FmodGeometryInstance3D as a child of a MeshInstance3D or CollisionShape3D
+		2. The geometry is automatically built when the node enters the scene tree
+		3. Adjust occlusion parameters in the inspector
+		[b]Note:[/b] Geometry occlusion requires [constant FmodSystem.FMOD_INIT_FLAG_CHANNEL_LOWPASS] to be set during system initialization.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="clear_geometry">
+			<return type="void" />
+			<description>
+				Clears and releases the internal FMOD geometry object.
+				This removes the occlusion effect but keeps the node in the scene tree.
+				Emits [signal geometry_cleared] when complete.
+			</description>
+		</method>
+		<method name="detect_source_node">
+			<return type="void" />
+			<description>
+				Manually triggers detection of the parent source node (MeshInstance3D or CollisionShape3D).
+				This is called automatically when the node enters the tree, but can be called manually if the parent changes.
+			</description>
+		</method>
+		<method name="get_active" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if the geometry is currently active and contributing to occlusion calculations.
+			</description>
+		</method>
+		<method name="get_auto_rebuild" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if auto-rebuild is enabled.
+				When enabled, the geometry is automatically rebuilt when mesh properties change.
+			</description>
+		</method>
+		<method name="get_direct_occlusion" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the direct occlusion factor (0.0 to 1.0).
+				Higher values block more direct sound between source and listener.
+			</description>
+		</method>
+		<method name="get_double_sided" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if polygons are double-sided.
+				Double-sided polygons block sound from both directions.
+			</description>
+		</method>
+		<method name="get_geometry" qualifiers="const">
+			<return type="FmodGeometry" />
+			<description>
+				Returns the internal [FmodGeometry] object.
+				Returns [code]null[/code] if no geometry has been created.
+			</description>
+		</method>
+		<method name="get_reverb_occlusion" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the reverb occlusion factor (0.0 to 1.0).
+				Higher values reduce the amount of reverb applied to occluded sounds.
+			</description>
+		</method>
+		<method name="get_show_debug_gizmo" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if the debug gizmo is enabled for visualization.
+			</description>
+		</method>
+		<method name="has_valid_geometry" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if valid FMOD geometry has been created and is ready for use.
+			</description>
+		</method>
+		<method name="rebuild_geometry">
+			<return type="void" />
+			<description>
+				Rebuilds the FMOD geometry from the source node.
+				This clears any existing geometry and creates new polygons based on the current mesh/collision shape.
+				Emits [signal geometry_rebuilt] and [signal geometry_created] when complete.
+			</description>
+		</method>
+		<method name="set_active">
+			<return type="void" />
+			<param index="0" name="value" type="bool" />
+			<description>
+				Enables or disables the geometry.
+				When inactive, the geometry does not contribute to occlusion calculations.
+			</description>
+		</method>
+		<method name="set_auto_rebuild">
+			<return type="void" />
+			<param index="0" name="value" type="bool" />
+			<description>
+				Enables or disables auto-rebuild.
+				When enabled, the geometry is automatically rebuilt when the source mesh changes (editor mode only).
+			</description>
+		</method>
+		<method name="set_direct_occlusion">
+			<return type="void" />
+			<param index="0" name="value" type="float" />
+			<description>
+				Sets the direct occlusion factor (0.0 to 1.0).
+				[code]0.0[/code] = transparent (no occlusion), [code]1.0[/code] = fully opaque.
+				If auto-rebuild is enabled, the geometry will be rebuilt when this changes.
+			</description>
+		</method>
+		<method name="set_double_sided">
+			<return type="void" />
+			<param index="0" name="value" type="bool" />
+			<description>
+				Sets whether polygons are double-sided.
+				If [code]true[/code], sound is blocked from both sides of the polygon.
+				If auto-rebuild is enabled, the geometry will be rebuilt when this changes.
+			</description>
+		</method>
+		<method name="set_reverb_occlusion">
+			<return type="void" />
+			<param index="0" name="value" type="float" />
+			<description>
+				Sets the reverb occlusion factor (0.0 to 1.0).
+				[code]0.0[/code] = no reverb reduction, [code]1.0[/code] = full reverb reduction.
+				If auto-rebuild is enabled, the geometry will be rebuilt when this changes.
+			</description>
+		</method>
+		<method name="set_show_debug_gizmo">
+			<return type="void" />
+			<param index="0" name="value" type="bool" />
+			<description>
+				Enables or disables the debug gizmo for visualization.
+				The gizmo shows the geometry wireframe in the editor viewport.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="active" type="bool" setter="set_active" getter="get_active" default="true">
+			Whether the geometry is active and contributes to occlusion calculations.
+		</member>
+		<member name="auto_rebuild" type="bool" setter="set_auto_rebuild" getter="get_auto_rebuild" default="true">
+			If [code]true[/code], automatically rebuilds geometry when the source mesh changes.
+		</member>
+		<member name="direct_occlusion" type="float" setter="set_direct_occlusion" getter="get_direct_occlusion" default="0.5">
+			Direct sound occlusion factor (0.0 to 1.0). Higher values block more direct sound.
+		</member>
+		<member name="double_sided" type="bool" setter="set_double_sided" getter="get_double_sided" default="true">
+			If [code]true[/code], polygons block sound from both sides.
+		</member>
+		<member name="reverb_occlusion" type="float" setter="set_reverb_occlusion" getter="get_reverb_occlusion" default="0.5">
+			Reverb occlusion factor (0.0 to 1.0). Higher values reduce more reverb.
+		</member>
+		<member name="show_debug_gizmo" type="bool" setter="set_show_debug_gizmo" getter="get_show_debug_gizmo" default="true">
+			If [code]true[/code], shows a debug gizmo in the editor viewport.
+		</member>
+	</members>
+	<signals>
+		<signal name="geometry_cleared">
+			<description>
+				Emitted when the geometry has been cleared via [method clear_geometry].
+			</description>
+		</signal>
+		<signal name="geometry_created">
+			<description>
+				Emitted when new geometry has been successfully created.
+			</description>
+		</signal>
+		<signal name="geometry_rebuilt">
+			<description>
+				Emitted when geometry has been rebuilt via [method rebuild_geometry].
+			</description>
+		</signal>
+	</signals>
+</class>

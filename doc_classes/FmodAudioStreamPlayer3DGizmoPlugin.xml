@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="FmodAudioStreamPlayer3DGizmoPlugin" inherits="EditorNode3DGizmoPlugin" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Editor gizmo plugin for visualizing FmodAudioStreamPlayer3D nodes in the 3D viewport.
+	</brief_description>
+	<description>
+		FmodAudioStreamPlayer3DGizmoPlugin is an editor-only plugin that provides visual gizmos for [FmodAudioStreamPlayer3D] nodes in the 3D editor viewport. It displays visual indicators for the audio source's position, attenuation range, and emission cone.
+		The gizmo helps designers visualize:
+		- The position of 3D audio sources in the scene
+		- The maximum distance/attenuation radius
+		- The directional emission cone (when enabled)
+		[b]Note:[/b] This is an editor-only class and is not available in exported projects. It is automatically registered when the plugin loads.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+	</methods>
+</class>

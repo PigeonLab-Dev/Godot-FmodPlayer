@@ -29,6 +29,15 @@
 				Returns an empty reference if no audio data is loaded or if the FMOD system is not available.
 			</description>
 		</method>
+		<method name="invalidate_sound">
+			<return type="void" />
+			<description>
+				Invalidates the cached [FmodSound] object while preserving the audio data.
+				The next call to [method get_sound] will create a new sound with the current mode flags.
+				This is useful when you need to change mode flags (e.g., switching between 2D and 3D)
+				without reloading the audio data.
+			</description>
+		</method>
 		<method name="is_data_loaded" qualifiers="const">
 			<return type="bool" />
 			<description>
@@ -70,6 +79,16 @@
 		</constant>
 		<constant name="MODE_LOOP_BIDI" value="8" enum="CreateMode">
 			Enable bidirectional (ping-pong) loop playback. When the audio reaches the end, it will play backwards to the beginning, then forwards again, creating a seamless back-and-forth loop.
+		</constant>
+		<constant name="MODE_2D" value="16" enum="CreateMode">
+			Force 2D mode, disabling all 3D processing for this sound.
+			When set, the sound will play without any 3D spatial positioning, distance attenuation, or doppler effects.
+			This is useful for UI sounds, background music, or when using custom 2D audio positioning.
+		</constant>
+		<constant name="MODE_3D" value="32" enum="CreateMode">
+			Force 3D mode, enabling 3D spatial processing for this sound.
+			When set, the sound will be processed with 3D positioning, distance attenuation, and other spatial effects.
+			This is the default for 3D audio sources.
 		</constant>
 	</constants>
 </class>

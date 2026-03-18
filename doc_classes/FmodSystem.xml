@@ -887,6 +887,92 @@
 				Must be called after [method lock_dsp].
 			</description>
 		</method>
+		<method name="set_3d_listener_attributes">
+			<return type="void" />
+			<param index="0" name="listener" type="int" />
+			<param index="1" name="position" type="Vector3" />
+			<param index="2" name="velocity" type="Vector3" />
+			<param index="3" name="forward" type="Vector3" />
+			<param index="4" name="up" type="Vector3" />
+			<description>
+				Sets the position, velocity, and orientation of a 3D listener.
+				The listener index specifies which listener to configure (for multi-listener setups).
+				- [param position]: World position of the listener
+				- [param velocity]: Velocity for doppler calculations
+				- [param forward]: Forward direction vector (must be normalized)
+				- [param up]: Up direction vector (must be normalized)
+			</description>
+		</method>
+		<method name="get_3d_listener_attributes" qualifiers="const">
+			<return type="Dictionary" />
+			<param index="0" name="listener" type="int" />
+			<description>
+				Returns the 3D attributes of the specified listener as a Dictionary:
+				- [code]position[/code]: World position (Vector3)
+				- [code]velocity[/code]: Velocity (Vector3)
+				- [code]forward[/code]: Forward direction (Vector3)
+				- [code]up[/code]: Up direction (Vector3)
+			</description>
+		</method>
+		<method name="set_reverb_properties">
+			<return type="void" />
+			<param index="0" name="instance" type="int" />
+			<param index="1" name="decay_time" type="float" />
+			<param index="2" name="early_delay" type="float" />
+			<param index="3" name="late_delay" type="float" />
+			<param index="4" name="hf_reference" type="float" />
+			<param index="5" name="hf_decay_ratio" type="float" />
+			<param index="6" name="diffusion" type="float" />
+			<param index="7" name="density" type="float" />
+			<param index="8" name="low_shelf_frequency" type="float" />
+			<param index="9" name="low_shelf_gain" type="float" />
+			<param index="10" name="high_cut" type="float" />
+			<param index="11" name="early_late_mix" type="float" />
+			<param index="12" name="wet_level" type="float" />
+			<description>
+				Sets the reverb properties for the specified global reverb instance.
+				Parameters control various aspects of the reverb effect:
+				- [param decay_time]: Reverberation decay time in seconds
+				- [param early_delay]: Initial reflection delay time
+				- [param late_delay]: Late reverberation delay time
+				- [param hf_reference]: High-frequency reference in Hz
+				- [param hf_decay_ratio]: High-frequency decay ratio
+				- [param diffusion]: Diffusion amount (echo density)
+				- [param density]: Density of late reverberation
+				- [param low_shelf_frequency]: Low shelf filter frequency
+				- [param low_shelf_gain]: Low shelf filter gain
+				- [param high_cut]: High cut frequency
+				- [param early_late_mix]: Mix between early and late reflections
+				- [param wet_level]: Wet (effected) signal level in dB
+			</description>
+		</method>
+		<method name="get_reverb_properties" qualifiers="const">
+			<return type="Dictionary" />
+			<param index="0" name="instance" type="int" />
+			<description>
+				Returns the reverb properties for the specified global reverb instance as a Dictionary with all parameters.
+			</description>
+		</method>
+		<method name="attach_channel_group_to_port">
+			<return type="void" />
+			<param index="0" name="channel_group" type="FmodChannelGroup" />
+			<param index="1" name="port_type" type="int" enum="FmodSystem.FmodPortType" />
+			<param index="2" name="port_index" type="int" default="0" />
+			<param index="3" name="pass_thru" type="bool" default="false" />
+			<description>
+				Attaches a channel group's output to an audio port on the output driver.
+				This allows routing audio to specific output destinations like controller speakers or auxiliary outputs.
+				See [enum FmodPortType] for available port types.
+			</description>
+		</method>
+		<method name="detach_channel_group_from_port">
+			<return type="void" />
+			<param index="0" name="channel_group" type="FmodChannelGroup" />
+			<description>
+				Detaches a channel group from its assigned audio port.
+				The channel group will return to normal routing to the master output.
+			</description>
+		</method>
 	</methods>
 	<constants>
 		<constant name="FMOD_INIT_FLAG_NORMAL" value="0" enum="FmodInitFlags">
@@ -1212,6 +1298,38 @@
 		</constant>
 		<constant name="FMOD_RESAMPLER_FORCEINT" value="65536" enum="FmodResamplerMethod">
 			Forces the enum to be 32-bit size.
+		</constant>
+		<constant name="FMOD_PORT_TYPE_MUSIC" value="0" enum="FmodPortType">
+			Background music port. Use [code]FMOD_PORT_INDEX_NONE[/code] as the port index.
+		</constant>
+		<constant name="FMOD_PORT_TYPE_COPYRIGHT_MUSIC" value="1" enum="FmodPortType">
+			Copyrighted background music port. Use [code]FMOD_PORT_INDEX_NONE[/code] as the port index.
+		</constant>
+		<constant name="FMOD_PORT_TYPE_VOICE" value="2" enum="FmodPortType">
+			Voice chat port. Use the platform-specific user ID as the port index.
+		</constant>
+		<constant name="FMOD_PORT_TYPE_CONTROLLER" value="3" enum="FmodPortType">
+			Controller speaker port (e.g., DualShock 4 speaker, Nintendo Switch controller).
+			Use the platform-specific user ID as the port index.
+		</constant>
+		<constant name="FMOD_PORT_TYPE_PERSONAL" value="4" enum="FmodPortType">
+			Personal audio device port (e.g., headphones, headset).
+			Use the platform-specific user ID as the port index.
+		</constant>
+		<constant name="FMOD_PORT_TYPE_VIBRATION" value="5" enum="FmodPortType">
+			Controller vibration port. Use the platform-specific user ID as the port index.
+		</constant>
+		<constant name="FMOD_PORT_TYPE_AUX" value="6" enum="FmodPortType">
+			Auxiliary output port. Use [code]FMOD_PORT_INDEX_NONE[/code] as the port index.
+		</constant>
+		<constant name="FMOD_PORT_TYPE_PASSTHROUGH" value="7" enum="FmodPortType">
+			Passthrough output port. Use [code]FMOD_PORT_INDEX_NONE[/code] as the port index.
+		</constant>
+		<constant name="FMOD_PORT_TYPE_VR_VIBRATION" value="8" enum="FmodPortType">
+			VR controller vibration port. Use the platform-specific user ID as the port index.
+		</constant>
+		<constant name="FMOD_PORT_TYPE_MAX" value="9" enum="FmodPortType">
+			Maximum port type value.
 		</constant>
 	</constants>
 </class>
