@@ -339,7 +339,7 @@ namespace godot {
 		Ref<FmodDSP> create_dsp_by_type(unsigned int type) const;								// 创建一个带有指定类型索引的 DSP
 		Ref<FmodChannelGroup> create_channel_group(const String& p_name) const;					// 创建 ChannelGroup
 		Ref<FmodSoundGroup> create_sound_group(const String& p_name) const;						// 创建 SoundGroup
-		Ref<FmodReverb3D> create_reverb_3d() const;												// 创建一个 "虚拟混响" 对象。这个物体会对3D位置做出反应，并根据与混响物体中心的距离来变形混响环境
+		Ref<FmodReverb3D> create_reverb_3d() const;												// 创建一个 "虚拟混响" 对象，这个物体会对3D位置做出反应，并根据与混响物体中心的距离来变形混响环境
 		Ref<FmodChannel> play_sound(
 			Ref<FmodSound> sound,
 			Ref<FmodChannelGroup> channel_group,
