@@ -9,7 +9,6 @@
 #include <godot_cpp/variant/array.hpp>
 
 namespace godot {
-
 	void AudioImporterFmod::_bind_methods() {
 
 	}

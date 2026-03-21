@@ -6,7 +6,6 @@
 #include <godot_cpp/classes/resource.hpp>
 
 namespace godot {
-	// 前向声明
 	class FmodAudioEffect;
 	
 	// 自定义 DSP 状态数据 - 存储在 FMOD_DSP_STATE->instance 中
