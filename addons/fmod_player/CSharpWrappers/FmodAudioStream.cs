@@ -94,6 +94,10 @@ public partial class FmodAudioStream : Resource
 		public new static readonly StringName IsDataLoaded = "is_data_loaded";
 		public new static readonly StringName Clear = "clear";
 		public new static readonly StringName LoadFromFile = "load_from_file";
+		public new static readonly StringName AddModeFlag = "add_mode_flag";
+		public new static readonly StringName RemoveModeFlag = "remove_mode_flag";
+		public new static readonly StringName HasModeFlag = "has_mode_flag";
+		public new static readonly StringName InvalidateSound = "invalidate_sound";
 	}
 
 	public new FmodSound GetSound() => 
@@ -110,5 +114,17 @@ public partial class FmodAudioStream : Resource
 
 	public new static FmodAudioStream LoadFromFile(string path, long flags = 1) => 
 		FmodAudioStream.Bind(ClassDB.ClassCallStatic(NativeName, GDExtensionMethodName.LoadFromFile, [path, flags]).As<Resource>());
+
+	public new void AddModeFlag(FmodAudioStream.CreateMode flag) => 
+		Call(GDExtensionMethodName.AddModeFlag, [Variant.From(flag)]);
+
+	public new void RemoveModeFlag(FmodAudioStream.CreateMode flag) => 
+		Call(GDExtensionMethodName.RemoveModeFlag, [Variant.From(flag)]);
+
+	public new bool HasModeFlag(FmodAudioStream.CreateMode flag) => 
+		Call(GDExtensionMethodName.HasModeFlag, [Variant.From(flag)]).As<bool>();
+
+	public new void InvalidateSound() => 
+		Call(GDExtensionMethodName.InvalidateSound, []);
 
 }

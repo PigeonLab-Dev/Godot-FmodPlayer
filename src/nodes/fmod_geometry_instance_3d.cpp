@@ -42,7 +42,6 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("has_valid_geometry"), &FmodGeometryInstance3D::has_valid_geometry);
 		ClassDB::bind_method(D_METHOD("get_geometry"), &FmodGeometryInstance3D::get_geometry);
 
-		// 信号
 		ADD_SIGNAL(MethodInfo("geometry_created"));
 		ADD_SIGNAL(MethodInfo("geometry_cleared"));
 		ADD_SIGNAL(MethodInfo("geometry_rebuilt"));
@@ -250,7 +249,6 @@ namespace godot {
 		last_mesh_version = mesh->get_rid().get_id();
 		#endif
 		
-		UtilityFunctions::print("Created FMOD geometry with " + String::num_int64(polygon_count) + " polygons");
 		return true;
 	}
 

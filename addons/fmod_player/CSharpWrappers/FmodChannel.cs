@@ -170,6 +170,17 @@ public partial class FmodChannel : FmodChannelControl
 		public new static readonly StringName Priority = "priority";
 		public new static readonly StringName ChannelGroup = "channel_group";
 		public new static readonly StringName LoopCount = "loop_count";
+		public new static readonly StringName OcclusionScale = "occlusion_scale";
+		public new static readonly StringName DirectOcclusionBias = "direct_occlusion_bias";
+		public new static readonly StringName ReverbOcclusionBias = "reverb_occlusion_bias";
+		public new static readonly StringName EnableLowpass = "enable_lowpass";
+		public new static readonly StringName MinDirectOcclusion = "min_direct_occlusion";
+		public new static readonly StringName MaxDirectOcclusion = "max_direct_occlusion";
+		public new static readonly StringName MinReverbOcclusion = "min_reverb_occlusion";
+		public new static readonly StringName MaxReverbOcclusion = "max_reverb_occlusion";
+		public new static readonly StringName SmoothOcclusion = "smooth_occlusion";
+		public new static readonly StringName Delta = "delta";
+		public new static readonly StringName OcclusionSpeed = "occlusion_speed";
 	}
 
 	public new double Frequency
@@ -194,6 +205,72 @@ public partial class FmodChannel : FmodChannelControl
 	{
 		get => Get(GDExtensionPropertyName.LoopCount).As<long>();
 		set => Set(GDExtensionPropertyName.LoopCount, value);
+	}
+
+	public new double OcclusionScale
+	{
+		get => Get(GDExtensionPropertyName.OcclusionScale).As<double>();
+		set => Set(GDExtensionPropertyName.OcclusionScale, value);
+	}
+
+	public new double DirectOcclusionBias
+	{
+		get => Get(GDExtensionPropertyName.DirectOcclusionBias).As<double>();
+		set => Set(GDExtensionPropertyName.DirectOcclusionBias, value);
+	}
+
+	public new double ReverbOcclusionBias
+	{
+		get => Get(GDExtensionPropertyName.ReverbOcclusionBias).As<double>();
+		set => Set(GDExtensionPropertyName.ReverbOcclusionBias, value);
+	}
+
+	public new bool EnableLowpass
+	{
+		get => Get(GDExtensionPropertyName.EnableLowpass).As<bool>();
+		set => Set(GDExtensionPropertyName.EnableLowpass, value);
+	}
+
+	public new double MinDirectOcclusion
+	{
+		get => Get(GDExtensionPropertyName.MinDirectOcclusion).As<double>();
+		set => Set(GDExtensionPropertyName.MinDirectOcclusion, value);
+	}
+
+	public new double MaxDirectOcclusion
+	{
+		get => Get(GDExtensionPropertyName.MaxDirectOcclusion).As<double>();
+		set => Set(GDExtensionPropertyName.MaxDirectOcclusion, value);
+	}
+
+	public new double MinReverbOcclusion
+	{
+		get => Get(GDExtensionPropertyName.MinReverbOcclusion).As<double>();
+		set => Set(GDExtensionPropertyName.MinReverbOcclusion, value);
+	}
+
+	public new double MaxReverbOcclusion
+	{
+		get => Get(GDExtensionPropertyName.MaxReverbOcclusion).As<double>();
+		set => Set(GDExtensionPropertyName.MaxReverbOcclusion, value);
+	}
+
+	public new bool SmoothOcclusion
+	{
+		get => Get(GDExtensionPropertyName.SmoothOcclusion).As<bool>();
+		set => Set(GDExtensionPropertyName.SmoothOcclusion, value);
+	}
+
+	public new double Delta
+	{
+		get => Get(GDExtensionPropertyName.Delta).As<double>();
+		set => Set(GDExtensionPropertyName.Delta, value);
+	}
+
+	public new double OcclusionSpeed
+	{
+		get => Get(GDExtensionPropertyName.OcclusionSpeed).As<double>();
+		set => Set(GDExtensionPropertyName.OcclusionSpeed, value);
 	}
 
 	public new static class GDExtensionMethodName

@@ -194,13 +194,27 @@ public partial class FmodSystem : GodotObject
 		Spline = 4,
 	}
 
+	public enum FmodPortType
+	{
+		Music = 0,
+		CopyrightMusic = 1,
+		Voice = 2,
+		Controller = 3,
+		Personal = 4,
+		Vibration = 5,
+		Aux = 6,
+		Passthrough = 7,
+		VrVibration = 8,
+		Max = 9,
+	}
+
 	public new static class GDExtensionPropertyName
 	{
 		public new static readonly StringName MaxSoftwareChannels = "max_software_channels";
 		public new static readonly StringName DopplerScale = "doppler_scale";
 		public new static readonly StringName DistanceFactor = "distance_factor";
 		public new static readonly StringName RolloffScale = "rolloff_scale";
-		public new static readonly StringName Arg3dNumListeners = "3d_num_listeners";
+		public new static readonly StringName Num3dListeners = "3d_num_listeners";
 		public new static readonly StringName MaxMpegCodecs = "max_mpeg_codecs";
 		public new static readonly StringName MaxAdpcmCodecs = "max_adpcm_codecs";
 		public new static readonly StringName MaxXmaCodecs = "max_xma_codecs";
@@ -220,7 +234,7 @@ public partial class FmodSystem : GodotObject
 		public new static readonly StringName RandomSeed = "random_seed";
 		public new static readonly StringName MaxConvolutionThreads = "max_convolution_threads";
 		public new static readonly StringName MaxSpatialObjects = "max_spatial_objects";
-		public new static readonly StringName Arg3dMaxWorldSize = "3d_max_world_size";
+		public new static readonly StringName Max3dWorldSize = "3d_max_world_size";
 	}
 
 	public new long MaxSoftwareChannels
@@ -247,10 +261,10 @@ public partial class FmodSystem : GodotObject
 		set => Set(GDExtensionPropertyName.RolloffScale, value);
 	}
 
-	public new long Arg3dNumListeners
+	public new long Num3dListeners
 	{
-		get => Get(GDExtensionPropertyName.Arg3dNumListeners).As<long>();
-		set => Set(GDExtensionPropertyName.Arg3dNumListeners, value);
+		get => Get(GDExtensionPropertyName.Num3dListeners).As<long>();
+		set => Set(GDExtensionPropertyName.Num3dListeners, value);
 	}
 
 	public new long MaxMpegCodecs
@@ -367,10 +381,10 @@ public partial class FmodSystem : GodotObject
 		set => Set(GDExtensionPropertyName.MaxSpatialObjects, value);
 	}
 
-	public new double Arg3dMaxWorldSize
+	public new double Max3dWorldSize
 	{
-		get => Get(GDExtensionPropertyName.Arg3dMaxWorldSize).As<double>();
-		set => Set(GDExtensionPropertyName.Arg3dMaxWorldSize, value);
+		get => Get(GDExtensionPropertyName.Max3dWorldSize).As<double>();
+		set => Set(GDExtensionPropertyName.Max3dWorldSize, value);
 	}
 
 	public new static class GDExtensionMethodName
@@ -390,6 +404,8 @@ public partial class FmodSystem : GodotObject
 		public new static readonly StringName GetDriverInfo = "get_driver_info";
 		public new static readonly StringName SetDriver = "set_driver";
 		public new static readonly StringName GetDriver = "get_driver";
+		public new static readonly StringName SetSoftwareChannels = "set_software_channels";
+		public new static readonly StringName GetSoftwareChannels = "get_software_channels";
 		public new static readonly StringName SetSoftwareFormat = "set_software_format";
 		public new static readonly StringName GetSoftwareFormat = "get_software_format";
 		public new static readonly StringName SetDspBufferSize = "set_dsp_buffer_size";
@@ -400,6 +416,12 @@ public partial class FmodSystem : GodotObject
 		public new static readonly StringName GetSpeakerPosition = "get_speaker_position";
 		public new static readonly StringName Set3dRolloffCallback = "set_3d_rolloff_callback";
 		public new static readonly StringName Get3dRolloffCallback = "get_3d_rolloff_callback";
+		public new static readonly StringName Set3dListenerAttributes = "set_3d_listener_attributes";
+		public new static readonly StringName Get3dListenerAttributes = "get_3d_listener_attributes";
+		public new static readonly StringName SetReverbProperties = "set_reverb_properties";
+		public new static readonly StringName GetReverbProperties = "get_reverb_properties";
+		public new static readonly StringName AttachChannelGroupToPort = "attach_channel_group_to_port";
+		public new static readonly StringName DetachChannelGroupFromPort = "detach_channel_group_from_port";
 		public new static readonly StringName SetNetworkProxy = "set_network_proxy";
 		public new static readonly StringName GetNetworkProxy = "get_network_proxy";
 		public new static readonly StringName SetNetworkTimeout = "set_network_timeout";
@@ -630,5 +652,29 @@ public partial class FmodSystem : GodotObject
 
 	public new void UnlockDsp() => 
 		Call(GDExtensionMethodName.UnlockDsp, []);
+
+	public new void SetSoftwareChannels(long numChannels) => 
+		Call(GDExtensionMethodName.SetSoftwareChannels, [numChannels]);
+
+	public new long GetSoftwareChannels() => 
+		Call(GDExtensionMethodName.GetSoftwareChannels, []).As<long>();
+
+	public new void Set3dListenerAttributes(long listener, Vector3 position, Vector3 velocity, Vector3 forward, Vector3 up) => 
+		Call(GDExtensionMethodName.Set3dListenerAttributes, [listener, position, velocity, forward, up]);
+
+	public new Godot.Collections.Dictionary Get3dListenerAttributes(long listener) => 
+		Call(GDExtensionMethodName.Get3dListenerAttributes, [listener]).As<Godot.Collections.Dictionary>();
+
+	public new void SetReverbProperties(long instance, double decayTime, double earlyDelay, double lateDelay, double hfReference, double hfDecayRatio, double diffusion, double density, double lowShelfFrequency, double lowShelfGain, double highCut, double earlyLateMix, double wetLevel) => 
+		Call(GDExtensionMethodName.SetReverbProperties, [instance, decayTime, earlyDelay, lateDelay, hfReference, hfDecayRatio, diffusion, density, lowShelfFrequency, lowShelfGain, highCut, earlyLateMix, wetLevel]);
+
+	public new Godot.Collections.Dictionary GetReverbProperties(long instance) => 
+		Call(GDExtensionMethodName.GetReverbProperties, [instance]).As<Godot.Collections.Dictionary>();
+
+	public new void AttachChannelGroupToPort(FmodChannelGroup channelGroup, FmodSystem.FmodPortType portType, ulong portIndex = 0, bool passThru = false) => 
+		Call(GDExtensionMethodName.AttachChannelGroupToPort, [channelGroup, Variant.From(portType), portIndex, passThru]);
+
+	public new void DetachChannelGroupFromPort(FmodChannelGroup channelGroup) => 
+		Call(GDExtensionMethodName.DetachChannelGroupFromPort, [channelGroup]);
 
 }

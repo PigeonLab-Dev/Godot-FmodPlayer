@@ -91,7 +91,7 @@ public partial class FmodChannelControl : RefCounted
 
 	public new static class GDExtensionPropertyName
 	{
-		public new static readonly StringName Pasued = "pasued";
+		public new static readonly StringName Paused = "paused";
 		public new static readonly StringName Pitch = "pitch";
 		public new static readonly StringName VolumeDb = "volume_db";
 		public new static readonly StringName VolumeRamp = "volume_ramp";
@@ -102,13 +102,13 @@ public partial class FmodChannelControl : RefCounted
 		public new static readonly StringName Arg3dMinDistance = "3d_min_distance";
 		public new static readonly StringName Arg3dMaxDistance = "3d_max_distance";
 		public new static readonly StringName Arg3dSpread = "3d_spread";
-		public new static readonly StringName Gain = "gain";
+		public new static readonly StringName LowPassGain = "low_pass_gain";
 	}
 
-	public new bool Pasued
+	public new bool Paused
 	{
-		get => Get(GDExtensionPropertyName.Pasued).As<bool>();
-		set => Set(GDExtensionPropertyName.Pasued, value);
+		get => Get(GDExtensionPropertyName.Paused).As<bool>();
+		set => Set(GDExtensionPropertyName.Paused, value);
 	}
 
 	public new double Pitch
@@ -171,10 +171,10 @@ public partial class FmodChannelControl : RefCounted
 		set => Set(GDExtensionPropertyName.Arg3dSpread, value);
 	}
 
-	public new double Gain
+	public new double LowPassGain
 	{
-		get => Get(GDExtensionPropertyName.Gain).As<double>();
-		set => Set(GDExtensionPropertyName.Gain, value);
+		get => Get(GDExtensionPropertyName.LowPassGain).As<double>();
+		set => Set(GDExtensionPropertyName.LowPassGain, value);
 	}
 
 	public new static class GDExtensionMethodName

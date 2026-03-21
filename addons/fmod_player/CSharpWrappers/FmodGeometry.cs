@@ -96,6 +96,7 @@ public partial class FmodGeometry : RefCounted
 	{
 		public new static readonly StringName GeometryIsValid = "geometry_is_valid";
 		public new static readonly StringName GeometryIsNull = "geometry_is_null";
+		public new static readonly StringName Setup = "setup";
 		public new static readonly StringName SetPolygonAttributes = "set_polygon_attributes";
 		public new static readonly StringName GetPolygonAttributes = "get_polygon_attributes";
 		public new static readonly StringName GetPolygonNumVertices = "get_polygon_num_vertices";
@@ -103,6 +104,7 @@ public partial class FmodGeometry : RefCounted
 		public new static readonly StringName GetPolygonVertex = "get_polygon_vertex";
 		public new static readonly StringName AddPolygon = "add_polygon";
 		public new static readonly StringName GetMaxPolygons = "get_max_polygons";
+		public new static readonly StringName GetNumPolygons = "get_num_polygons";
 		public new static readonly StringName Save = "save";
 		public new static readonly StringName GetSaveSize = "get_save_size";
 		public new static readonly StringName Release = "release";
@@ -134,6 +136,9 @@ public partial class FmodGeometry : RefCounted
 
 	public new Godot.Collections.Dictionary GetMaxPolygons() => 
 		Call(GDExtensionMethodName.GetMaxPolygons, []).As<Godot.Collections.Dictionary>();
+
+	public new long GetNumPolygons() => 
+		Call(GDExtensionMethodName.GetNumPolygons, []).As<long>();
 
 	public new byte[] Save() => 
 		Call(GDExtensionMethodName.Save, []).As<byte[]>();

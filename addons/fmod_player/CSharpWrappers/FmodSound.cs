@@ -146,6 +146,9 @@ public partial class FmodSound : RefCounted
 	public new static class GDExtensionMethodName
 	{
 		public new static readonly StringName LoadFromFile = "load_from_file";
+		public new static readonly StringName SoundIsValid = "sound_is_valid";
+		public new static readonly StringName SoundIsNull = "sound_is_null";
+		public new static readonly StringName Setup = "setup";
 		public new static readonly StringName GetName = "get_name";
 		public new static readonly StringName GetFormat = "get_format";
 		public new static readonly StringName GetLength = "get_length";
@@ -163,10 +166,22 @@ public partial class FmodSound : RefCounted
 		public new static readonly StringName GetSyncPoint = "get_sync_point";
 		public new static readonly StringName GetSyncPointInfo = "get_sync_point_info";
 		public new static readonly StringName GetNumSubSounds = "get_num_sub_sounds";
+		public new static readonly StringName SetPcmreadCallback = "set_pcmread_callback";
+		public new static readonly StringName GetPcmreadCallback = "get_pcmread_callback";
+		public new static readonly StringName SetPcmsetposCallback = "set_pcmsetpos_callback";
+		public new static readonly StringName GetPcmsetposCallback = "get_pcmsetpos_callback";
+		public new static readonly StringName SetNonblockCallback = "set_nonblock_callback";
+		public new static readonly StringName GetNonblockCallback = "get_nonblock_callback";
 	}
 
 	public new static FmodSound LoadFromFile(string path) => 
 		FmodSound.Bind(ClassDB.ClassCallStatic(NativeName, GDExtensionMethodName.LoadFromFile, [path]).As<RefCounted>());
+
+	public new bool SoundIsValid() => 
+		Call(GDExtensionMethodName.SoundIsValid, []).As<bool>();
+
+	public new bool SoundIsNull() => 
+		Call(GDExtensionMethodName.SoundIsNull, []).As<bool>();
 
 	public new string GetName() => 
 		Call(GDExtensionMethodName.GetName, []).As<string>();
@@ -218,5 +233,23 @@ public partial class FmodSound : RefCounted
 
 	public new long GetNumSubSounds() => 
 		Call(GDExtensionMethodName.GetNumSubSounds, []).As<long>();
+
+	public new void SetPcmreadCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetPcmreadCallback, [callback]);
+
+	public new Callable GetPcmreadCallback() => 
+		Call(GDExtensionMethodName.GetPcmreadCallback, []).As<Callable>();
+
+	public new void SetPcmsetposCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetPcmsetposCallback, [callback]);
+
+	public new Callable GetPcmsetposCallback() => 
+		Call(GDExtensionMethodName.GetPcmsetposCallback, []).As<Callable>();
+
+	public new void SetNonblockCallback(Callable callback) => 
+		Call(GDExtensionMethodName.SetNonblockCallback, [callback]);
+
+	public new Callable GetNonblockCallback() => 
+		Call(GDExtensionMethodName.GetNonblockCallback, []).As<Callable>();
 
 }

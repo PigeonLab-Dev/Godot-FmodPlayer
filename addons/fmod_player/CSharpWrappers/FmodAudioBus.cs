@@ -98,7 +98,9 @@ public partial class FmodAudioBus : RefCounted
 		public new static readonly StringName SetParent = "set_parent";
 		public new static readonly StringName GetBus = "get_bus";
 		public new static readonly StringName GetParent = "get_parent";
+		public new static readonly StringName GetBusName = "get_bus_name";
 		public new static readonly StringName ApplyMute = "apply_mute";
+		public new static readonly StringName SyncBypass = "sync_bypass";
 		public new static readonly StringName AddEffect = "add_effect";
 		public new static readonly StringName RemoveEffect = "remove_effect";
 		public new static readonly StringName GetEffect = "get_effect";
@@ -116,8 +118,14 @@ public partial class FmodAudioBus : RefCounted
 	public new FmodChannelGroup GetParent() => 
 		FmodChannelGroup.Bind(Call(GDExtensionMethodName.GetParent, []).As<RefCounted>());
 
+	public new string GetBusName() => 
+		Call(GDExtensionMethodName.GetBusName, []).As<string>();
+
 	public new void ApplyMute(bool unnamedArg0) => 
 		Call(GDExtensionMethodName.ApplyMute, [unnamedArg0]);
+
+	public new void SyncBypass() => 
+		Call(GDExtensionMethodName.SyncBypass, []);
 
 	public new void AddEffect(FmodAudioEffect effect, long index) => 
 		Call(GDExtensionMethodName.AddEffect, [effect, index]);
