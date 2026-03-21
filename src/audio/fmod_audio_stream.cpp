@@ -131,11 +131,11 @@ namespace godot {
 
 	Ref<FmodAudioStream> FmodAudioStream::load_from_file(const String& p_path, int p_flags) {
 		Ref<FileAccess> file = FileAccess::open(p_path, FileAccess::READ);
-		ERR_FAIL_COND_V_MSG(file.is_null(), Ref<FmodAudioStream>(), "Cannot open audio file: ", p_path);
+		ERR_FAIL_COND_V_MSG(file.is_null(), Ref<FmodAudioStream>(), "Cannot open audio file: " + p_path);
 		
 		PackedByteArray data = file->get_buffer(file->get_length());
 		file->close();
-		ERR_FAIL_COND_V_MSG(data.is_empty(), Ref<FmodAudioStream>(), "Failed to read audio file: ", p_path);
+		ERR_FAIL_COND_V_MSG(data.is_empty(), Ref<FmodAudioStream>(), "Failed to read audio file: " + p_path);
 
 		Ref<FmodAudioStream> stream;
 		stream.instantiate();
