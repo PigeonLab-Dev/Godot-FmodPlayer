@@ -59,7 +59,7 @@ void initialize_fmod_player_module(ModuleInitializationLevel p_level) {
 		// 注册自定义项目设置
 		ProjectSettings* settings = ProjectSettings::get_singleton();
 		
-		// FMOD Profile 高级设置：仅在编辑器中初始化时启用 FMOD Profile (修改需要重启编辑器)
+		// FMOD Profile 高级设置: 仅在编辑器中初始化时启用 FMOD Profile (修改需要重启编辑器)
 		if (!settings->has_setting("audio/fmod/enable_profile")) {
 			settings->set_setting("audio/fmod/enable_profile", true);
 		}
@@ -71,7 +71,7 @@ void initialize_fmod_player_module(ModuleInitializationLevel p_level) {
 		property_info_enable_profile["type"] = Variant::BOOL;
 		settings->add_property_info(property_info_enable_profile);
 
-		// FMOD Network Proxy 高级设置：仅在编辑器中初始化时启用 FMOD 网络代理 (修改需要重启编辑器)
+		// FMOD Network Proxy 高级设置: 仅在编辑器中初始化时启用 FMOD 网络代理 (修改需要重启编辑器)
 		if (!settings->has_setting("audio/fmod/network_proxy")) {
 			settings->set_setting("audio/fmod/network_proxy", "");
 		}
@@ -83,7 +83,7 @@ void initialize_fmod_player_module(ModuleInitializationLevel p_level) {
 		property_info_network_proxy["type"] = Variant::STRING;
 		settings->add_property_info(property_info_network_proxy);
 
-		// FMOD System 最大通道数高级设置：初始化时指定主系统的最大通道数 (修改需要重启编辑器)
+		// FMOD System 最大通道数高级设置: 初始化时指定主系统的最大通道数 (修改需要重启编辑器)
 		if (!settings->has_setting("audio/fmod/max_channels")) {
 			settings->set_setting("audio/fmod/max_channels", 32);
 		}

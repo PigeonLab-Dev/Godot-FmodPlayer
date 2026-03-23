@@ -1,15 +1,7 @@
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef FMOD_SERVER_H
+#define FMOD_SERVER_H
 
 #include "fmod_system.h"
-#include <godot_cpp/classes/audio_server.hpp>
-#include <godot_cpp/classes/engine.hpp>
-#include <godot_cpp/classes/object.hpp>
-#include <godot_cpp/classes/performance.hpp>
-#include <godot_cpp/classes/project_settings.hpp>
-#include <godot_cpp/classes/scene_tree.hpp>
-#include <godot_cpp/core/class_db.hpp>
-#include <godot_cpp/variant/utility_functions.hpp>
 
 namespace godot {
 	class FmodAudioBus;
@@ -57,4 +49,4 @@ namespace godot {
 	};
 }
 
-#endif // !SERVER_H
+#endif // !FMOD_SERVER_H

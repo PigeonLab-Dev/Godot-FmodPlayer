@@ -1,5 +1,8 @@
 #include "nodes/fmod_audio_stream_player.h"
 #include "mixer/fmod_audio_bus_layout.h"
+#include <godot_cpp/classes/audio_server.hpp>
+#include <godot_cpp/classes/engine.hpp>
+#include <godot_cpp/classes/editor_interface.hpp>
 
 namespace godot {
 	void FmodAudioStreamPlayer::_bind_methods() {
@@ -7,7 +10,7 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_stream"), &FmodAudioStreamPlayer::get_stream);
 		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "stream", PROPERTY_HINT_RESOURCE_TYPE, "FmodAudioStream"), "set_stream", "get_stream");
 		
-		ClassDB::bind_method(D_METHOD("play", "from_position"), &FmodAudioStreamPlayer::play, DEFVAL(0.0));
+		ClassDB::bind_method(D_METHOD("play", "from_position"), &FmodAudioStreamPlayer::play, DEFVAL(0.0f));
 		ClassDB::bind_method(D_METHOD("seek", "to_position"), &FmodAudioStreamPlayer::play);
 		ClassDB::bind_method(D_METHOD("stop"), &FmodAudioStreamPlayer::stop);
 
@@ -25,9 +28,9 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_volume_db"), &FmodAudioStreamPlayer::get_volume_db);
 		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "volume_db", PROPERTY_HINT_RANGE, "-80,24,0.1,suffix:dB"), "set_volume_db", "get_volume_db");
 		
-		ClassDB::bind_method(D_METHOD("set_pitch", "pitch"), &FmodAudioStreamPlayer::set_pitch);
-		ClassDB::bind_method(D_METHOD("get_pitch"), &FmodAudioStreamPlayer::get_pitch);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pitch", PROPERTY_HINT_RANGE, "0.01,4.00,0.01"), "set_pitch", "get_pitch");
+		ClassDB::bind_method(D_METHOD("set_pitch_scale", "pitch_scale"), &FmodAudioStreamPlayer::set_pitch_scale);
+		ClassDB::bind_method(D_METHOD("get_pitch_scale"), &FmodAudioStreamPlayer::get_pitch_scale);
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pitch_scale", PROPERTY_HINT_RANGE, "0.01,4,0.01,or_greater"), "set_pitch_scale", "get_pitch_scale");
 
 		ClassDB::bind_method(D_METHOD("set_auto_play", "enable"), &FmodAudioStreamPlayer::set_auto_play);
 		ClassDB::bind_method(D_METHOD("is_autoplay_enabled"), &FmodAudioStreamPlayer::is_autoplay_enabled);
@@ -92,7 +95,7 @@ namespace godot {
 	void FmodAudioStreamPlayer::_create_internal_channel(Ref<FmodAudioStream> stream) {
 		Ref<FmodSystem> system = FmodServer::get_main_system();
 
-		// 通过 get_sound() 获取 Sound（延迟创建）
+		// 通过 get_sound() 获取 Sound (延迟创建)
 		Ref<FmodSound> sound = stream->get_sound();
 		if (sound.is_null()) {
 			UtilityFunctions::push_error("Failed to get sound from stream");
@@ -144,7 +147,7 @@ namespace godot {
 		
 		Ref<FmodChannelGroup> channel_group;
 		if (audio_bus.is_null()) {
-			// 如果找不到总线（可能还没同步），直接回退到 FMOD Master ChannelGroup
+			// 如果找不到总线 (可能还没同步)，直接回退到 FMOD Master ChannelGroup
 			channel_group = FmodServer::get_master_channel_group();
 		} else {
 			channel_group = audio_bus->get_bus();
@@ -239,14 +242,14 @@ namespace godot {
 		return volume_db;
 	}
 
-	void FmodAudioStreamPlayer::set_pitch(const float new_pitch) {
+	void FmodAudioStreamPlayer::set_pitch_scale(const float new_pitch) {
 		pitch = new_pitch;
 
 		if (internal_channel.is_null() || internal_channel->channel_is_null()) return;
 		internal_channel->set_pitch(pitch);
 	}
 
-	float FmodAudioStreamPlayer::get_pitch() const {
+	float FmodAudioStreamPlayer::get_pitch_scale() const {
 		return pitch;
 	}
 

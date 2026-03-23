@@ -8,6 +8,7 @@
 #include "spatial/fmod_reverb_3d.h"
 
 #include <godot_cpp/classes/file_access.hpp>
+#include <godot_cpp/classes/project_settings.hpp>
 
 namespace godot {
 	void FmodSystem::_bind_methods() {
@@ -460,11 +461,11 @@ namespace godot {
 		FMOD_ERR_CHECK(system->setDriver(driver));
 	}
 
-	int64_t FmodSystem::get_driver() const {
+	int FmodSystem::get_driver() const {
 		ERR_FAIL_COND_V(!system, 0);
 		int driver = -1;
 		FMOD_ERR_CHECK_V(system->getDriver(&driver), -1);
-		return (int64_t)driver;
+		return driver;
 	}
 
 	void FmodSystem::set_software_channels(const int num_software_channels) {
@@ -790,11 +791,11 @@ namespace godot {
 		FMOD_ERR_CHECK(system->setNetworkTimeout(timeout));
 	}
 
-	int64_t FmodSystem::get_network_timeout() const {
+	int FmodSystem::get_network_timeout() const {
 		ERR_FAIL_COND_V(!system, 0);
 		int timeout = -1;
 		FMOD_ERR_CHECK_V(system->getNetworkTimeout(&timeout), -1);
-		return (int64_t)timeout;
+		return timeout;
 	}
 
 	Dictionary FmodSystem::get_version() const {

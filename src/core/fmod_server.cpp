@@ -1,19 +1,27 @@
-#include "playback/fmod_channel.h"
-#include "playback/fmod_channel_group.h"
-#include "fmod_server.h"
 #include "audio/fmod_sound.h"
+#include "dsp/fmod_audio_effect.h"
+#include "fmod_server.h"
 #include "mixer/fmod_audio_bus.h"
 #include "mixer/fmod_audio_bus_layout.h"
-#include "dsp/fmod_audio_effect.h"
+#include "playback/fmod_channel.h"
+#include "playback/fmod_channel_group.h"
 
-#include <godot_cpp/classes/viewport.hpp>
-#include <godot_cpp/classes/camera3d.hpp>
+#include <godot_cpp/classes/audio_server.hpp>
 #include <godot_cpp/classes/camera2d.hpp>
-#include <godot_cpp/classes/window.hpp>
+#include <godot_cpp/classes/camera3d.hpp>
 #include <godot_cpp/classes/editor_interface.hpp>
 #include <godot_cpp/classes/editor_script_picker.hpp>
+#include <godot_cpp/classes/engine.hpp>
+#include <godot_cpp/classes/object.hpp>
+#include <godot_cpp/classes/performance.hpp>
+#include <godot_cpp/classes/project_settings.hpp>
+#include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/sub_viewport.hpp>
+#include <godot_cpp/classes/viewport.hpp>
+#include <godot_cpp/classes/window.hpp>
+#include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/math.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 
 // 用于获取编辑器视口的辅助函数
 #ifdef TOOLS_ENABLED
@@ -148,7 +156,7 @@ namespace godot {
 				perf->add_custom_monitor("FmodFileUsage/OtherBytesRead", callable_mp(this, &FmodServer::_get_other_bytes_read));
 			}
 			else {
-				UtilityFunctions::push_warning("Failed to get Performance!");
+				WARN_PRINT("Failed to get Performance!");
 			}
 
 			AudioServer* audio_server = AudioServer::get_singleton();
@@ -157,11 +165,11 @@ namespace godot {
 				_build_bus_layout();
 			}
 			else {
-				UtilityFunctions::push_warning("Failed to get AudioServer!");
+				WARN_PRINT("Failed to get AudioServer!");
 			}
 		}
 		else {
-			UtilityFunctions::push_error("Failed to get SceneTree!");
+			ERR_PRINT("Failed to get SceneTree!");
 		}
 	}
 

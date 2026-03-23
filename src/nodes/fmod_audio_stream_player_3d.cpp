@@ -31,9 +31,9 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_unit_size"), &FmodAudioStreamPlayer3D::get_unit_size);
 		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "unit_size", PROPERTY_HINT_RANGE, "0.001,100,0.001,or_greater"), "set_unit_size", "get_unit_size");
 
-		ClassDB::bind_method(D_METHOD("set_pitch", "pitch"), &FmodAudioStreamPlayer3D::set_pitch);
-		ClassDB::bind_method(D_METHOD("get_pitch"), &FmodAudioStreamPlayer3D::get_pitch);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pitch", PROPERTY_HINT_RANGE, "0.01,4,0.01"), "set_pitch", "get_pitch");
+		ClassDB::bind_method(D_METHOD("set_pitch_scale", "pitch_scale"), &FmodAudioStreamPlayer3D::set_pitch_scale);
+		ClassDB::bind_method(D_METHOD("get_pitch_scale"), &FmodAudioStreamPlayer3D::get_pitch_scale);
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pitch_scale", PROPERTY_HINT_RANGE, "0.01,4,0.01,or_greater"), "set_pitch_scale", "get_pitch_scale");
 
 		ClassDB::bind_method(D_METHOD("set_playing", "playing"), &FmodAudioStreamPlayer3D::set_playing);
 		ClassDB::bind_method(D_METHOD("is_playing"), &FmodAudioStreamPlayer3D::is_playing);
@@ -401,14 +401,14 @@ namespace godot {
 		return volume_db;
 	}
 
-	void FmodAudioStreamPlayer3D::set_pitch(const float new_pitch) {
+	void FmodAudioStreamPlayer3D::set_pitch_scale(const float new_pitch) {
 		pitch = new_pitch;
 		if (internal_channel.is_valid() && internal_channel->channel_control_is_valid()) {
 			internal_channel->set_pitch(pitch);
 		}
 	}
 
-	float FmodAudioStreamPlayer3D::get_pitch() const {
+	float FmodAudioStreamPlayer3D::get_pitch_scale() const {
 		return pitch;
 	}
 

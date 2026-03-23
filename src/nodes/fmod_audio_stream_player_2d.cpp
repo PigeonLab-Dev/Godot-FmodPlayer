@@ -1,6 +1,7 @@
 #include "nodes/fmod_audio_stream_player_2d.h"
 #include "mixer/fmod_audio_bus_layout.h"
 #include "core/fmod_utils.hpp"
+#include <godot_cpp/classes/audio_server.hpp>
 
 namespace godot {
 	void FmodAudioStreamPlayer2D::_bind_methods() {

@@ -38,6 +38,7 @@
 #include <godot_cpp/classes/audio_effect_reverb.hpp>
 #include <godot_cpp/classes/audio_effect_spectrum_analyzer.hpp>
 #include <godot_cpp/classes/audio_effect_stereo_enhance.hpp>
+#include <godot_cpp/classes/audio_server.hpp>
 
 namespace godot {
 	void FmodAudioBusLayout::_bind_methods() {

@@ -32,7 +32,7 @@ namespace godot {
 			FMOD_INIT_FLAG_VOL0_BECOMES_VIRTUAL = 0x00020000,									// 任何音量为 0 的声音都会变成虚拟音频，除了虚拟更新位置外不会被处理
 			FMOD_INIT_FLAG_GEOMETRY_USECLOSEST = 0x00040000,									// 使用几何引擎时，只需处理最近的多边形，而不是累积所有声音到听者线路相交的多边形
 			FMOD_INIT_FLAG_PREFER_DOLBY_DOWNMIX = 0x00080000,									// 使用立体声输出设备 FMOD_SPEAKERMODE_5POINT1 时，请使用 Dolby Pro Logic II 的下混算法，而非默认的立体声下混算法
-			FMOD_INIT_FLAG_THREAD_UNSAFE = 0x00100000,											// 禁用 API 调用的线程安全。只有在 FMOD 是从单线程调用且没有使用 Studio API 时才使用！
+			FMOD_INIT_FLAG_THREAD_UNSAFE = 0x00100000,											// 禁用 API 调用的线程安全，只有在 FMOD 是从单线程调用且没有使用 Studio API 时才使用！
 			FMOD_INIT_FLAG_PROFILE_METER_ALL = 0x00200000,										// 虽然速度较慢，但可以为图表中的每台 DSP 设备添加电平计量
 			FMOD_INIT_FLAG_MEMORY_TRACKING = 0x00400000											// 支持内存分配追踪，目前这功能仅在使用 Studio API 时有用，增加内存占用并降低性能
 		};
@@ -216,7 +216,7 @@ namespace godot {
 		int get_num_drivers() const;															// 获取所选输出类型可用的输出驱动器数量
 		Dictionary get_driver_info(const int id) const;											// 获取由其索引指定的声音设备的识别信息，且针对所选输出模式
 		void set_driver(const int driver);														// 设置所选输出类型的输出驱动
-		int64_t get_driver() const;																// 获取所选输出类型的输出驱动
+		int get_driver() const;																	// 获取所选输出类型的输出驱动
 
 		// 设置
 		void set_software_channels(const int num_software_channels);							// 设置软件混合 Channel 的最大数量
@@ -318,13 +318,13 @@ namespace godot {
 		void set_network_proxy(const String& p_proxy);											// 设置一个代理服务器，用于所有后续的互联网连接
 		String get_network_proxy() const;														// 获取用于互联网流媒体的代理服务器的URL
 		void set_network_timeout(const int timeout);											// 设置网络流的超时
-		int64_t get_network_timeout() const;													// 获取网络流的超时
+		int get_network_timeout() const;														// 获取网络流的超时
 
 		// 信息
 		Dictionary get_version() const;															// 获取 Fmod 版本
 		uint64_t get_output_handle() const;														// 获取输出类型特定的内部原生接口
 		Dictionary get_channels_playing() const;												// 获取当前播放 Channel 数量
-		Dictionary get_cpu_usage() const;														// 获取 Core API不同部分所使用的 CPU 资源
+		Dictionary get_cpu_usage() const;														// 获取 Core API 不同部分所使用的 CPU 资源
 		Dictionary get_file_usage() const;														// 获取文件读取信息
 		PackedFloat32Array get_default_mix_matrix(
 			const FmodSpeakerMode source_speaker_mode,
@@ -390,7 +390,7 @@ namespace godot {
 			const uint64_t port_index = FMOD_PORT_INDEX_NONE,
 			const bool pass_thru = false
 		);																						// 将指定的 ChannelGroup 输出连接到输出驱动上的音频端口
-		void detach_channel_group_from_port(Ref<FmodChannelGroup> channel_group);				// 将指定ChannelGroup的输出从输出驱动上的音频端口断开
+		void detach_channel_group_from_port(Ref<FmodChannelGroup> channel_group);				// 将指定 ChannelGroup 的输出从输出驱动上的音频端口断开
 
 		// 录音
 		Dictionary get_record_num_drivers() const;												// 获取该输出模式下可用的录音设备数量

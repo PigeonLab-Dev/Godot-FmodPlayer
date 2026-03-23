@@ -91,8 +91,8 @@ namespace godot {
 		void set_volume_db(const float new_volume_db);
 		float get_volume_db() const;
 
-		void set_pitch(const float new_pitch);
-		float get_pitch() const;
+		void set_pitch_scale(const float new_pitch);
+		float get_pitch_scale() const;
 
 		void set_auto_play(const bool enable);
 		bool is_autoplay_enabled() const;

@@ -2,6 +2,8 @@
 #include "core/fmod_server.h"
 #include "core/fmod_system.h"
 #include "playback/fmod_channel_group.h"
+#include <godot_cpp/classes/engine.hpp>
+#include <godot_cpp/classes/audio_server.hpp>
 
 namespace godot {
 	void FmodAudioEffectCompressor::_bind_methods() {

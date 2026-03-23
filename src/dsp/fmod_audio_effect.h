@@ -10,8 +10,8 @@ namespace godot {
 	
 	// 自定义 DSP 状态数据 - 存储在 FMOD_DSP_STATE->instance 中
 	struct CustomDSPState {
-		FmodAudioEffect* effect;  // 指向效果对象（非引用计数，仅用于 C++ 虚函数调用）
-		void* user_data;          // 子类自定义数据
+		FmodAudioEffect* effect;										// 指向效果对象（非引用计数，仅用于 C++ 虚函数调用）
+		void* user_data;												// 子类自定义数据
 		
 		CustomDSPState() : effect(nullptr), user_data(nullptr) {}
 	};
