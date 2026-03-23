@@ -72,8 +72,8 @@ namespace godot {
 
 		bus = p_bus;
 
-		FmodSystem* system = FmodServer::get_singleton()->get_main_system();
-		ERR_FAIL_COND_MSG(!system, "FMOD system not initialized");
+		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized");
 
 		// 创建 FMOD Compressor DSP
 		Ref<FmodDSP> compressor_dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_COMPRESSOR);

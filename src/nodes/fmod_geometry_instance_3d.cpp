@@ -210,8 +210,8 @@ namespace godot {
 	bool FmodGeometryInstance3D::build_from_mesh(Ref<Mesh> mesh, const Transform3D& transform) {
 		ERR_FAIL_COND_V(!mesh.is_valid(), false);
 		
-		FmodSystem* system = FmodServer::get_singleton()->get_main_system();
-		ERR_FAIL_COND_V(!system, false);
+		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+		ERR_FAIL_COND_V(system.is_null(), false);
 		
 		geometry = system->create_geometry();
 		ERR_FAIL_COND_V(!geometry.is_valid(), false);

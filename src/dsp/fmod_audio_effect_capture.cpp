@@ -62,8 +62,8 @@ namespace godot {
 		bus = p_bus;
 		
 		// 获取主系统
-		FmodSystem* system = FmodServer::get_main_system();
-		ERR_FAIL_COND_MSG(!system, "FMOD system not initialized");
+		Ref<FmodSystem> system = FmodServer::get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized");
 		
 		// 创建自定义 DSP
 		Ref<FmodDSP> dsp = create_custom_dsp(system);

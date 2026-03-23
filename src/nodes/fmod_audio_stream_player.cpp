@@ -43,8 +43,8 @@ namespace godot {
 	FmodAudioStreamPlayer::FmodAudioStreamPlayer() {
 		internal_channel.instantiate();
 		if (FmodServer::get_singleton()) {
-			FmodSystem* system = FmodServer::get_main_system();
-			if (system) {
+			Ref<FmodSystem> system = FmodServer::get_main_system();
+			if (system.is_valid()) {
 				internal_channel_group = system->get_master_channel_group();
 			}
 		}
@@ -90,7 +90,7 @@ namespace godot {
 	}
 
 	void FmodAudioStreamPlayer::_create_internal_channel(Ref<FmodAudioStream> stream) {
-		FmodSystem* system = FmodServer::get_main_system();
+		Ref<FmodSystem> system = FmodServer::get_main_system();
 
 		// 通过 get_sound() 获取 Sound（延迟创建）
 		Ref<FmodSound> sound = stream->get_sound();

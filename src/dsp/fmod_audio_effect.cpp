@@ -106,10 +106,10 @@ namespace godot {
 	}
 	
 	// 创建自定义 DSP
-	Ref<FmodDSP> FmodAudioEffect::create_custom_dsp(FmodSystem* system) {
-		ERR_FAIL_COND_V(!system, Ref<FmodDSP>());
+	Ref<FmodDSP> FmodAudioEffect::create_custom_dsp(Ref<FmodSystem> system) {
+		ERR_FAIL_COND_V(system.is_null(), Ref<FmodDSP>());
 		
-		FMOD::System* fmod_system = system->system;
+		FMOD::System* fmod_system = system->get_system();
 		ERR_FAIL_COND_V(!fmod_system, Ref<FmodDSP>());
 		
 		// 为每个实例创建独立的 DSP 描述符副本

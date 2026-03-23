@@ -372,8 +372,8 @@ namespace godot {
 	}
 
 	void FmodAudioBusLayout::create_audio_bus(const String& name, Ref<FmodAudioBus> parent) {
-		FmodSystem* system = FmodServer::get_main_system();
-		ERR_FAIL_COND_MSG(!system, "FMOD System is null");
+		Ref<FmodSystem> system = FmodServer::get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "FMOD System is null");
 		ERR_FAIL_COND_MSG(audio_buses_map.has(name), "Name is already taken");
 
 		Ref<FmodAudioBus> new_bus;
@@ -480,8 +480,8 @@ namespace godot {
 	}
 
 	void FmodAudioBusLayout::sync_from_audio_server() {
-		FmodSystem* system = FmodServer::get_main_system();
-		ERR_FAIL_COND_MSG(!system, "FMOD System is not initialized.");
+		Ref<FmodSystem> system = FmodServer::get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "FMOD System is not initialized.");
 
 		AudioServer* audio_server = AudioServer::get_singleton();
 		if (!audio_server) return;

@@ -100,15 +100,15 @@ namespace godot {
 
 		bus = p_bus;
 
-		FmodSystem* system = FmodServer::get_singleton()->get_main_system();
-		ERR_FAIL_COND_MSG(!system, "FMOD system not initialized");
+		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized");
 
 		// 简化方案：使用单个 Chorus DSP，将多 voice 参数合并
 		// 这样可以避免串联多个 DSP 导致的累积效应
 		_create_merged_chorus_dsp(system);
 	}
 
-	void FmodAudioEffectChorus::_create_merged_chorus_dsp(FmodSystem* system) {
+	void FmodAudioEffectChorus::_create_merged_chorus_dsp(Ref<FmodSystem> system) {
 		// 使用 FMOD 内置 Chorus DSP
 		Ref<FmodDSP> chorus_dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_CHORUS);
 		if (!chorus_dsp.is_valid()) {

@@ -4,10 +4,7 @@
 #include "fmod_utils.hpp"
 #include <fmod.hpp>
 #include <fmod_errors.h>
-#include <godot_cpp/classes/object.hpp>
-#include <godot_cpp/classes/file_access.hpp>
-#include <godot_cpp/core/class_db.hpp>
-#include <godot_cpp/core/gdvirtual.gen.inc>
+#include <godot_cpp/classes/ref_counted.hpp>
 
 namespace godot {
 	class FmodSound;
@@ -18,32 +15,11 @@ namespace godot {
 	class FmodDSP;
 	class FmodReverb3D;
 
-	class FmodSystem : public Object {
-		GDCLASS(FmodSystem, Object)
-
-	private:
-		FMOD_ADVANCEDSETTINGS settings = {};
-
-		// 3D Settings
-		float doppler_scale = 1.0f;
-		float distance_factor = 1.0f;
-		float rolloff_scale = 1.0f;
-		Callable _3d_rolloff_callback;
-
-		void _apply_advanced_settings();
-		void _apply_3d_settings();
-
-	protected:
-		static void _bind_methods();
+	class FmodSystem : public RefCounted {
+		GDCLASS(FmodSystem, RefCounted)
 
 	public:
-		FmodSystem();
-		~FmodSystem();
-
-		// Static pointer for C callback to access the instance that set the callback
-		static FmodSystem* current_callback_system;
-
-		// 初始化系统对象时使用的配置标志
+		// 初始化标志
 		enum FmodInitFlags {
 			FMOD_INIT_FLAG_NORMAL = 0x00000000,													// 正常初始化
 			FMOD_INIT_FLAG_STREAM_FROM_UPDATE = 0x00000001,										// 内部没有创建流线程，流是从 update 驱动，主要用于非实时输出
@@ -61,7 +37,7 @@ namespace godot {
 			FMOD_INIT_FLAG_MEMORY_TRACKING = 0x00400000											// 支持内存分配追踪，目前这功能仅在使用 Studio API 时有用，增加内存占用并降低性能
 		};
 
-		// 内置输出类型，可用于运行调音台
+		// 输出类型
 		enum FmodOutputType {
 			FMOD_OUTPUT_TYPE_AUTODETECT,
 			FMOD_OUTPUT_TYPE_UNKNOWN,
@@ -90,6 +66,7 @@ namespace godot {
 			FMOD_OUTPUT_TYPE_FORCEINT = 65536
 		};
 
+		// 扬声器
 		enum FmodSpeaker {
 			FMOD_SPEAKER_NONE = -1,
 			FMOD_SPEAKER_FRONT_LEFT,
@@ -109,6 +86,7 @@ namespace godot {
 			FMOD_SPEAKER_FORCEINT = 65536
 		};
 
+		// 扬声器类型
 		enum FmodSpeakerMode {
 			FMOD_SPEAKER_MODE_DEFAULT,
 			FMOD_SPEAKER_MODE_RAW,
@@ -124,6 +102,7 @@ namespace godot {
 			FMOD_SPEAKER_MODE_FORCEINT = 65536
 		};
 
+		// 声音模式
 		enum FmodMode {
 			FMOD_MODE_DEFAULT = 0x00000000,
 			FMOD_MODE_LOOP_OFF = 0x00000001,
@@ -156,6 +135,7 @@ namespace godot {
 			FMOD_MODE_VIRTUAL_PLAYFROMSTART = 0x80000000
 		};
 
+		// 时间计量单位
 		enum FmodTimeUnit {
 			FMOD_TIME_UNIT_MS = 0x00000001,
 			FMOD_TIME_UNIT_PCM = 0x00000002,
@@ -192,13 +172,37 @@ namespace godot {
 			FMOD_PORT_TYPE_MAX																	// 支持的最大端口类型数
 		};
 
+	private:
 		FMOD::System* system = nullptr;
+
+		FMOD_ADVANCEDSETTINGS settings = {};
+
+		// 3D Settings
+		float doppler_scale = 1.0f;
+		float distance_factor = 1.0f;
+		float rolloff_scale = 1.0f;
+		Callable _3d_rolloff_callback;
+
+		void _apply_advanced_settings();
+		void _apply_3d_settings();
+
+	protected:
+		static void _bind_methods();
+
+	public:
+		FmodSystem();
+		~FmodSystem();
+
+		// Static pointer for C callback to access the instance that set the callback
+		static FmodSystem* current_callback_system;
 
 		bool system_is_valid() const;															// 检查 FMOD System 是否有效
 		bool system_is_null() const;															// 检查 FMOD System 是否无效
+		FMOD::System* get_system() const;
 
 		// 管理
-		static FmodSystem* create_system(const int max_channels, FmodInitFlags flags);			// 创建 FMOD System 实例
+		static Ref<FmodSystem> create_system(const int max_channels, FmodInitFlags flags);		// 创建 FMOD System 实例
+		void setup(FMOD::System* p_system);														// 设置 FMOD System 指针
 		void init(const int max_channels, FmodInitFlags flags);									// 初始化 FMOD System
 		void close();																			// 关闭与输出的连接，回到未初始化状态，但不释放对象
 		void release();																			// 关闭并释放该对象及其资源
@@ -418,6 +422,14 @@ namespace godot {
 	};
 }
 
+extern "C" {
+	// 衰减回调
+	float F_CALL GD_3D_ROLLOFF_CALLBACK(
+		FMOD_CHANNELCONTROL* channel_control,
+		float distance
+	);
+}
+
 VARIANT_ENUM_CAST(FmodSystem::FmodInitFlags);
 VARIANT_ENUM_CAST(FmodSystem::FmodOutputType);
 VARIANT_ENUM_CAST(FmodSystem::FmodSpeaker);
@@ -426,13 +438,5 @@ VARIANT_ENUM_CAST(FmodSystem::FmodMode);
 VARIANT_ENUM_CAST(FmodSystem::FmodTimeUnit);
 VARIANT_ENUM_CAST(FmodSystem::FmodResamplerMethod);
 VARIANT_ENUM_CAST(FmodSystem::FmodPortType);
-
-extern "C" {
-	// 衰减回调
-	float F_CALL GD_3D_ROLLOFF_CALLBACK(
-		FMOD_CHANNELCONTROL* channel_control,
-		float distance
-	);
-}
 
 #endif // !FMOD_SYSTEM_H

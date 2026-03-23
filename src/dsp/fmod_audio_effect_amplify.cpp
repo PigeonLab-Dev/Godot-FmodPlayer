@@ -32,10 +32,8 @@ namespace godot {
 
 		bus = p_bus;
 
-		FmodSystem* system = FmodServer::get_singleton()->get_main_system();
-		if (!system) {
-			return;
-		}
+		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+		if (system.is_null()) return;
 
 		// FMOD Fader DSP 的 Gain 参数范围是 -80 ~ 10 dB
 		// 为了达到 Godot 的 -80 ~ 24 dB 范围，使用两个 Fader DSP 串联
@@ -109,8 +107,8 @@ namespace godot {
 				dsp_chain[1]->set_parameter_float(0, fader2_gain);
 			} else if (dsp_chain.size() == 1 && dsp_chain[0].is_valid()) {
 				// 需要创建第二个 fader
-				FmodSystem* system = FmodServer::get_singleton()->get_main_system();
-				if (system) {
+				Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+				if (system.is_valid()) {
 					Ref<FmodDSP> fader2 = system->create_dsp_by_type(FmodDSP::DSP_TYPE_FADER);
 					if (fader2.is_valid()) {
 						fader2->set_parameter_float(0, fader2_gain);

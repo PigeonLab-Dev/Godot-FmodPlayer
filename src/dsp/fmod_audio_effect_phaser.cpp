@@ -41,10 +41,8 @@ namespace godot {
 
 		bus = p_bus;
 
-		FmodSystem* system = FmodServer::get_singleton()->get_main_system();
-		if (!system) {
-			return;
-		}
+		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized");
 
 		// 创建 FLANGE DSP 来近似模拟 Phaser 效果
 		Ref<FmodDSP> phaser_dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_FLANGE);

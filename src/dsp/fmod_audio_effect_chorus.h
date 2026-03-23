@@ -47,7 +47,7 @@ namespace godot {
 		float dry = 1.0f;
 
 	private:
-		void _create_merged_chorus_dsp(FmodSystem* system);
+		void _create_merged_chorus_dsp(Ref<FmodSystem> system);
 
 	public:
 		FmodAudioEffectChorus();

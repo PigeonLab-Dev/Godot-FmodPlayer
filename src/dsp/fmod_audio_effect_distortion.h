@@ -31,11 +31,11 @@ namespace godot {
 		int oversample = 4;														// 过采样倍数
 
 		// 创建对应模式的 DSP
-		Ref<FmodDSP> _create_distortion_dsp(FmodSystem* system);
-		Ref<FmodDSP> _create_gain_dsp(FmodSystem* system, float gain_db);
-		Ref<FmodDSP> _create_lofi_dsp(FmodSystem* system);
-		Ref<FmodDSP> _create_bitcrush_dsp(FmodSystem* system);
-		Ref<FmodDSP> _create_waveshape_dsp(FmodSystem* system);
+		Ref<FmodDSP> _create_distortion_dsp(Ref<FmodSystem> system);
+		Ref<FmodDSP> _create_gain_dsp(Ref<FmodSystem> system, float gain_db);
+		Ref<FmodDSP> _create_lofi_dsp(Ref<FmodSystem> system);
+		Ref<FmodDSP> _create_bitcrush_dsp(Ref<FmodSystem> system);
+		Ref<FmodDSP> _create_waveshape_dsp(Ref<FmodSystem> system);
 
 	public:
 		FmodAudioEffectDistortion();

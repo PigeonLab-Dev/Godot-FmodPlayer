@@ -15,8 +15,8 @@ void FmodAudioSampleEmitter::_bind_methods() {
 }
 
 FmodAudioSampleEmitter::FmodAudioSampleEmitter() {
-	FmodSystem* system = FmodServer::get_main_system();
-	if (system) {
+	Ref<FmodSystem> system = FmodServer::get_main_system();
+	if (system.is_valid()) {
 		internal_channel_group = system->get_master_channel_group();
 	}
 }
@@ -53,8 +53,8 @@ void FmodAudioSampleEmitter::emit() {
 		return;
 	}
 	
-	FmodSystem* system = FmodServer::get_main_system();
-	if (!system) {
+	Ref<FmodSystem> system = FmodServer::get_main_system();
+	if (system.is_null()) {
 		UtilityFunctions::push_error("FMOD system not available");
 		return;
 	}

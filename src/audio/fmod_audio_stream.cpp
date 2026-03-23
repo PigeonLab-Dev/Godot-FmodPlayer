@@ -72,8 +72,8 @@ namespace godot {
 			return Ref<FmodSound>();
 		}
 
-		FmodSystem* system = FmodServer::get_main_system();
-		if (!system || system->system_is_null()) {
+		Ref<FmodSystem> system = FmodServer::get_main_system();
+		if (system.is_null() || system->system_is_null()) {
 			return Ref<FmodSound>();
 		}
 

@@ -49,15 +49,11 @@ namespace godot {
 
 		bus = p_bus;
 
-		FmodSystem* system = FmodServer::get_singleton()->get_main_system();
-		if (!system) {
-			return;
-		}
+		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized");
 
 		Ref<FmodDSP> reverb_dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_SFXREVERB);
-		if (!reverb_dsp.is_valid()) {
-			return;
-		}
+		if (!reverb_dsp.is_valid()) return;
 
 		// FMOD SFXREVERB DSP 参数：
 		// 0 = Decay Time (ms) - 100 ~ 20000, default 1500

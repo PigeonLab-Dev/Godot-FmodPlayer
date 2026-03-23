@@ -70,8 +70,8 @@ namespace godot {
 	FmodAudioStreamPlayer2D::FmodAudioStreamPlayer2D() {
 		internal_channel.instantiate();
 		if (FmodServer::get_singleton()) {
-			FmodSystem* system = FmodServer::get_main_system();
-			if (system) {
+			Ref<FmodSystem> system = FmodServer::get_main_system();
+			if (system.is_valid()) {
 				internal_channel_group = system->get_master_channel_group();
 			}
 		}
@@ -190,8 +190,8 @@ namespace godot {
 	}
 
 	void FmodAudioStreamPlayer2D::_create_internal_channel(Ref<FmodAudioStream> p_stream) {
-		FmodSystem* system = FmodServer::get_main_system();
-		if (!system) {
+		Ref<FmodSystem> system = FmodServer::get_main_system();
+		if (system.is_null()) {
 			UtilityFunctions::push_error("FMOD system not available");
 			return;
 		}

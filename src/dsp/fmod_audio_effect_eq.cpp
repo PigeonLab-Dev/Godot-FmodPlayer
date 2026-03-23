@@ -206,10 +206,8 @@ namespace godot {
 
 		bus = p_bus;
 
-		FmodSystem* system = FmodServer::get_singleton()->get_main_system();
-		if (!system) {
-			return;
-		}
+		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized");
 
 		// 计算需要的 DSP 数量
 		int dsp_count = _get_required_dsp_count();

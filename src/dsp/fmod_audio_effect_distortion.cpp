@@ -55,10 +55,8 @@ namespace godot {
 
 		bus = p_bus;
 
-		FmodSystem* system = FmodServer::get_singleton()->get_main_system();
-		if (!system) {
-			return;
-		}
+		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized");
 
 		// 前置增益 (如果需要)
 		if (pre_gain != 0.0f) {
@@ -115,7 +113,7 @@ namespace godot {
 		}
 	}
 
-	Ref<FmodDSP> FmodAudioEffectDistortion::_create_distortion_dsp(FmodSystem* system) {
+	Ref<FmodDSP> FmodAudioEffectDistortion::_create_distortion_dsp(Ref<FmodSystem> system) {
 		Ref<FmodDSP> dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_DISTORTION);
 		if (!dsp.is_valid()) {
 			return Ref<FmodDSP>();
@@ -145,7 +143,7 @@ namespace godot {
 		return dsp;
 	}
 
-	Ref<FmodDSP> FmodAudioEffectDistortion::_create_gain_dsp(FmodSystem* system, float gain_db) {
+	Ref<FmodDSP> FmodAudioEffectDistortion::_create_gain_dsp(Ref<FmodSystem> system, float gain_db) {
 		// 使用 Fader DSP 作为增益控制
 		Ref<FmodDSP> dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_FADER);
 		if (!dsp.is_valid()) {
@@ -160,7 +158,7 @@ namespace godot {
 		return dsp;
 	}
 
-	Ref<FmodDSP> FmodAudioEffectDistortion::_create_lofi_dsp(FmodSystem* system) {
+	Ref<FmodDSP> FmodAudioEffectDistortion::_create_lofi_dsp(Ref<FmodSystem> system) {
 		// LoFi 效果：使用失真 + 降采样模拟
 		Ref<FmodDSP> dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_DISTORTION);
 		if (!dsp.is_valid()) {
@@ -175,7 +173,7 @@ namespace godot {
 		return dsp;
 	}
 
-	Ref<FmodDSP> FmodAudioEffectDistortion::_create_bitcrush_dsp(FmodSystem* system) {
+	Ref<FmodDSP> FmodAudioEffectDistortion::_create_bitcrush_dsp(Ref<FmodSystem> system) {
 		// 比特破碎：使用失真模拟
 		Ref<FmodDSP> dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_DISTORTION);
 		if (!dsp.is_valid()) {
@@ -188,7 +186,7 @@ namespace godot {
 		return dsp;
 	}
 
-	Ref<FmodDSP> FmodAudioEffectDistortion::_create_waveshape_dsp(FmodSystem* system) {
+	Ref<FmodDSP> FmodAudioEffectDistortion::_create_waveshape_dsp(Ref<FmodSystem> system) {
 		// 波形塑形：使用失真
 		Ref<FmodDSP> dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_DISTORTION);
 		if (!dsp.is_valid()) {

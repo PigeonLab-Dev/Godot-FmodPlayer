@@ -666,12 +666,13 @@ namespace godot {
 		return usage;
 	}
 
-	FmodSystem* FmodDSP::get_system_object() const {
-		ERR_FAIL_COND_V(!dsp, nullptr);
+	Ref<FmodSystem> FmodDSP::get_system_object() const {
+		ERR_FAIL_COND_V(!dsp, Ref<FmodSystem>());
 		FMOD::System* system_ptr = nullptr;
-		FMOD_ERR_CHECK_V(dsp->getSystemObject(&system_ptr), nullptr);
-		FmodSystem* system = memnew(FmodSystem);
-		system->system = system_ptr;
+		FMOD_ERR_CHECK_V(dsp->getSystemObject(&system_ptr), Ref<FmodSystem>());
+		Ref<FmodSystem> system;
+		system.instantiate();
+		system->setup(system_ptr);
 		return system;
 	}
 

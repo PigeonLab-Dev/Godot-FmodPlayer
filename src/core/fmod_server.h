@@ -44,13 +44,13 @@ namespace godot {
 		FmodServer();
 		~FmodServer();
 
-		static FmodSystem* main_system;
+		static Ref<FmodSystem> main_system;
 		static Ref<FmodAudioBusLayout> audio_bus_layout;
 
 		static FmodServer* get_singleton();
 
 		// 获取
-		static FmodSystem* get_main_system();
+		static Ref<FmodSystem> get_main_system();
 		static Ref<FmodChannelGroup> get_master_channel_group();
 		static Ref<FmodAudioBusLayout> get_audio_bus_layout();
 		static void generate_bus_layout();

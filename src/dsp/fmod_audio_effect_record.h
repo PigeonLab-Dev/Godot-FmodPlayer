@@ -43,7 +43,7 @@ namespace godot {
 
 		virtual void apply_to(Ref<FmodChannelGroup> p_bus) override;
 
-		virtual Ref<FmodDSP> create_custom_dsp(FmodSystem* system) override;
+		virtual Ref<FmodDSP> create_custom_dsp(Ref<FmodSystem> system) override;
 		virtual void _on_dsp_process(FMOD_DSP_STATE* dsp_state,
 			unsigned int length,
 			const FMOD_DSP_BUFFER_ARRAY* inbufferarray,

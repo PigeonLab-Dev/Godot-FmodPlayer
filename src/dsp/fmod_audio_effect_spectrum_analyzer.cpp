@@ -54,16 +54,12 @@ namespace godot {
 
 		bus = p_bus;
 
-		FmodSystem* system = FmodServer::get_singleton()->get_main_system();
-		if (!system) {
-			return;
-		}
+		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized");
 
 		// 创建 FFT DSP
 		Ref<FmodDSP> fft_dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_FFT);
-		if (!fft_dsp.is_valid()) {
-			return;
-		}
+		if (!fft_dsp.is_valid()) return;
 
 		// FMOD FFT DSP 参数：
 		// 0 = Size (int) - FFT 窗口大小: 128, 256, 512, 1024, 2048, 4096, 8192, 16384

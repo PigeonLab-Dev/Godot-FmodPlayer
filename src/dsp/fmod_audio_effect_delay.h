@@ -27,8 +27,8 @@ namespace godot {
 		float feedback_lowpass = 16000.0f;
 
 	private:
-		void _create_tap_dsp(FmodSystem* system, float delay_ms, float level_db, float pan, float wet_scale, bool is_first_tap);
-		void _create_feedback_dsp(FmodSystem* system, float delay_ms, float level_db, float lowpass_hz);
+		void _create_tap_dsp(Ref<FmodSystem> system, float delay_ms, float level_db, float pan, float wet_scale, bool is_first_tap);
+		void _create_feedback_dsp(Ref<FmodSystem> system, float delay_ms, float level_db, float lowpass_hz);
 
 	protected:
 		static void _bind_methods();

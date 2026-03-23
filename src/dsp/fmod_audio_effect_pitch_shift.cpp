@@ -55,15 +55,11 @@ namespace godot {
 
 		bus = p_bus;
 
-		FmodSystem* system = FmodServer::get_singleton()->get_main_system();
-		if (!system) {
-			return;
-		}
+		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized");
 
 		Ref<FmodDSP> pitch_dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_PITCHSHIFT);
-		if (!pitch_dsp.is_valid()) {
-			return;
-		}
+		if (!pitch_dsp.is_valid()) return;
 
 		// FMOD PitchShift DSP 参数：
 		// 0 = Pitch (float, 0.5 ~ 2.0)

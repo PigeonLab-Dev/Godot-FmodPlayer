@@ -96,8 +96,8 @@ namespace godot {
 
 		bus = p_bus;
 
-		FmodSystem* system = FmodServer::get_singleton()->get_main_system();
-		ERR_FAIL_COND_MSG(!system, "FMOD system not initialized");
+		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized");
 
 		// 计算总电平用于归一化
 		float tap1_linear = tap_1_active ? FmodUtils::db_to_linear(tap_1_level) : 0.0f;
@@ -130,7 +130,7 @@ namespace godot {
 		}
 	}
 
-	void FmodAudioEffectDelay::_create_tap_dsp(FmodSystem* system, float delay_ms, float level_db, float pan, float normalize_scale, bool is_first_tap) {
+	void FmodAudioEffectDelay::_create_tap_dsp(Ref<FmodSystem> system, float delay_ms, float level_db, float pan, float normalize_scale, bool is_first_tap) {
 		// 创建 Delay DSP
 		Ref<FmodDSP> delay_dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_DELAY);
 		if (!delay_dsp.is_valid()) return;
@@ -172,7 +172,7 @@ namespace godot {
 		}
 	}
 
-	void FmodAudioEffectDelay::_create_feedback_dsp(FmodSystem* system, float delay_ms, float level_db, float lowpass_hz) {
+	void FmodAudioEffectDelay::_create_feedback_dsp(Ref<FmodSystem> system, float delay_ms, float level_db, float lowpass_hz) {
 		Ref<FmodDSP> delay_dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_DELAY);
 		if (!delay_dsp.is_valid()) return;
 

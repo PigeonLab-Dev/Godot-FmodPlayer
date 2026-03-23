@@ -42,16 +42,12 @@ namespace godot {
 
 		bus = p_bus;
 
-		FmodSystem* system = FmodServer::get_singleton()->get_main_system();
-		if (!system) {
-			return;
-		}
+		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized");
 
 		// 创建自定义 DSP 用于录音
 		Ref<FmodDSP> record_dsp = create_custom_dsp(system);
-		if (!record_dsp.is_valid()) {
-			return;
-		}
+		if (!record_dsp.is_valid()) return;
 
 		bus->add_dsp(-1, record_dsp);
 		dsp_chain.push_back(record_dsp);
@@ -133,10 +129,10 @@ namespace godot {
 		return FMOD_OK;
 	}
 
-	Ref<FmodDSP> FmodAudioEffectRecord::create_custom_dsp(FmodSystem* system) {
-		ERR_FAIL_COND_V(!system, Ref<FmodDSP>());
+	Ref<FmodDSP> FmodAudioEffectRecord::create_custom_dsp(Ref<FmodSystem> system) {
+		ERR_FAIL_COND_V(system.is_null(), Ref<FmodDSP>());
 
-		FMOD::System* fmod_system = system->system;
+		FMOD::System* fmod_system = system->get_system();
 		ERR_FAIL_COND_V(!fmod_system, Ref<FmodDSP>());
 
 		static FMOD_DSP_DESCRIPTION desc = {};

@@ -50,7 +50,7 @@ namespace godot {
 		Vector<Ref<FmodDSP>> get_dsp_chain() const;
 		
 		// 创建自定义 DSP - 子类可以重写以提供自己的 DSP 描述
-		virtual Ref<FmodDSP> create_custom_dsp(FmodSystem* system);
+		virtual Ref<FmodDSP> create_custom_dsp(Ref<FmodSystem> system);
 		// 获取 DSP 描述 - 子类重写以自定义 DSP 行为
 		virtual FMOD_DSP_DESCRIPTION* get_dsp_description();
 	};

@@ -7,6 +7,8 @@
 #include "dsp/fmod_dsp.h"
 #include "spatial/fmod_reverb_3d.h"
 
+#include <godot_cpp/classes/file_access.hpp>
+
 namespace godot {
 	void FmodSystem::_bind_methods() {
 		BIND_ENUM_CONSTANT(FMOD_INIT_FLAG_NORMAL);
@@ -324,7 +326,7 @@ namespace godot {
 
 	FmodSystem::~FmodSystem() {
 		if (system) {
-			release();
+			system->setUserData(nullptr);
 		}
 	}
 
@@ -347,10 +349,28 @@ namespace godot {
 		return system == nullptr;
 	}
 
-	FmodSystem* FmodSystem::create_system(const int max_channels, FmodInitFlags flags) {
+	FMOD::System* FmodSystem::get_system() const {
+		return system;
+	}
+
+	void FmodSystem::setup(FMOD::System* p_system) {
+		ERR_FAIL_COND_MSG(!p_system, "System pointer is null");
+
+		if (system) {
+			system->setUserData(nullptr);
+		}
+
+		system = p_system;
+		system->setUserData(this);
+	}
+
+	Ref<FmodSystem> FmodSystem::create_system(const int max_channels, FmodInitFlags flags) {
 		auto initflags = static_cast<FMOD_INITFLAGS>((int)flags);
-		FmodSystem* new_system = memnew(FmodSystem);
-		FMOD_ERR_CHECK_V(FMOD::System_Create(&new_system->system), nullptr);
+		Ref<FmodSystem> new_system;
+		new_system.instantiate();
+		FMOD::System* system_ptr = nullptr;
+		FMOD_ERR_CHECK_V(FMOD::System_Create(&system_ptr), Ref<FmodSystem>());
+		new_system->setup(system_ptr);
 		const int maxchannels = CLAMP(max_channels, 0, 4096);
 		new_system->init(maxchannels, flags);
 		return new_system;
@@ -369,6 +389,7 @@ namespace godot {
 
 	void FmodSystem::release() {
 		ERR_FAIL_COND(!system);
+		system->setUserData(nullptr);
 		FMOD_RESULT result = system->release();
 		if (result != FMOD_OK) {
 			UtilityFunctions::push_error("Failed to release FMOD System: ", FMOD_ErrorString(result));
@@ -395,7 +416,7 @@ namespace godot {
 
 	void FmodSystem::set_output(FmodOutputType output_type) {
 		ERR_FAIL_COND(!system);
-		auto fmod_output_type = static_cast<FMOD_OUTPUTTYPE>((int)output_type);
+		auto fmod_output_type = static_cast<FMOD_OUTPUTTYPE>(output_type);
 		FMOD_ERR_CHECK(system->setOutput(fmod_output_type));
 	}
 
@@ -403,7 +424,7 @@ namespace godot {
 		ERR_FAIL_COND_V(!system, FMOD_OUTPUT_TYPE_UNKNOWN);
 		FMOD_OUTPUTTYPE fmod_output_type = FMOD_OUTPUTTYPE_UNKNOWN;
 		FMOD_ERR_CHECK_V(system->getOutput(&fmod_output_type), FMOD_OUTPUT_TYPE_UNKNOWN);
-		FmodOutputType output_type = static_cast<FmodOutputType>((int)fmod_output_type);
+		FmodOutputType output_type = static_cast<FmodOutputType>(fmod_output_type);
 		return output_type;
 	}
 
@@ -429,7 +450,7 @@ namespace godot {
 		result["name"] = String::utf8(name);
 		result["guid"] = FmodUtils::guid_to_string(guid);
 		result["system_rate"] = system_rate;
-		result["speaker_mode"] = static_cast<FmodSpeakerMode>((int)speaker_mode);
+		result["speaker_mode"] = static_cast<FmodSpeakerMode>(speaker_mode);
 		result["speaker_mode_channels"] = speaker_mode_channels;
 		return result;
 	}
@@ -866,9 +887,7 @@ namespace godot {
 
 		ERR_FAIL_COND_V(!matrix, PackedFloat32Array());
 		for (int i = 0; i < arr_len; i++) {
-
 			matrix[i] = 0.0f;
-
 		}
 
 		// 获取默认混音矩阵

@@ -33,7 +33,7 @@ static godot::SubViewport* _get_editor_viewport_3d(int p_index = 0) {
 
 namespace godot {
 	FmodServer* FmodServer::singleton = nullptr;
-	FmodSystem* FmodServer::main_system = nullptr;
+	Ref<FmodSystem> FmodServer::main_system;
 	Ref<FmodAudioBusLayout> FmodServer::audio_bus_layout = Ref<FmodAudioBusLayout>();
 
 	void FmodServer::_bind_methods() {
@@ -67,7 +67,7 @@ namespace godot {
 		}
 
 		main_system = FmodSystem::create_system(max_channels, mode);
-		if (!main_system || main_system->system_is_null()) {
+		if (main_system.is_null() || main_system->system_is_null()) {
 			UtilityFunctions::print_rich("[b][color=WHITE][bgcolor=RED]Failed to init main system![/bgcolor][/color][/b]");
 			return;
 		}
@@ -100,11 +100,8 @@ namespace godot {
 		ERR_FAIL_COND(singleton != this);
 		singleton = nullptr;
 
-		// 释放 FmodSystem
-		if (main_system) {
-			memdelete(main_system);
-			main_system = nullptr;
-		}
+		// 释放 FMODSystem
+		main_system->release();
 
 		// 注销自定义监视器
 		Performance* perf = Performance::get_singleton();
@@ -169,7 +166,7 @@ namespace godot {
 	}
 
 	void FmodServer::_update_fmod() {
-		if (!singleton || !main_system) return;
+		if (!singleton || main_system.is_null()) return;
 		
 		// 更新 3D 监听者位置
 		SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop());
@@ -278,12 +275,12 @@ namespace godot {
 		main_system->update();
 	}
 
-	FmodSystem* FmodServer::get_main_system() {
+	Ref<FmodSystem> FmodServer::get_main_system() {
 		return main_system;
 	}
 
 	Ref<FmodChannelGroup> FmodServer::get_master_channel_group() {
-		if (!main_system) {
+		if (main_system.is_null()) {
 			return Ref<FmodChannelGroup>();
 		}
 		return main_system->get_master_channel_group();
@@ -304,47 +301,47 @@ namespace godot {
 	}
 
 	double FmodServer::_get_dsp() const {
-		if (!singleton || !main_system) return 0.0;
+		if (!singleton || main_system.is_null()) return 0.0;
 		return main_system->get_cpu_usage().get("dsp", 0.0);
 	}
 
 	double FmodServer::_get_stream() const {
-		if (!singleton || !main_system) return 0.0;
+		if (!singleton || main_system.is_null()) return 0.0;
 		return main_system->get_cpu_usage().get("stream", 0.0);
 	}
 
 	double FmodServer::_get_geometry() const {
-		if (!singleton || !main_system) return 0.0;
+		if (!singleton || main_system.is_null()) return 0.0;
 		return main_system->get_cpu_usage().get("geometry", 0.0);
 	}
 
 	double FmodServer::_get_update() const {
-		if (!singleton || !main_system) return 0.0;
+		if (!singleton || main_system.is_null()) return 0.0;
 		return main_system->get_cpu_usage().get("update", 0.0);
 	}
 
 	double FmodServer::_get_convolution1() const {
-		if (!singleton || !main_system) return 0.0;
+		if (!singleton || main_system.is_null()) return 0.0;
 		return main_system->get_cpu_usage().get("convolution1", 0.0);
 	}
 
 	double FmodServer::_get_convolution2() const {
-		if (!singleton || !main_system) return 0.0;
+		if (!singleton || main_system.is_null()) return 0.0;
 		return main_system->get_cpu_usage().get("convolution2", 0.0);
 	}
 
 	int64_t FmodServer::_get_sample_bytes_read() const {
-		if (!singleton || !main_system) return 0;
+		if (!singleton || main_system.is_null()) return 0;
 		return main_system->get_file_usage().get("sample_bytes_read", 0);
 	}
 
 	int64_t FmodServer::_get_stream_bytes_read() const {
-		if (!singleton || !main_system) return 0;
+		if (!singleton || main_system.is_null()) return 0;
 		return main_system->get_file_usage().get("stream_bytes_read", 0);
 	}
 
 	int64_t FmodServer::_get_other_bytes_read() const {
-		if (!singleton || !main_system) return 0;
+		if (!singleton || main_system.is_null()) return 0;
 		return main_system->get_file_usage().get("other_bytes_read", 0);
 	}
 }

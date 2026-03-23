@@ -42,8 +42,8 @@ namespace godot {
 	}
 
 	void FmodAudioBus::init_bus(const String& p_name, Ref<FmodChannelGroup> p_parent) {
-		FmodSystem* system = FmodServer::get_main_system();
-		ERR_FAIL_COND_MSG(!system, "Failed to get FMOD System");
+		Ref<FmodSystem> system = FmodServer::get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "Failed to get FMOD System");
 		bus_name = p_name;
 		
 		// 如果是 Master 总线，直接使用 FMOD 的 Master ChannelGroup
