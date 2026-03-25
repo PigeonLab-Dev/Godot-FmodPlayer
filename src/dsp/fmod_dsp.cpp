@@ -97,7 +97,6 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_cpu_usage"), &FmodDSP::get_cpu_usage);
 		ClassDB::bind_method(D_METHOD("get_system_object"), &FmodDSP::get_system_object);
 
-		// DSP 回调绑定
 		ClassDB::bind_method(D_METHOD("set_create_callback", "callback"), &FmodDSP::set_create_callback);
 		ClassDB::bind_method(D_METHOD("get_create_callback"), &FmodDSP::get_create_callback);
 		ClassDB::bind_method(D_METHOD("set_release_callback", "callback"), &FmodDSP::set_release_callback);
@@ -499,7 +498,7 @@ namespace godot {
 		info["description"] = desc->description ? String::utf8(desc->description) : String();
 
 		// 根据参数类型添加特定字段
-		// 注意：FMOD_DSP_PARAMETER_DESC 使用联合体，必须根据 type 访问正确的成员
+		// 注意: FMOD_DSP_PARAMETER_DESC 使用联合体，必须根据 type 访问正确的成员
 		switch (desc->type) {
 		case FMOD_DSP_PARAMETER_TYPE_FLOAT: {
 			info["min"] = desc->floatdesc.min;
@@ -517,7 +516,8 @@ namespace godot {
 				piecewiselinearmapping["numpoints"] = numpoints;
 
 				// 安全地访问指针，只有当 numpoints > 0 且指针不为 nullptr 时才访问
-				if (numpoints > 0 && numpoints < 1000) {  // 添加上限检查防止垃圾值
+				// 添加上限检查防止垃圾值
+				if (numpoints > 0 && numpoints < 1000) {  
 					float* pointparamvalues = desc->floatdesc.mapping.piecewiselinearmapping.pointparamvalues;
 					float* pointpositions = desc->floatdesc.mapping.piecewiselinearmapping.pointpositions;
 

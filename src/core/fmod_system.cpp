@@ -1443,7 +1443,6 @@ namespace godot {
 		return _3d_rolloff_callback;
 	}
 
-	// 成员函数：处理 3D 衰减回调，调用 Callable
 	float FmodSystem::_handle_3d_rolloff_callback(float distance) const {
 		if (_3d_rolloff_callback.is_valid()) {
 			const Variant ret = _3d_rolloff_callback.call(distance);
@@ -1451,7 +1450,6 @@ namespace godot {
 				return ret;
 			}
 		}
-		// Callable 无效或返回类型错误，返回默认线性衰减
 		return 1.0f;
 	}
 }
