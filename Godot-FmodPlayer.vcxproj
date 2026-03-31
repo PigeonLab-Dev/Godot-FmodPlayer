@@ -177,7 +177,6 @@
     <ClInclude Include="src\audio\fmod_sound.h" />
     <ClInclude Include="src\core\fmod_server.h" />
     <ClInclude Include="src\nodes\fmod_audio_stream_player.h" />
-    <ClInclude Include="src\nodes\fmod_audio_sample_emitter.h" />
     <ClInclude Include="src\core\fmod_system.h" />
     <ClInclude Include="src\core\fmod_utils.hpp" />
     <ClInclude Include="src\core\register_types.h" />
@@ -224,7 +223,6 @@
     <ClCompile Include="src\audio\fmod_sound.cpp" />
     <ClCompile Include="src\core\fmod_server.cpp" />
     <ClCompile Include="src\nodes\fmod_audio_stream_player.cpp" />
-    <ClCompile Include="src\nodes\fmod_audio_sample_emitter.cpp" />
     <ClCompile Include="src\core\fmod_system.cpp" />
     <ClCompile Include="src\core\register_types.cpp" />
     <ClCompile Include="src\playback\fmod_sound_group.cpp" />

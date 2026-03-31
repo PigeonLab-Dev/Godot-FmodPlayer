@@ -16,7 +16,6 @@ android.release.arm64 = "libfmod_player.android.template_release.arm64.so"
 FmodAudioStreamPlayer = "icons/FmodAudioStreamPlayer.svg"
 FmodAudioStreamPlayer2D = "icons/FmodAudioStreamPlayer2D.svg"
 FmodAudioStreamPlayer3D = "icons/FmodAudioStreamPlayer3D.svg"
-FmodAudioSampleEmitter = "icons/FmodAudioSampleEmitter.svg"
 FmodAudioStream = "icons/FmodAudioStream.svg"
 FmodAudioBusLayout = "icons/FmodAudioBusLayout.svg"
 

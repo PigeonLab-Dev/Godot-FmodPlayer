@@ -110,9 +110,6 @@
     <ClInclude Include="src\nodes\fmod_audio_stream_player.h">
       <Filter>Header Files\nodes</Filter>
     </ClInclude>
-    <ClInclude Include="src\nodes\fmod_audio_sample_emitter.h">
-      <Filter>Header Files\nodes</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\register_types.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
@@ -242,9 +239,6 @@
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
     <ClCompile Include="src\nodes\fmod_audio_stream_player.cpp">
-      <Filter>Source Files\nodes</Filter>
-    </ClCompile>
-    <ClCompile Include="src\nodes\fmod_audio_sample_emitter.cpp">
       <Filter>Source Files\nodes</Filter>
     </ClCompile>
     <ClCompile Include="src\core\register_types.cpp">
