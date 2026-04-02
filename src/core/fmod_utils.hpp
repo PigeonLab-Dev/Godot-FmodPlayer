@@ -39,12 +39,12 @@
     } while(0)
 
 namespace FmodUtils {
-    static constexpr double MIN_DB = -60.0;         // 静音阈值
-    static constexpr double MIN_LINEAR = 0.001;     // 10^(-60/20)
+    inline static constexpr double MIN_DB = -60.0;         // 静音阈值
+    inline static constexpr double MIN_LINEAR = 0.001;     // 10^(-60/20)
 
     // 线性值转 dB
     // 输入: 0.0 ~ +∞, 输出: -144.0 dB ~ +∞ dB（0 返回 -144dB 而非 -inf）
-    static double linear_to_db(double linear) {
+    inline double linear_to_db(double linear) {
         // 防止 log(0) 和负数
         linear = std::max(linear, MIN_LINEAR);
         return 20.0 * std::log10(linear);
@@ -52,14 +52,14 @@ namespace FmodUtils {
 
     // dB 转线性值
     // 输入: -∞ ~ +∞, 输出: 0.0 ~ +∞（-144dB 以下返回 0）
-    static double db_to_linear(double db) {
+    inline double db_to_linear(double db) {
         // 防止下溢
         if (db <= MIN_DB) return 0.0;
         return std::pow(10.0, db / 20.0);
     }
 
     // 0.0~1.0 → -60dB~0dB（0 映射到 -inf 显示为 -60dB）
-    static double fader_to_db(double fader) {
+    inline double fader_to_db(double fader) {
         if (fader <= 0.0) return MIN_DB;
         // 使用曲线让 0.5 对应 -20dB 左右（感知线性）
         return 20.0 * std::log10(fader);
@@ -67,20 +67,20 @@ namespace FmodUtils {
 
     // 采样值转 dBFS（Full Scale）
     // 1.0 = 0 dBFS, 0.5 = -6 dBFS, 0.0 = -inf
-    static double sample_to_dbfs(double sample) {
+    inline double sample_to_dbfs(double sample) {
         double absSample = std::abs(sample);
         if (absSample < 1.0e-10) return -144.0;     // 噪声底
         return 20.0 * std::log10(absSample);
     }
 
     // dBFS 转采样值（带极性）
-    static double dbfs_to_sample(double dbfs, bool positive = true) {
+    inline double dbfs_to_sample(double dbfs, bool positive = true) {
         double linear = std::pow(10.0, dbfs / 20.0);
         return positive ? linear : -linear;
     }
 
     // 生成标准GUID格式: {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}
-    static godot::String guid_to_string(const FMOD_GUID& guid) {
+    inline godot::String guid_to_string(const FMOD_GUID& guid) {
         godot::String guid_string = godot::vformat("{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
             guid.Data1,
             guid.Data2,
@@ -93,7 +93,7 @@ namespace FmodUtils {
 		return guid_string;
     }
 
-    static godot::Ref<godot::Texture2D> get_editor_theme_icon(const godot::String& name) {
+    inline godot::Ref<godot::Texture2D> get_editor_theme_icon(const godot::String& name) {
         godot::EditorInterface* editor_interface = godot::EditorInterface::get_singleton();
         if (editor_interface == nullptr) return godot::Ref<godot::Texture2D>();
         godot::Ref<godot::Theme> theme = editor_interface->get_editor_theme();
@@ -101,7 +101,7 @@ namespace FmodUtils {
 		return theme->get_icon(name, "EditorIcons");
     }
 
-    static godot::Color get_editor_theme_color(const godot::String& name, const godot::String& theme_type) {
+    inline godot::Color get_editor_theme_color(const godot::String& name, const godot::String& theme_type) {
         godot::EditorInterface* editor_interface = godot::EditorInterface::get_singleton();
         if (editor_interface == nullptr) return godot::Color();
         godot::Ref<godot::Theme> theme = editor_interface->get_editor_theme();
@@ -110,7 +110,7 @@ namespace FmodUtils {
     }
 
     // 将 FMOD 方向向量转换为 Godot 的旋转矩阵
-    static godot::Basis fmod_vectors_to_godot_basis(const FMOD_VECTOR& forward, const FMOD_VECTOR& up) {
+    inline godot::Basis fmod_vectors_to_godot_basis(const FMOD_VECTOR& forward, const FMOD_VECTOR& up) {
         // FMOD (左手系 Y-up) -> Godot (右手系 Y-up) 转换
         godot::Vector3 f(-forward.x, forward.y, forward.z);   // X 取反
         godot::Vector3 u(-up.x, up.y, up.z);                  // X 取反
@@ -122,7 +122,7 @@ namespace FmodUtils {
         return godot::Basis(r, u, f);
     }
 
-    static godot::Vector3 fmod_vectors_to_godot_euler(const FMOD_VECTOR& forward, const FMOD_VECTOR& up) {
+    inline godot::Vector3 fmod_vectors_to_godot_euler(const FMOD_VECTOR& forward, const FMOD_VECTOR& up) {
         // FMOD (左手系 Y-up) -> Godot (右手系 Y-up) 转换
         // 关键：翻转 X 轴来改变手性
         
@@ -142,12 +142,12 @@ namespace FmodUtils {
     }
 
     // 将 FMOD 方向向量转换为 Godot 的四元数
-    static godot::Quaternion fmod_vectors_to_godot_quat(const FMOD_VECTOR& forward, const FMOD_VECTOR& up) {
+    inline godot::Quaternion fmod_vectors_to_godot_quat(const FMOD_VECTOR& forward, const FMOD_VECTOR& up) {
         return godot::Quaternion(fmod_vectors_to_godot_basis(forward, up));
     }
 
     // 将 Godot 欧拉角转换为 FMOD 方向向量
-    static void godot_euler_to_fmod_vectors(const godot::Vector3& euler, FMOD_VECTOR* out_forward, FMOD_VECTOR* out_up) {
+    inline void godot_euler_to_fmod_vectors(const godot::Vector3& euler, FMOD_VECTOR* out_forward, FMOD_VECTOR* out_up) {
         // Godot (右手系 Y-up) -> FMOD (左手系 Y-up) 转换
         godot::Basis basis = godot::Basis::from_euler(euler);
         

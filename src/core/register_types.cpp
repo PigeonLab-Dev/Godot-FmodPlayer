@@ -55,7 +55,6 @@ static FmodServer* fmod_server_instance = nullptr;
 
 void initialize_fmod_player_module(ModuleInitializationLevel p_level) {
 	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
-		// 注册自定义项目设置
 		ProjectSettings* settings = ProjectSettings::get_singleton();
 		
 		// FMOD Profile 高级设置: 仅在编辑器中初始化时启用 FMOD Profile (修改需要重启编辑器)
@@ -96,7 +95,6 @@ void initialize_fmod_player_module(ModuleInitializationLevel p_level) {
 		property_info_max_channels["hint_string"] = "1,4095,1";
 		settings->add_property_info(property_info_max_channels);
 		
-		// 编辑器特有的类
 		GDREGISTER_CLASS(AudioImporterFmod);
 		GDREGISTER_CLASS(FmodAudioPreviewInspector);
 		GDREGISTER_CLASS(FmodAudioPreviewProperty);
@@ -109,7 +107,6 @@ void initialize_fmod_player_module(ModuleInitializationLevel p_level) {
 		return;
 	}
 
-	// 音频核心类
 	GDREGISTER_CLASS(FmodChannelControl);
 	GDREGISTER_CLASS(FmodChannel);
 	GDREGISTER_CLASS(FmodChannelGroup);
@@ -120,7 +117,6 @@ void initialize_fmod_player_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(FmodSoundLock);
 	GDREGISTER_CLASS(FmodSystem);
 
-	// 音频效果类
 	GDREGISTER_ABSTRACT_CLASS(FmodAudioEffect);
 	GDREGISTER_CLASS(FmodAudioEffectAmplify);
 	GDREGISTER_CLASS(FmodAudioEffectFilter);
@@ -142,33 +138,31 @@ void initialize_fmod_player_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(FmodAudioEffectSpectrumAnalyzer);
 	GDREGISTER_CLASS(FmodAudioEffectStereoEnhance);
 
-	// 音频总线类
 	GDREGISTER_CLASS(FmodAudioBus);
 	GDREGISTER_CLASS(FmodAudioBusLayout);
 
-	// 音频流类
 	GDREGISTER_CLASS(FmodAudioStream);
 	GDREGISTER_CLASS(FmodAudioStreamFLAC);
 
-	// 空间
 	GDREGISTER_CLASS(FmodReverb3D);
 
-	// 几何体
 	GDREGISTER_CLASS(FmodGeometry);
 
-	// 音频播放器类
 	GDREGISTER_CLASS(FmodAudioStreamPlayer);
 	GDREGISTER_CLASS(FmodAudioStreamPlayer2D);
 	GDREGISTER_CLASS(FmodAudioStreamPlayer3D);
 	GDREGISTER_CLASS(FmodGeometryInstance3D);
 
-	// FmodServer 注册和添加单例
 	GDREGISTER_CLASS(FmodServer);
 	fmod_server_instance = memnew(FmodServer);
 	Engine::get_singleton()->register_singleton("FmodServer", FmodServer::get_singleton());
 }
 
 void uninitialize_fmod_player_module(ModuleInitializationLevel p_level) {
+	if (p_level != MODULE_INITIALIZATION_LEVEL_EDITOR) {
+		return;
+	}
+
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}

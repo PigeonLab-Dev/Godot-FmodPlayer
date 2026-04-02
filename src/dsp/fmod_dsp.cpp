@@ -138,7 +138,6 @@ namespace godot {
 			dsp->setCallback(nullptr);
 			dsp = nullptr;
 		}
-		// 释放自定义 DSP 描述符
 		if (dsp_description) {
 			memdelete(dsp_description);
 			dsp_description = nullptr;
@@ -148,7 +147,6 @@ namespace godot {
 	void FmodDSP::setup(FMOD::DSP* p_dsp, FMOD_DSP_DESCRIPTION* p_desc) {
 		ERR_FAIL_COND_MSG(!p_dsp, "DSP pointer is null");
 
-		// 如果已经有 DSP，先清理旧的
 		if (dsp) {
 			dsp->setUserData(nullptr);
 			if (callbacks_set) {
@@ -158,7 +156,6 @@ namespace godot {
 		dsp = p_dsp;
 		dsp->setUserData(this);
 		
-		// 保存描述符指针（如果是自定义 DSP）
 		if (p_desc) {
 			dsp_description = p_desc;
 		}
@@ -190,7 +187,6 @@ namespace godot {
 		FMOD::DSPConnection* dsp_connection_ptr = nullptr;
 		FMOD_ERR_CHECK_V(dsp->getOutput(index, &dsp_ptr, &dsp_connection_ptr), Dictionary());
 
-		// 从 userdata 获取已有对象，没有则创建
 		Ref<FmodDSP> output_dsp;
 		if (dsp_ptr) {
 			void* userdata = nullptr;
@@ -228,7 +224,6 @@ namespace godot {
 		FMOD::DSPConnection* dsp_connection_ptr = nullptr;
 		FMOD_ERR_CHECK_V(dsp->getInput(index, &dsp_ptr, &dsp_connection_ptr), Dictionary());
 
-		// 从 userdata 获取已有对象，没有则创建
 		Ref<FmodDSP> input_dsp;
 		if (dsp_ptr) {
 			void* userdata = nullptr;

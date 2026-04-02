@@ -75,7 +75,6 @@ namespace godot {
 
 	void FmodAudioStreamPlayer::_validate_property(PropertyInfo& p_property) const {
 		if (p_property.name == StringName("bus")) {
-			// 动态构建枚举字符串
 			String bus_list;
 			AudioServer* audio_server = AudioServer::get_singleton();
 
