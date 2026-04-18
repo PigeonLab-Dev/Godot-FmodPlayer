@@ -39,28 +39,28 @@ namespace godot {
 
 		// 输出类型
 		enum FmodOutputType {
-			FMOD_OUTPUT_TYPE_AUTODETECT,
-			FMOD_OUTPUT_TYPE_UNKNOWN,
-			FMOD_OUTPUT_TYPE_NOSOUND,
-			FMOD_OUTPUT_TYPE_WAVWRITER,
-			FMOD_OUTPUT_TYPE_NOSOUND_NRT,
-			FMOD_OUTPUT_TYPE_WAVWRITER_NRT,
-			FMOD_OUTPUT_TYPE_WASAPI,
-			FMOD_OUTPUT_TYPE_ASIO,
-			FMOD_OUTPUT_TYPE_PULSEAUDIO,
-			FMOD_OUTPUT_TYPE_ALSA,
-			FMOD_OUTPUT_TYPE_COREAUDIO,
-			FMOD_OUTPUT_TYPE_AUDIOTRACK,
-			FMOD_OUTPUT_TYPE_OPENSL,
-			FMOD_OUTPUT_TYPE_AUDIOOUT,
-			FMOD_OUTPUT_TYPE_AUDIO3D,
-			FMOD_OUTPUT_TYPE_WEBAUDIO,
-			FMOD_OUTPUT_TYPE_NNAUDIO,
-			FMOD_OUTPUT_TYPE_WINSONIC,
-			FMOD_OUTPUT_TYPE_AAUDIO,
-			FMOD_OUTPUT_TYPE_AUDIOWORKLET,
-			FMOD_OUTPUT_TYPE_PHASE,
-			FMOD_OUTPUT_TYPE_OHAUDIO,
+			FMOD_OUTPUT_TYPE_AUTODETECT,														// 选择平台的最佳输出模式
+			FMOD_OUTPUT_TYPE_UNKNOWN,															// 未知
+			FMOD_OUTPUT_TYPE_NOSOUND,															// 全部 - 执行所有混音，但丢弃最终输出
+			FMOD_OUTPUT_TYPE_WAVWRITER,															// 全部 - 将输出写入 WAV 文件
+			FMOD_OUTPUT_TYPE_NOSOUND_NRT,														// 全部 - 非实时版本的 FMOD_OUTPUTTYPE_NOSOUND
+			FMOD_OUTPUT_TYPE_WAVWRITER_NRT,														// 全部 - 非实时版本的 FMOD_OUTPUTTYPE_WAVWRITER
+			FMOD_OUTPUT_TYPE_WASAPI,															// Win / UWP / Xbox One / Game Core - Windows 音频会话 API
+			FMOD_OUTPUT_TYPE_ASIO,																// Win - 低延迟 ASIO 2.0
+			FMOD_OUTPUT_TYPE_PULSEAUDIO,														// Linux - 脉冲音频
+			FMOD_OUTPUT_TYPE_ALSA,																// Linux - 高级 Linux 声音架构
+			FMOD_OUTPUT_TYPE_COREAUDIO,															// Mac / iOS - 核心音频
+			FMOD_OUTPUT_TYPE_AUDIOTRACK,														// Android - Java 音频轨道
+			FMOD_OUTPUT_TYPE_OPENSL,															// Android - OpenSL ES
+			FMOD_OUTPUT_TYPE_AUDIOOUT,															// PS4 / PS5 - 音频输出
+			FMOD_OUTPUT_TYPE_AUDIO3D,															// PS4 - Audio3D
+			FMOD_OUTPUT_TYPE_WEBAUDIO,															// HTML5 - Web Audio ScriptProcessorNode 输出
+			FMOD_OUTPUT_TYPE_NNAUDIO,															// Switch - NN Audio
+			FMOD_OUTPUT_TYPE_WINSONIC,															// Win10 / Xbox One / Game Core - Windows Sonic
+			FMOD_OUTPUT_TYPE_AAUDIO,															// Android - AAudio
+			FMOD_OUTPUT_TYPE_AUDIOWORKLET,														// HTML5 - 网页音频音频 WorkletNode 输出
+			FMOD_OUTPUT_TYPE_PHASE,																// iOS - PHASE 框架
+			FMOD_OUTPUT_TYPE_OHAUDIO,															// OpenHarmony - OHAudio
 
 			FMOD_OUTPUT_TYPE_MAX,
 			FMOD_OUTPUT_TYPE_FORCEINT = 65536
