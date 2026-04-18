@@ -201,7 +201,7 @@ namespace godot {
 		FMOD::System* get_system() const;
 
 		// 管理
-		static Ref<FmodSystem> create_system(const int max_channels, FmodInitFlags flags);		// 创建 FMOD System 实例
+		static Ref<FmodSystem> create_system();													// 创建 FMOD System 实例
 		void setup(FMOD::System* p_system);														// 设置 FMOD System 指针
 		void init(const int max_channels, FmodInitFlags flags);									// 初始化 FMOD System
 		void close();																			// 关闭与输出的连接，回到未初始化状态，但不释放对象

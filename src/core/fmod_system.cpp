@@ -122,7 +122,7 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("system_is_valid"), &FmodSystem::system_is_valid);
 		ClassDB::bind_method(D_METHOD("system_is_null"), &FmodSystem::system_is_null);
 
-		ClassDB::bind_static_method("FmodSystem", D_METHOD("create_system", "max_channels", "flags"), &FmodSystem::create_system, DEFVAL(FMOD_INIT_FLAG_NORMAL), DEFVAL(32));
+		ClassDB::bind_static_method("FmodSystem", D_METHOD("create_system"), &FmodSystem::create_system);
 		ClassDB::bind_method(D_METHOD("init", "max_channels", "flags"), &FmodSystem::init, DEFVAL(FMOD_INIT_FLAG_NORMAL), DEFVAL(32));
 		ClassDB::bind_method(D_METHOD("close"), &FmodSystem::close);
 		ClassDB::bind_method(D_METHOD("release"), &FmodSystem::release);
@@ -365,15 +365,12 @@ namespace godot {
 		system->setUserData(this);
 	}
 
-	Ref<FmodSystem> FmodSystem::create_system(const int max_channels, FmodInitFlags flags) {
-		auto initflags = static_cast<FMOD_INITFLAGS>((int)flags);
+	Ref<FmodSystem> FmodSystem::create_system() {
 		Ref<FmodSystem> new_system;
 		new_system.instantiate();
 		FMOD::System* system_ptr = nullptr;
 		FMOD_ERR_CHECK_V(FMOD::System_Create(&system_ptr), Ref<FmodSystem>());
 		new_system->setup(system_ptr);
-		const int maxchannels = CLAMP(max_channels, 0, 4096);
-		new_system->init(maxchannels, flags);
 		return new_system;
 	}
 

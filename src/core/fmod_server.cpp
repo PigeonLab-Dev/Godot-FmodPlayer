@@ -50,6 +50,7 @@ namespace godot {
 		ClassDB::bind_static_method("FmodServer", D_METHOD("get_main_system"), &FmodServer::get_main_system);
 		ClassDB::bind_static_method("FmodServer", D_METHOD("get_master_channel_group"), &FmodServer::get_master_channel_group);
 		ClassDB::bind_static_method("FmodServer", D_METHOD("get_audio_bus_layout"), &FmodServer::get_audio_bus_layout);
+		ClassDB::bind_static_method("FmodServer", D_METHOD("reset_main_system", "system"), &FmodServer::reset_main_system);
 	}
 
 	FmodServer::FmodServer() {
@@ -74,31 +75,38 @@ namespace godot {
 			}
 		}
 
-		main_system = FmodSystem::create_system(max_channels, mode);
+		main_system = FmodSystem::create_system();
 		if (main_system.is_null() || main_system->system_is_null()) {
 			UtilityFunctions::print_rich("[b][color=WHITE][bgcolor=RED]Failed to init main system![/bgcolor][/color][/b]");
 			return;
 		}
+		main_system->init(max_channels, mode);
 
 		if (Engine::get_singleton()->is_editor_hint() && enable_profile && settings && settings->has_setting("audio/fmod/network_proxy")) {
 			String proxy = settings->get_setting("audio/fmod/network_proxy");
 			main_system->set_network_proxy(proxy);
 		}
 
-		UtilityFunctions::print("    _____                    _ ____  _                       ");
-		UtilityFunctions::print("   |  ___| __ ___   ___   __| |  _ \\| | __ _ _   _  ___ _ __ ");
-		UtilityFunctions::print("   | |_ | '_ ` _ \\ / _ \\ / _` | |_) | |/ _` | | | |/ _ \\ '__|");
-		UtilityFunctions::print("   |  _|| | | | | | (_) | (_| |  __/| | (_| | |_| |  __/ |   ");
-		UtilityFunctions::print("   |_|  |_| |_| |_|\\___/ \\__,_|_|   |_|\\__,_|\\__, |\\___|_|   ");
-		UtilityFunctions::print("                                             |___/           ");
-		Dictionary version = main_system->get_version();
-		UtilityFunctions::print_rich(
-			"[b][color=BLACK][bgcolor=WHITE]Fmod Completed.\tFmod Version: ", 
-			version.get("version", "Unknow"),
-			"\tFmod Build Number: ",
-			version.get("build_number", "Unknow"),
-			"[/bgcolor][/color][/b]"
-		);
+		bool show_startup_banner = true;
+		if (settings && settings->has_setting("audio/fmod/show_startup_banner")) {
+			show_startup_banner = settings->get_setting("audio/fmod/show_startup_banner");
+		}
+		if (show_startup_banner) {
+			UtilityFunctions::print("    _____                    _ ____  _                       ");
+			UtilityFunctions::print("   |  ___| __ ___   ___   __| |  _ \\| | __ _ _   _  ___ _ __ ");
+			UtilityFunctions::print("   | |_ | '_ ` _ \\ / _ \\ / _` | |_) | |/ _` | | | |/ _ \\ '__|");
+			UtilityFunctions::print("   |  _|| | | | | | (_) | (_| |  __/| | (_| | |_| |  __/ |   ");
+			UtilityFunctions::print("   |_|  |_| |_| |_|\\___/ \\__,_|_|   |_|\\__,_|\\__, |\\___|_|   ");
+			UtilityFunctions::print("                                             |___/           ");
+			Dictionary version = main_system->get_version();
+			UtilityFunctions::print_rich(
+				"[b][color=BLACK][bgcolor=WHITE]Fmod Completed.\tFmod Version: ", 
+				version.get("version", "Unknow"),
+				"\tFmod Build Number: ",
+				version.get("build_number", "Unknow"),
+				"[/bgcolor][/color][/b]"
+			);
+		}
 
 		// 初始化总线布局
 		audio_bus_layout.instantiate();
@@ -300,6 +308,14 @@ namespace godot {
 
 	void FmodServer::generate_bus_layout() {
 		audio_bus_layout->sync_from_audio_server();
+	}
+
+	void FmodServer::reset_main_system(Ref<FmodSystem> p_system) {
+		ERR_FAIL_COND_MSG(p_system.is_null() || p_system->system_is_null(), "New system is null");
+		if (main_system.is_valid()) {
+			main_system->release();
+		}
+		main_system = p_system;
 	}
 
 	void FmodServer::_build_bus_layout() {
