@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="3400" height="920" alt="fmod_player_banner" src="https://github.com/user-attachments/assets/1d2655f5-d440-4bdb-978a-b095cb275e9c" />
+  <img alt="fmod_player_banner" src="https://github.com/user-attachments/assets/1d2655f5-d440-4bdb-978a-b095cb275e9c" />
 </p>
 
 <h1 align="center">Godot-FmodPlayer</h1>
