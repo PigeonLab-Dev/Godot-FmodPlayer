@@ -2,17 +2,17 @@
 #define FMOD_AUDIO_STREAM_PLAYER_2D_H
 
 #include "audio/fmod_audio_stream.h"
+#include "core/fmod_server.h"
 #include "playback/fmod_channel.h"
 #include "playback/fmod_channel_group.h"
-#include "core/fmod_server.h"
-#include <godot_cpp/classes/node2d.hpp>
-#include <godot_cpp/classes/engine.hpp>
-#include <godot_cpp/classes/viewport.hpp>
-#include <godot_cpp/classes/window.hpp>
 #include <godot_cpp/classes/camera2d.hpp>
+#include <godot_cpp/classes/engine.hpp>
+#include <godot_cpp/classes/node2d.hpp>
 #include <godot_cpp/classes/physics_direct_space_state2d.hpp>
 #include <godot_cpp/classes/physics_point_query_parameters2d.hpp>
 #include <godot_cpp/classes/physics_server2d.hpp>
+#include <godot_cpp/classes/viewport.hpp>
+#include <godot_cpp/classes/window.hpp>
 #include <godot_cpp/classes/world2d.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
@@ -33,14 +33,12 @@ namespace godot {
 		bool auto_play = false;
 		StringName bus;
 
-		// 2D 空间音频属性
 		float max_distance = 2000.0f;
 		float attenuation = 1.0f;
 		float panning_strength = 1.0f;
 		uint32_t area_mask = 1;
 		int max_polyphony = 1;
 
-		// 内部状态
 		float setplay = -1.0f;
 		uint64_t last_mix_count = 0;
 		bool force_update_panning = false;

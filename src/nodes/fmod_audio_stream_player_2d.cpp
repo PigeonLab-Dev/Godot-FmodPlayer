@@ -96,7 +96,7 @@ namespace godot {
 				last_position = get_global_position();
 			} break;
 
-			case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
+			case NOTIFICATION_PHYSICS_PROCESS: {
 				// 更新位置和声像
 				if (internal_channel.is_valid() && internal_channel->is_playing()) {
 					_update_panning();
@@ -132,49 +132,43 @@ namespace godot {
 		Vector2 global_pos = get_global_position();
 		last_position = global_pos;
 
-		// 获取视口和监听器位置
+		// 从 FmodServer 获取摄像机位置和旋转
+		Vector2 listener_pos = FmodServer::camera_2d_pos;
+		float listener_rotation = FmodServer::camera_2d_rot;
+
+		// 若 FmodServer 未获取到摄像机，回退到视口中心
 		Viewport *viewport = get_viewport();
-		if (!viewport) {
-			return;
-		}
-
-		// 获取摄像机位置作为监听器位置
-		Camera2D *camera = viewport->get_camera_2d();
-		Vector2 listener_pos;
-		float listener_rotation = 0.0f;
-
-		if (camera) {
-			listener_pos = camera->get_global_position();
-			listener_rotation = camera->get_global_rotation();
-		} else {
-			// 使用视口中心作为监听器位置
-			Rect2 visible_rect = viewport->get_visible_rect();
-			listener_pos = visible_rect.get_center();
+		if (viewport && listener_pos == Vector2() && listener_rotation == 0.0f) {
+			Camera2D *camera = viewport->get_camera_2d();
+			if (camera) {
+				listener_pos = camera->get_global_position();
+				listener_rotation = camera->get_global_rotation();
+			} else {
+				Rect2 visible_rect = viewport->get_visible_rect();
+				listener_pos = visible_rect.get_center();
+			}
 		}
 
 		// 计算距离
 		float dist = global_pos.distance_to(listener_pos);
-
 		if (dist > max_distance) {
-			// 超出最大距离，设置音量为 0
 			internal_channel->set_volume_db(-80.0f);
 			return;
 		}
 
-		// 计算距离衰减
+		// 计算距离衰减、相对位置和声像
 		float attenuation_mult = Math::pow(1.0f - dist / max_distance, attenuation);
-
-		// 计算相对位置和声像
 		Vector2 relative_pos = (global_pos - listener_pos).rotated(-listener_rotation);
-		Size2 screen_size = viewport->get_visible_rect().size;
+		float pan = 0.0f;
+		if (viewport) {
+			Size2 screen_size = viewport->get_visible_rect().size;
+			pan = -(relative_pos.x / screen_size.x);
+			pan = CLAMP(pan, -1.0f, 1.0f);
+			pan *= panning_strength;
+			pan = CLAMP(pan + 0.5f, 0.0f, 1.0f);
+		}
 
-		// 计算声像 (-1 到 1)
-		float pan = relative_pos.x / screen_size.x;
-		pan = CLAMP(pan, -1.0f, 1.0f);
-		pan *= panning_strength;
-		pan = CLAMP(pan + 0.5f, 0.0f, 1.0f);
-
-		// 应用音量（距离衰减 + 用户设置音量）
+		// 应用音量
 		float total_volume_db = volume_db;
 		if (attenuation_mult > 0.0f) {
 			total_volume_db += FmodUtils::linear_to_db(attenuation_mult);
@@ -185,9 +179,6 @@ namespace godot {
 
 		// 应用声像（转换到 -1 到 1 范围）
 		internal_channel->set_pan(pan * 2.0f - 1.0f);
-		
-		// 注意：不使用 FMOD 3D 处理，完全依赖手动音量和声像控制
-		// 这样可以确保距离衰减正确生效
 	}
 
 	void FmodAudioStreamPlayer2D::_create_internal_channel(Ref<FmodAudioStream> p_stream) {

@@ -43,6 +43,8 @@ namespace godot {
 	FmodServer* FmodServer::singleton = nullptr;
 	Ref<FmodSystem> FmodServer::main_system;
 	Ref<FmodAudioBusLayout> FmodServer::audio_bus_layout = Ref<FmodAudioBusLayout>();
+	Vector2 FmodServer::camera_2d_pos;
+	float FmodServer::camera_2d_rot = 0.0f;
 
 	void FmodServer::_bind_methods() {
 		ClassDB::bind_method(D_METHOD("_connect_update"), &FmodServer::_connect_update);
@@ -50,6 +52,7 @@ namespace godot {
 		ClassDB::bind_static_method("FmodServer", D_METHOD("get_main_system"), &FmodServer::get_main_system);
 		ClassDB::bind_static_method("FmodServer", D_METHOD("get_master_channel_group"), &FmodServer::get_master_channel_group);
 		ClassDB::bind_static_method("FmodServer", D_METHOD("get_audio_bus_layout"), &FmodServer::get_audio_bus_layout);
+		ClassDB::bind_static_method("FmodServer", D_METHOD("generate_bus_layout"), &FmodServer::generate_bus_layout);
 		ClassDB::bind_static_method("FmodServer", D_METHOD("reset_main_system", "system"), &FmodServer::reset_main_system);
 	}
 
@@ -184,16 +187,14 @@ namespace godot {
 	void FmodServer::_update_fmod() {
 		if (!singleton || main_system.is_null()) return;
 		
-		// 更新 3D 监听者位置
+		// 更新监听者位置
 		SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop());
 		if (tree) {
 			Viewport* viewport = tree->get_root();
 			
-			// 在编辑器中优先使用编辑器视口
 			if (Engine::get_singleton()->is_editor_hint()) {
 				EditorInterface* editor = EditorInterface::get_singleton();
 				if (editor) {
-					// 优先尝试 3D 编辑器视口
 					SubViewport* editor_viewport_3d = editor->get_editor_viewport_3d(0);
 					if (editor_viewport_3d) {
 						Camera3D* camera_3d = editor_viewport_3d->get_camera_3d();
@@ -201,7 +202,6 @@ namespace godot {
 							Vector3 position = camera_3d->get_global_position();
 							Vector3 forward = -camera_3d->get_global_transform().get_basis().get_column(2).normalized();
 							Vector3 up = camera_3d->get_global_transform().get_basis().get_column(1).normalized();
-							
 							main_system->set_3d_listener_attributes(
 								0,
 								position,
@@ -209,86 +209,46 @@ namespace godot {
 								forward,
 								up
 							);
-							
 							main_system->update();
-							return;
 						}
 					}
 					
-					// 尝试 2D 编辑器视口
 					Viewport* editor_viewport_2d = editor->get_editor_viewport_2d();
 					if (editor_viewport_2d) {
-						Camera2D* camera_2d = editor_viewport_2d->get_camera_2d();
-						if (camera_2d) {
-							Vector2 pos_2d = camera_2d->get_global_position();
-							float rotation = camera_2d->get_global_rotation();
-							
-							Vector3 position(pos_2d.x, 0.0f, pos_2d.y);
-							Vector3 forward(Math::sin(rotation), 0.0f, -Math::cos(rotation));
-							Vector3 up(0.0f, 1.0f, 0.0f);
-							
-							main_system->set_3d_listener_attributes(
-								0,
-								position,
-								Vector3(0, 0, 0),
-								forward,
-								up
-							);
-							
-							main_system->update();
-							return;
-						}
+						Transform2D transform = editor_viewport_2d->get_global_canvas_transform();
+						camera_2d_pos = transform.get_origin();
+						camera_2d_rot = transform.get_rotation();
 					}
+
+					return;
 				}
 			}
 			
 			// 运行时或编辑器中未找到编辑器相机，使用游戏视口
 			if (viewport) {
-				// 优先检测 3D 相机
 				Camera3D* camera_3d = viewport->get_camera_3d();
 				if (camera_3d) {
-					// 获取相机的位置和方向
 					Vector3 position = camera_3d->get_global_position();
 					Vector3 forward = -camera_3d->get_global_transform().get_basis().get_column(2).normalized();
 					Vector3 up = camera_3d->get_global_transform().get_basis().get_column(1).normalized();
-					
-					// 设置 FMOD 监听者属性
 					main_system->set_3d_listener_attributes(
-						0,                          // listener index
-						position,                   // position
-						Vector3(0, 0, 0),          	// velocity (可以后续添加速度追踪)
-						forward,                    // forward
-						up                          // up
+						0,
+						position,
+						Vector3(0, 0, 0),
+						forward,
+						up
 					);
+					main_system->update();
 				}
 				else {
-					// 没有 3D 相机时，检测 2D 相机
 					Camera2D* camera_2d = viewport->get_camera_2d();
 					if (camera_2d) {
-						// 2D 相机：将 XY 平面映射到 XZ 平面（FMOD 默认）
-						Vector2 pos_2d = camera_2d->get_global_position();
-						float rotation = camera_2d->get_global_rotation();
-						
-						// 将 2D 位置映射到 3D：XY -> XZ（Y 向上变为 Z 向前）
-						Vector3 position(pos_2d.x, 0.0f, pos_2d.y);
-						
-						// 根据 2D 旋转计算前向向量
-						Vector3 forward(Math::sin(rotation), 0.0f, -Math::cos(rotation));
-						Vector3 up(0.0f, 1.0f, 0.0f);
-						
-						main_system->set_3d_listener_attributes(
-							0,
-							position,
-							Vector3(0, 0, 0),
-							forward,
-							up
-						);
+						camera_2d_pos = camera_2d->get_global_position();
+						camera_2d_rot = camera_2d->get_global_rotation();
 					}
 				}
 			}
 		}
-		
-		main_system->update();
 	}
 
 	Ref<FmodSystem> FmodServer::get_main_system() {

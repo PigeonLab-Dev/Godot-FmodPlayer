@@ -38,6 +38,8 @@ namespace godot {
 
 		static Ref<FmodSystem> main_system;
 		static Ref<FmodAudioBusLayout> audio_bus_layout;
+		static Vector2 camera_2d_pos;
+		static float camera_2d_rot;
 
 		static FmodServer* get_singleton();
 
