@@ -216,7 +216,7 @@ namespace godot {
 			// 创建 MULTIBAND_EQ DSP
 			Ref<FmodDSP> eq_dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_MULTIBAND_EQ);
 			if (!eq_dsp.is_valid()) {
-				UtilityFunctions::push_error("Failed to create MULTIBAND_EQ DSP");
+				ERR_PRINT("Failed to create MULTIBAND_EQ DSP");
 				continue;
 			}
 

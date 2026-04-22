@@ -133,7 +133,7 @@ namespace godot {
 		reverb_3d->setUserData(nullptr);
 		FMOD_RESULT result = reverb_3d->release();
 		if (result != FMOD_OK) {
-			UtilityFunctions::push_error("Failed to release Reverb3D");
+			ERR_PRINT("Failed to release Reverb3D");
 			return;
 		}
 		reverb_3d = nullptr;

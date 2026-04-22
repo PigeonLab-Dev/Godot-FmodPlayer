@@ -376,7 +376,7 @@ namespace godot {
 
 	void FmodSystem::init(const int max_channels, FmodInitFlags flags) {
 		ERR_FAIL_COND(!system);
-		auto initflags = static_cast<FMOD_INITFLAGS>((int)flags);
+		auto initflags = static_cast<FMOD_INITFLAGS>(flags);
 		FMOD_ERR_CHECK(system->init(max_channels, initflags, nullptr));
 	}
 
@@ -390,7 +390,7 @@ namespace godot {
 		system->setUserData(nullptr);
 		FMOD_RESULT result = system->release();
 		if (result != FMOD_OK) {
-			UtilityFunctions::push_error("Failed to release FMOD System: ", FMOD_ErrorString(result));
+			ERR_PRINT(vformat("Failed to release FMOD System: ", FMOD_ErrorString(result)));
 			return;
 		}
 		system = nullptr;
@@ -399,7 +399,7 @@ namespace godot {
 	void FmodSystem::update() {
 		FMOD_RESULT result = system->update();
 		if (result != FMOD_OK)
-			UtilityFunctions::push_error("FMOD Sytem update failed: ", FMOD_ErrorString(result));
+			ERR_PRINT(vformat("FMOD Sytem update failed: ", FMOD_ErrorString(result)));
 	}
 
 	void FmodSystem::mixer_suspend() {
@@ -494,7 +494,7 @@ namespace godot {
 		FMOD_ERR_CHECK_V(system->getSoftwareFormat(&samplerate, &fmod_speaker_mode, &numrawspeakers), Dictionary());
 		Dictionary result;
 		result["sample_rate"] = samplerate;
-		result["speaker_mode"] = (int)fmod_speaker_mode;
+		result["speaker_mode"] = static_cast<int>(fmod_speaker_mode);
 		result["num_raw_speakers"] = numrawspeakers;
 		return result;
 	}
@@ -531,8 +531,8 @@ namespace godot {
 		FMOD_TIMEUNIT filebuffersizetype = FMOD_TIMEUNIT_RAWBYTES;
 		FMOD_ERR_CHECK_V(system->getStreamBufferSize(&filebuffersize, &filebuffersizetype), Dictionary());
 		Dictionary result;
-		result["file_buffer_size"] = (uint64_t)filebuffersize;
-		result["file_buffer_size_type"] = (uint64_t)filebuffersizetype;
+		result["file_buffer_size"] = static_cast<uint64_t>(filebuffersize);
+		result["file_buffer_size_type"] = static_cast<uint64_t>(filebuffersizetype);
 		return result;
 	}
 	
@@ -865,8 +865,8 @@ namespace godot {
 		const int hop) const {
 		ERR_FAIL_COND_V(!system, PackedFloat32Array());
 
-		FMOD_SPEAKERMODE fmod_source = static_cast<FMOD_SPEAKERMODE>((int)source_speaker_mode);
-		FMOD_SPEAKERMODE fmod_target = static_cast<FMOD_SPEAKERMODE>((int)target_speaker_mode);
+		FMOD_SPEAKERMODE fmod_source = static_cast<FMOD_SPEAKERMODE>(source_speaker_mode);
+		FMOD_SPEAKERMODE fmod_target = static_cast<FMOD_SPEAKERMODE>(target_speaker_mode);
 		int source_channels = 0, arr_len = array_length;
 
 		// 获取实际需要的大小
@@ -918,7 +918,7 @@ namespace godot {
 	}
 
 	int FmodSystem::get_speaker_mode_channels(FmodSpeakerMode mode) const {
-		FMOD_SPEAKERMODE fmod_speaker_mode = static_cast<FMOD_SPEAKERMODE>((int)mode);
+		FMOD_SPEAKERMODE fmod_speaker_mode = static_cast<FMOD_SPEAKERMODE>(mode);
 		int channels = 0;
 		FMOD_ERR_CHECK_V(system->getSpeakerModeChannels(fmod_speaker_mode, &channels), -1);
 		return channels;
@@ -1114,7 +1114,7 @@ namespace godot {
 		), nullptr);
 
 		if (!fmod_channel) {
-			UtilityFunctions::push_error("playSound returned null channel");
+			ERR_PRINT("playSound returned null channel");
 			return nullptr;
 		}
 
@@ -1139,7 +1139,7 @@ namespace godot {
 		), Ref<FmodChannel>());
 
 		if (!fmod_channel) {
-			UtilityFunctions::push_error("playSound returned null channel");
+			ERR_PRINT("playSound returned null channel");
 			return Ref<FmodChannel>();
 		}
 
@@ -1333,9 +1333,9 @@ namespace godot {
 		info["name"] = String::utf8(name);
 		info["guid"] = FmodUtils::guid_to_string(guid);
 		info["system_rate"] = systemrate;
-		info["speaker_mode"] = (int)speakermode;
+		info["speaker_mode"] = static_cast<int>(speakermode);
 		info["speaker_mode_channels"] = speakermodechannels;
-		info["state"] = (int)state;
+		info["state"] = static_cast<int>(state);
 		return info;
 	}
 

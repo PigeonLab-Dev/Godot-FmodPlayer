@@ -243,7 +243,7 @@ namespace godot {
 		geometry->setUserData(nullptr);
 		FMOD_RESULT result = geometry->release();
 		if (result != FMOD_OK) {
-			UtilityFunctions::push_error("Failed to release Geometry");
+			ERR_PRINT("Failed to release Geometry");
 			return;
 		}
 		geometry = nullptr;

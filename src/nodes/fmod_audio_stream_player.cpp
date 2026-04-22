@@ -94,16 +94,15 @@ namespace godot {
 	void FmodAudioStreamPlayer::_create_internal_channel(Ref<FmodAudioStream> stream) {
 		Ref<FmodSystem> system = FmodServer::get_main_system();
 
-		// 通过 get_sound() 获取 Sound (延迟创建)
 		Ref<FmodSound> sound = stream->get_sound();
 		if (sound.is_null()) {
-			UtilityFunctions::push_error("Failed to get sound from stream");
+			ERR_PRINT("Failed to get sound from stream");
 			return;
 		}
 
 		internal_channel = system->play_sound(sound, internal_channel_group, true);
 		if (internal_channel.is_null()) {
-			UtilityFunctions::push_error("Failed to get Fmod Channel!");
+			ERR_PRINT("Failed to get Fmod Channel!");
 			return;
 		}
 
@@ -146,14 +145,14 @@ namespace godot {
 		
 		Ref<FmodChannelGroup> channel_group;
 		if (audio_bus.is_null()) {
-			// 如果找不到总线 (可能还没同步)，直接回退到 FMOD Master ChannelGroup
+			// 如果找不到总线则回退到 FMOD Master ChannelGroup
 			channel_group = FmodServer::get_master_channel_group();
 		} else {
 			channel_group = audio_bus->get_bus();
 		}
 		
 		if (channel_group.is_null()) {
-			UtilityFunctions::push_error(vformat("Cannot get channel group for bus: %s", actual_bus));
+			ERR_PRINT(vformat("Cannot get channel group for bus: %s", actual_bus));
 			return;
 		}
 		internal_channel_group = channel_group;
@@ -169,7 +168,7 @@ namespace godot {
 		if (stream.is_valid()) {
 			Ref<FmodSound> current_sound = stream->get_sound();
 			if (current_sound.is_null()) {
-				UtilityFunctions::push_error("No sound available");
+				ERR_PRINT("No sound available");
 				return;
 			}
 

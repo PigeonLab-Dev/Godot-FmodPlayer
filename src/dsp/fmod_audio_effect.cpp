@@ -128,7 +128,7 @@ namespace godot {
 		FMOD::DSP* dsp_ptr = nullptr;
 		FMOD_RESULT result = fmod_system->createDSP(&desc, &dsp_ptr);
 		if (result != FMOD_OK || !dsp_ptr) {
-			UtilityFunctions::push_error("Failed to create custom DSP: ", FMOD_ErrorString(result));
+			ERR_PRINT(vformat("Failed to create custom DSP: %s", FMOD_ErrorString(result)));
 			return Ref<FmodDSP>();
 		}
 		

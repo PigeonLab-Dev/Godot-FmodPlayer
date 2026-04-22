@@ -623,7 +623,7 @@ namespace godot {
 		ERR_FAIL_COND(!dsp);
 		FMOD_RESULT result = dsp->release();
 		if (result != FMOD_OK) {
-			UtilityFunctions::push_error("Failed to release DSP");
+			ERR_PRINT("Failed to release DSP");
 			return;
 		}
 		dsp = nullptr;

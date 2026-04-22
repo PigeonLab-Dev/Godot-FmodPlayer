@@ -73,7 +73,7 @@ namespace godot {
 
 		FMOD_RESULT result = channel_group->addGroup(child_group->channel_group, propagatedspclock);
 		if (result != FMOD_OK) {
-			UtilityFunctions::push_error("Failed to add group: ", FMOD_ErrorString(result));
+			ERR_PRINT(vformat("Failed to add group: %s", FMOD_ErrorString(result)));
 		}
 	}
 

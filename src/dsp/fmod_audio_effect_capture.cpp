@@ -68,13 +68,13 @@ namespace godot {
 		// 创建自定义 DSP
 		Ref<FmodDSP> dsp = create_custom_dsp(system);
 		if (!dsp.is_valid()) {
-			UtilityFunctions::push_error("FmodAudioEffectCapture: Failed to create custom DSP");
+			ERR_PRINT("FmodAudioEffectCapture: Failed to create custom DSP");
 			return;
 		}
 		
 		// 检查 DSP 内部指针
 		if (!dsp->dsp) {
-			UtilityFunctions::push_error("FmodAudioEffectCapture: DSP internal pointer is null after setup");
+			ERR_PRINT("FmodAudioEffectCapture: DSP internal pointer is null after setup");
 			return;
 		}
 		

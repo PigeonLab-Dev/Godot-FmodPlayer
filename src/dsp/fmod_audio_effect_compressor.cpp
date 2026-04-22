@@ -137,7 +137,7 @@ namespace godot {
 			// TODO: 实现旁链支持
 			// 需要创建 SEND DSP 将信号发送到旁链总线
 			// 然后设置 compressor 的 sidechain 数据源
-			UtilityFunctions::push_warning("Sidechain compression not yet fully implemented in FMOD");
+			WARN_PRINT("Sidechain compression not yet fully implemented in FMOD");
 		}
 	}
 

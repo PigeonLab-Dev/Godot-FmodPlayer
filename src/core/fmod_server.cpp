@@ -215,9 +215,10 @@ namespace godot {
 					
 					Viewport* editor_viewport_2d = editor->get_editor_viewport_2d();
 					if (editor_viewport_2d) {
-						Transform2D transform = editor_viewport_2d->get_global_canvas_transform();
-						camera_2d_pos = transform.get_origin();
-						camera_2d_rot = transform.get_rotation();
+						Transform2D canvas_transform = editor_viewport_2d->get_global_canvas_transform();
+						Vector2 screen_center = editor_viewport_2d->get_visible_rect().size * 0.5f;
+						camera_2d_pos = canvas_transform.affine_inverse().xform(screen_center);
+						camera_2d_rot = canvas_transform.get_rotation();
 					}
 
 					return;

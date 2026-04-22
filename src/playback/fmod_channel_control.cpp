@@ -485,7 +485,7 @@ namespace godot {
 		ERR_FAIL_COND_MSG(!dsp->dsp, "DSP internal pointer is null");
 		FMOD_RESULT result = channel_control->addDSP(index, dsp->dsp);
 		if (result != FMOD_OK) {
-			UtilityFunctions::push_error("Failed to add DSP: ", FMOD_ErrorString(result));
+			ERR_PRINT(vformat("Failed to add DSP: ", FMOD_ErrorString(result)));
 		}
 	}
 

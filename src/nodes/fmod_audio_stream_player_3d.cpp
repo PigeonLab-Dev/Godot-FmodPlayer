@@ -170,20 +170,20 @@ namespace godot {
 	void FmodAudioStreamPlayer3D::_create_internal_channel(Ref<FmodAudioStream> p_stream) {
 		Ref<FmodSystem> system = FmodServer::get_main_system();
 		if (system.is_null()) {
-			UtilityFunctions::push_error("FMOD system not available");
+			ERR_PRINT("FMOD system not available");
 			return;
 		}
 
 		Ref<FmodSound> sound = p_stream->get_sound();
 		if (sound.is_null()) {
-			UtilityFunctions::push_error("Failed to get sound from stream");
+			ERR_PRINT("Failed to get sound from stream");
 			return;
 		}
 
 		// 使用暂停模式创建，以便设置 3D 属性
 		internal_channel = system->play_sound(sound, internal_channel_group, true);
 		if (internal_channel.is_null()) {
-			UtilityFunctions::push_error("Failed to create FMOD channel");
+			ERR_PRINT("Failed to create FMOD channel");
 			return;
 		}
 
@@ -321,7 +321,7 @@ namespace godot {
 		}
 
 		if (channel_group.is_null()) {
-			UtilityFunctions::push_error(vformat("Cannot get channel group for bus: %s", actual_bus));
+			ERR_PRINT(vformat("Cannot get channel group for bus: %s", actual_bus));
 			return;
 		}
 		internal_channel_group = channel_group;

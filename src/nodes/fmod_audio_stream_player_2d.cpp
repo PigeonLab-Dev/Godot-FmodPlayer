@@ -89,19 +89,19 @@ namespace godot {
 
 	void FmodAudioStreamPlayer2D::_notification(int p_what) {
 		switch (p_what) {
-			case NOTIFICATION_READY: {
-				if (auto_play && stream.is_valid() && !Engine::get_singleton()->is_editor_hint()) {
-					call_deferred("play");
-				}
-				last_position = get_global_position();
-			} break;
+		case NOTIFICATION_READY: {
+			if (auto_play && stream.is_valid() && !Engine::get_singleton()->is_editor_hint()) {
+				call_deferred("play");
+			}
+			last_position = get_global_position();
+		} break;
 
-			case NOTIFICATION_PHYSICS_PROCESS: {
-				// 更新位置和声像
-				if (internal_channel.is_valid() && internal_channel->is_playing()) {
-					_update_panning();
-				}
-			} break;
+		case NOTIFICATION_PHYSICS_PROCESS: {
+			// 更新位置和声像
+			if (internal_channel.is_valid() && internal_channel->is_playing()) {
+				_update_panning();
+			}
+		} break;
 		}
 	}
 
@@ -136,16 +136,13 @@ namespace godot {
 		Vector2 listener_pos = FmodServer::camera_2d_pos;
 		float listener_rotation = FmodServer::camera_2d_rot;
 
-		// 若 FmodServer 未获取到摄像机，回退到视口中心
-		Viewport *viewport = get_viewport();
+		Viewport* viewport = get_viewport();
+		Camera2D* camera = nullptr;
 		if (viewport && listener_pos == Vector2() && listener_rotation == 0.0f) {
-			Camera2D *camera = viewport->get_camera_2d();
+			camera = viewport->get_camera_2d();
 			if (camera) {
 				listener_pos = camera->get_global_position();
 				listener_rotation = camera->get_global_rotation();
-			} else {
-				Rect2 visible_rect = viewport->get_visible_rect();
-				listener_pos = visible_rect.get_center();
 			}
 		}
 
@@ -156,13 +153,15 @@ namespace godot {
 			return;
 		}
 
-		// 计算距离衰减、相对位置和声像
+		// 计算距离衰减和相对位置
 		float attenuation_mult = Math::pow(1.0f - dist / max_distance, attenuation);
 		Vector2 relative_pos = (global_pos - listener_pos).rotated(-listener_rotation);
+
+		// 计算声像
 		float pan = 0.0f;
 		if (viewport) {
 			Size2 screen_size = viewport->get_visible_rect().size;
-			pan = -(relative_pos.x / screen_size.x);
+			pan = relative_pos.x / screen_size.x;
 			pan = CLAMP(pan, -1.0f, 1.0f);
 			pan *= panning_strength;
 			pan = CLAMP(pan + 0.5f, 0.0f, 1.0f);
@@ -172,7 +171,8 @@ namespace godot {
 		float total_volume_db = volume_db;
 		if (attenuation_mult > 0.0f) {
 			total_volume_db += FmodUtils::linear_to_db(attenuation_mult);
-		} else {
+		}
+		else {
 			total_volume_db = -80.0f;
 		}
 		internal_channel->set_volume_db(total_volume_db);
@@ -184,7 +184,7 @@ namespace godot {
 	void FmodAudioStreamPlayer2D::_create_internal_channel(Ref<FmodAudioStream> p_stream) {
 		Ref<FmodSystem> system = FmodServer::get_main_system();
 		if (system.is_null()) {
-			UtilityFunctions::push_error("FMOD system not available");
+			ERR_PRINT("FMOD system not available");
 			return;
 		}
 
@@ -192,26 +192,26 @@ namespace godot {
 		p_stream->add_mode_flag(FmodAudioStream::MODE_2D);
 		// 使已缓存的声音失效，让它用新标志重新创建（保留数据）
 		p_stream->invalidate_sound();
-		
+
 		Ref<FmodSound> sound = p_stream->get_sound();
 		if (sound.is_null()) {
-			UtilityFunctions::push_error("Failed to get sound from stream");
+			ERR_PRINT("Failed to get sound from stream");
 			return;
 		}
 
 		internal_channel = system->play_sound(sound, internal_channel_group, true);
 		if (internal_channel.is_null()) {
-			UtilityFunctions::push_error("Failed to create FMOD channel");
+			ERR_PRINT("Failed to create FMOD channel");
 			return;
 		}
 
 		internal_channel->set_volume_db(volume_db);
 		internal_channel->set_pitch(pitch);
-		
+
 		// 设置为 2D 模式，禁用 FMOD 的 3D 处理
 		// 这样距离衰减完全由我们手动控制
 		internal_channel->set_mode(FmodSystem::FMOD_MODE_2D);
-		
+
 		// 连接结束信号
 		internal_channel->connect("ended", callable_mp(this, &FmodAudioStreamPlayer2D::_on_internal_channel_ended), CONNECT_DEFERRED);
 	}
@@ -248,12 +248,13 @@ namespace godot {
 		Ref<FmodChannelGroup> channel_group;
 		if (audio_bus.is_null()) {
 			channel_group = FmodServer::get_master_channel_group();
-		} else {
+		}
+		else {
 			channel_group = audio_bus->get_bus();
 		}
 
 		if (channel_group.is_null()) {
-			UtilityFunctions::push_error(vformat("Cannot get channel group for bus: %s", actual_bus));
+			ERR_PRINT(vformat("Cannot get channel group for bus: %s", actual_bus));
 			return;
 		}
 		internal_channel_group = channel_group;
@@ -295,7 +296,8 @@ namespace godot {
 	void FmodAudioStreamPlayer2D::set_playing(const bool p_playing) {
 		if (p_playing) {
 			play();
-		} else {
+		}
+		else {
 			stop();
 		}
 	}

@@ -143,7 +143,7 @@ namespace godot {
 		ERR_FAIL_COND(!sound_group);
 		FMOD_RESULT result = sound_group->release();
 		if (result != FMOD_OK) {
-			UtilityFunctions::push_error("Failed to release FMOD SoundGroup: ", FMOD_ErrorString(result));
+			ERR_PRINT(vformat("Failed to release FMOD SoundGroup: %s", FMOD_ErrorString(result)));
 			return;
 		}
 		sound_group = nullptr;

@@ -117,7 +117,7 @@ namespace godot {
 				Ref<FmodAudioEffectFilter> fmod_filter;
 				fmod_filter.instantiate();
 				fmod_filter->set_cutoff_hz(godot_filter->get_cutoff());
-				fmod_filter->set_db(static_cast<FmodAudioEffectFilter::FilterDB>((int)godot_filter->get_db()));
+				fmod_filter->set_db(static_cast<FmodAudioEffectFilter::FilterDB>(godot_filter->get_db()));
 				fmod_filter->set_gain(godot_filter->get_gain());
 				fmod_filter->set_resonance(godot_filter->get_resonance());
 				bus->add_effect(fmod_filter, i);
@@ -130,7 +130,7 @@ namespace godot {
 				Ref<FmodAudioEffectCapture> fmod_capture;
 				fmod_capture.instantiate();
 				if (fmod_capture.is_null()) {
-					UtilityFunctions::push_error("Failed to instantiate FmodAudioEffectCapture");
+					ERR_PRINT("Failed to instantiate FmodAudioEffectCapture");
 					continue;
 				}
 				// 获取 Godot 的 buffer_length，确保它是有效的
@@ -206,7 +206,7 @@ namespace godot {
 			if (godot_distortion.is_valid()) {
 				Ref<FmodAudioEffectDistortion> fmod_distortion;
 				fmod_distortion.instantiate();
-				fmod_distortion->set_mode(static_cast<FmodAudioEffectDistortion::Mode>((int)godot_distortion->get_mode()));
+				fmod_distortion->set_mode(static_cast<FmodAudioEffectDistortion::Mode>(godot_distortion->get_mode()));
 				fmod_distortion->set_pre_gain(godot_distortion->get_pre_gain());
 				fmod_distortion->set_drive(godot_distortion->get_drive());
 				fmod_distortion->set_post_gain(godot_distortion->get_post_gain());
@@ -293,7 +293,7 @@ namespace godot {
 				Ref<FmodAudioEffectPitchShift> fmod_pitch;
 				fmod_pitch.instantiate();
 				fmod_pitch->set_pitch_scale(godot_pitch->get_pitch_scale());
-				fmod_pitch->set_fft_size(static_cast<FmodAudioEffectPitchShift::FFTSize>((int)godot_pitch->get_fft_size()));
+				fmod_pitch->set_fft_size(static_cast<FmodAudioEffectPitchShift::FFTSize>(godot_pitch->get_fft_size()));
 				fmod_pitch->set_oversampling(godot_pitch->get_oversampling());
 				bus->add_effect(fmod_pitch, i);
 				continue;
@@ -304,7 +304,7 @@ namespace godot {
 			if (godot_record.is_valid()) {
 				Ref<FmodAudioEffectRecord> fmod_record;
 				fmod_record.instantiate();
-				fmod_record->set_format(static_cast<FmodAudioEffectRecord::Format>((int)godot_record->get_format()));
+				fmod_record->set_format(static_cast<FmodAudioEffectRecord::Format>(godot_record->get_format()));
 				bus->add_effect(fmod_record, i);
 				continue;
 			}
@@ -331,7 +331,7 @@ namespace godot {
 			if (godot_spectrum.is_valid()) {
 				Ref<FmodAudioEffectSpectrumAnalyzer> fmod_spectrum;
 				fmod_spectrum.instantiate();
-				fmod_spectrum->set_fft_size(static_cast<FmodAudioEffectSpectrumAnalyzer::FFTSize>((int)godot_spectrum->get_fft_size()));
+				fmod_spectrum->set_fft_size(static_cast<FmodAudioEffectSpectrumAnalyzer::FFTSize>(godot_spectrum->get_fft_size()));
 				fmod_spectrum->set_buffer_length(godot_spectrum->get_buffer_length());
 				bus->add_effect(fmod_spectrum, i);
 				continue;
@@ -352,8 +352,7 @@ namespace godot {
 			// 检查是否是不支持的效果器类型
 			String effect_class = godot_effect->get_class();
 			if (effect_class != "AudioEffect") {
-				UtilityFunctions::push_warning("FmodAudioBusLayout: Audio effect '", effect_class, "' on bus index ", audio_server_bus_index, 
-					" is not supported by FMOD. Effect will be skipped.");
+				WARN_PRINT(vformat("FmodAudioBusLayout: Audio effect '%s' on bus index %d is not supported by FMOD. Effect will be skipped.", effect_class, audio_server_bus_index));
 			}
 		}
 	}
@@ -506,11 +505,11 @@ namespace godot {
 
 			Ref<FmodAudioBus> new_bus;
 			new_bus.instantiate();
-			new_bus->init_bus(bus_name);							// 暂时不指定 parent，后面统一连接
+			new_bus->init_bus(bus_name);
 			
 			// 检查 bus 是否成功创建
 			if (new_bus.is_null() || new_bus->get_bus().is_null()) {
-				UtilityFunctions::push_error("FmodAudioBusLayout: Failed to create bus '", bus_name, "', skipping.");
+				ERR_PRINT(vformat("FmodAudioBusLayout: Failed to create bus '%s', skipping.", bus_name));
 				continue;
 			}
 			
@@ -548,8 +547,8 @@ namespace godot {
 			if (bus.is_null()) {
 				continue;
 			}
-			sync_bus_state(bus_name, i);							// 同步音量和静音状态
-			_sync_bus_effects(bus, i);								// 效果器处理
+			sync_bus_state(bus_name, i);
+			_sync_bus_effects(bus, i);
 		}
 		// 应用 solo 静音
 		// bypass 已在每个 bus 的 set_bypass 中通过 sync_bypass 应用，无需额外操作
