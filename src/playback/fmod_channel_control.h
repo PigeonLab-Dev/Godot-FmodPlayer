@@ -33,8 +33,8 @@ namespace godot {
 		void set_mode(FmodSystem::FmodMode mode);					// 设置播放模式，控制该对象的行为
 		FmodSystem::FmodMode get_mode() const;						// 获取控制该对象行为的播放模式
 
-		void set_pitch(const double pitch);							// 设置相对音高/播放速率
-		double get_pitch() const;									// 获取相对音高/播放速率
+		void set_pitch(float pitch);								// 设置相对音高/播放速率
+		float get_pitch() const;									// 获取相对音高/播放速率
 
 		// 音量等级
 		float get_audibility() const;								// 根据所有影响最终输出音量的衰减因子计算出可听度

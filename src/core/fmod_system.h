@@ -335,10 +335,13 @@ namespace godot {
 		int get_speaker_mode_channels(FmodSpeakerMode mode) const;								// 获取给定扬声器模式的通道数
 
 		// 创建与获取
-		Ref<FmodSound> create_sound_from_file(const String p_path, unsigned int mode);			// 从文件创建 FmodSound
-		Ref<FmodSound> create_sound_from_memory(const PackedByteArray& data, unsigned int mode);// 从内存创建 FmodSound
-		Ref<FmodSound> create_sound_from_res(const String p_path, unsigned int mode);			// 从资源文件创建 FmodSound
-		Ref<FmodSound> create_stream_from_file(const String p_path, unsigned int mode);			// 从文件创建流 FmodSound
+		Ref<FmodSound> create_sound_from_file(const String p_path, unsigned int mode) const;	// 从文件创建 FmodSound
+		Ref<FmodSound> create_sound_from_memory(
+			const PackedByteArray& data,
+			unsigned int mode
+		) const;																				// 从内存创建 FmodSound
+		Ref<FmodSound> create_sound_from_res(const String p_path, unsigned int mode) const;		// 从资源文件创建 FmodSound
+		Ref<FmodSound> create_stream_from_file(const String p_path, unsigned int mode) const;	// 从文件创建流 FmodSound
 		Ref<FmodDSP> create_dsp(const String& name) const;										// 创建 DSP
 		Ref<FmodDSP> create_dsp_by_type(unsigned int type) const;								// 创建一个带有指定类型索引的 DSP
 		Ref<FmodChannelGroup> create_channel_group(const String& p_name) const;					// 创建 ChannelGroup
@@ -348,12 +351,12 @@ namespace godot {
 			Ref<FmodSound> sound,
 			Ref<FmodChannelGroup> channel_group,
 			const bool paused = false
-		);																						// 在 Channel 播放一个声音
+		) const;																				// 在 Channel 播放一个声音
 		Ref<FmodChannel> play_dsp(
 			Ref<FmodDSP> dsp,
 			Ref<FmodChannelGroup> channel_group,
 			const bool paused = false
-		);																						// 播放一个 DSP 及其任何输入在 Channel 的信号
+		) const;																				// 播放一个 DSP 及其任何输入在 Channel 的信号
 		Ref<FmodChannel> get_channel(const int id) const;										// 通过 ID 获取 Channel 的句柄
 		Dictionary get_dsp_info_by_type(unsigned int type) const;								// 获取内置 DSP 描述结构信息
 		Ref<FmodChannelGroup> get_master_channel_group() const;									// 获取所有声音最终路由到的主通道组
@@ -368,7 +371,7 @@ namespace godot {
 			const Vector3 up
 		);																						// 设置指定三维声音听者的位置、力度和方向
 		Dictionary get_3d_listener_attributes(const int listener) const;						// 获取指定三维声音听者的位置、力度和方向
-		void set_reverb_porioerties(
+		void set_reverb_properties(
 			const int instance,
 			const float decay_time,
 			const float early_delay,

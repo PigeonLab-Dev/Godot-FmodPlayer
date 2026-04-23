@@ -107,6 +107,7 @@ namespace godot {
 
 		static Ref<FmodSound> load_from_file(const String& p_path);
 
+		// 有效性检查
 		bool sound_is_valid() const;									// 检查声音是否有效
 		bool sound_is_null() const;										// 检查声音是否无效
 

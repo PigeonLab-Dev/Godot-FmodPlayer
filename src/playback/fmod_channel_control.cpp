@@ -158,7 +158,7 @@ namespace godot {
 
 	void FmodChannelControl::set_mode(FmodSystem::FmodMode mode) {
 		ERR_FAIL_COND(!channel_control);
-		FMOD_MODE fmod_mode = static_cast<FMOD_MODE>((int)mode);
+		FMOD_MODE fmod_mode = static_cast<FMOD_MODE>(mode);
 		FMOD_ERR_CHECK(channel_control->setMode(fmod_mode));
 	}
 
@@ -170,16 +170,16 @@ namespace godot {
 		return mode;
 	}
 
-	void FmodChannelControl::set_pitch(double pitch) {
+	void FmodChannelControl::set_pitch(float pitch) {
 		ERR_FAIL_COND(!channel_control);
-		FMOD_ERR_CHECK(channel_control->setPitch((double)pitch));
+		FMOD_ERR_CHECK(channel_control->setPitch(pitch));
 	}
 
-	double FmodChannelControl::get_pitch() const {
+	float FmodChannelControl::get_pitch() const {
 		if (!channel_control) return 1.0f;
 		float pitch = 1.0f;
 		FMOD_ERR_CHECK(channel_control->getPitch(&pitch));
-		return (double)pitch;
+		return pitch;
 	}
 
 	float FmodChannelControl::get_audibility() const {

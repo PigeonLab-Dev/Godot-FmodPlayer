@@ -8,6 +8,11 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("set_parent", "parent"), &FmodAudioBus::set_parent);
 		ClassDB::bind_method(D_METHOD("get_bus"), &FmodAudioBus::get_bus);
 		ClassDB::bind_method(D_METHOD("get_parent"), &FmodAudioBus::get_parent);
+		ClassDB::bind_method(D_METHOD("get_bus_name"), &FmodAudioBus::get_bus_name);
+
+		ClassDB::bind_method(D_METHOD("add_effect", "effect", "index"), &FmodAudioBus::add_effect, DEFVAL(0));
+		ClassDB::bind_method(D_METHOD("remove_effect", "index"), &FmodAudioBus::remove_effect);
+		ClassDB::bind_method(D_METHOD("get_effect", "index"), &FmodAudioBus::get_effect);
 
 		ClassDB::bind_method(D_METHOD("set_volume_db", "volume_db"), &FmodAudioBus::set_volume_db);
 		ClassDB::bind_method(D_METHOD("get_volume_db"), &FmodAudioBus::get_volume_db);
@@ -15,7 +20,7 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_mute", "mute"), &FmodAudioBus::set_mute);
 		ClassDB::bind_method(D_METHOD("is_mute"), &FmodAudioBus::is_mute);
-		ClassDB::bind_method(D_METHOD("apply_mute"), &FmodAudioBus::apply_mute);
+		ClassDB::bind_method(D_METHOD("apply_mute", "mute"), &FmodAudioBus::apply_mute);
 		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "mute"), "set_mute", "is_mute");
 
 		ClassDB::bind_method(D_METHOD("set_solo", "solo"), &FmodAudioBus::set_solo);
@@ -24,11 +29,8 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_bypass", "bypass"), &FmodAudioBus::set_bypass);
 		ClassDB::bind_method(D_METHOD("is_bypass"), &FmodAudioBus::is_bypass);
+		ClassDB::bind_method(D_METHOD("sync_bypass"), &FmodAudioBus::sync_bypass);
 		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bypass"), "set_bypass", "is_bypass");
-
-		ClassDB::bind_method(D_METHOD("add_effect", "effect", "index"), &FmodAudioBus::add_effect);
-		ClassDB::bind_method(D_METHOD("remove_effect", "index"), &FmodAudioBus::remove_effect);
-		ClassDB::bind_method(D_METHOD("get_effect", "index"), &FmodAudioBus::get_effect);
 	}
 
 	FmodAudioBus::FmodAudioBus() {
@@ -78,8 +80,37 @@ namespace godot {
 		return parent;
 	}
 
-	const String& FmodAudioBus::get_bus_name() const {
+	String FmodAudioBus::get_bus_name() const {
 		return bus_name;
+	}
+
+	void FmodAudioBus::add_effect(Ref<FmodAudioEffect> effect, int index) {
+		ERR_FAIL_COND(bus.is_null());
+		ERR_FAIL_COND_MSG(effect.is_null(), "Effect is null");
+
+		audio_effects.append(effect);
+		effect->apply_to(bus);
+
+		// 如果当前总线为 bypass，立即禁用新添加的效果器
+		if (bypass) {
+			sync_bypass();
+		}
+	}
+
+	void FmodAudioBus::remove_effect(int index) {
+		ERR_FAIL_COND(bus.is_null());
+		ERR_FAIL_COND_MSG(index < 0 || index > audio_effects.size(), "Index out of bounds");
+		Ref<FmodAudioEffect> effect = audio_effects[index];
+		if (effect.is_valid()) {
+			effect->remove_from_bus(bus);
+		}
+		audio_effects.remove_at(index);
+	}
+
+	Ref<FmodAudioEffect> FmodAudioBus::get_effect(int index) const {
+		ERR_FAIL_COND_V(bus.is_null(), Ref<FmodAudioEffect>());
+		ERR_FAIL_COND_V_MSG(index < 0 || index > audio_effects.size(), Ref<FmodAudioEffect>(), "Index out of bounds");
+		return audio_effects.get(index);
 	}
 
 	void FmodAudioBus::set_volume_db(const float volume_db) {
@@ -133,34 +164,5 @@ namespace godot {
 				dsp->set_bypass(bypass);
 			}
 		}
-	}
-
-	void FmodAudioBus::add_effect(Ref<FmodAudioEffect> effect, int index) {
-		ERR_FAIL_COND(bus.is_null());
-		ERR_FAIL_COND_MSG(effect.is_null(), "Effect is null");
-		
-		audio_effects.append(effect);
-		effect->apply_to(bus);
-
-		// 如果当前总线为 bypass，立即禁用新添加的效果器
-		if (bypass) {
-			sync_bypass();
-		}
-	}
-
-	void FmodAudioBus::remove_effect(int index) {
-		ERR_FAIL_COND(bus.is_null());
-		ERR_FAIL_COND_MSG(index < 0 || index > audio_effects.size(), "Index out of bounds");
-		Ref<FmodAudioEffect> effect = audio_effects[index];
-		if (effect.is_valid()) {
-			effect->remove_from_bus(bus);
-		}
-		audio_effects.remove_at(index);
-	}
-
-	Ref<FmodAudioEffect> FmodAudioBus::get_effect(int index) const {
-		ERR_FAIL_COND_V(bus.is_null(), Ref<FmodAudioEffect>());
-		ERR_FAIL_COND_V_MSG(index < 0 || index > audio_effects.size(), Ref<FmodAudioEffect>(), "Index out of bounds");
-		return audio_effects.get(index);
 	}
 }

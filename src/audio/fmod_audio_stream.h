@@ -28,21 +28,14 @@ namespace godot {
 		// 音频数据（由导入器填充或运行时加载）
 		PackedByteArray audio_data;
 		bool data_loaded = false;
-
-		// Sound 对象（延迟创建）
 		Ref<FmodSound> sound;
-
-		// 创建标志
 		unsigned int create_mode_flags = MODE_STREAM;
-
-		// 创建 FMOD Sound
-		virtual Ref<FmodSound> _create_sound();
 
 	public:
 		FmodAudioStream();
 		virtual ~FmodAudioStream();
 
-		// 音频数据设置（用于从内存加载）
+		virtual Ref<FmodSound> _create_sound();
 		void set_audio_data(const PackedByteArray& p_data);
 		PackedByteArray get_audio_data() const;
 
@@ -60,12 +53,12 @@ namespace godot {
 		double get_length() const;
 		bool is_data_loaded() const;
 
-		// 运行时加载外部文件（静态方法）
+		// 运行时加载外部文件
 		static Ref<FmodAudioStream> load_from_file(const String& p_path, int p_flags = MODE_STREAM);
 
 		// 清理资源
 		void clear();
-		
+
 		// 仅使 sound 缓存失效（保留数据），下次 get_sound() 会重新创建
 		void invalidate_sound();
 	};

@@ -282,7 +282,7 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_3d_listener_attributes", "listener_index", "position", "velocity", "forward", "up"), &FmodSystem::set_3d_listener_attributes);
 		ClassDB::bind_method(D_METHOD("get_3d_listener_attributes", "listener_index"), &FmodSystem::get_3d_listener_attributes);
-		ClassDB::bind_method(D_METHOD("set_reverb_porioerties",
+		ClassDB::bind_method(D_METHOD("set_reverb_properties",
 			"instance",
 			"decay_time",
 			"early_time",
@@ -296,9 +296,9 @@ namespace godot {
 			"high_cut",
 			"early_late_mix",
 			"wet_level"
-		), &FmodSystem::set_reverb_porioerties);
+		), &FmodSystem::set_reverb_properties);
 		ClassDB::bind_method(D_METHOD("get_reverb_properties", "instance"), &FmodSystem::get_reverb_properties);
-		ClassDB::bind_method(D_METHOD("attach_channel_group_to_port", "channel_group", "prot_type", "port_index", "pass_thru"), &FmodSystem::attach_channel_group_to_port, DEFVAL(false), DEFVAL(FMOD_PORT_INDEX_NONE));
+		ClassDB::bind_method(D_METHOD("attach_channel_group_to_port", "channel_group", "prot_type", "port_index", "pass_thru"), &FmodSystem::attach_channel_group_to_port, DEFVAL(false), DEFVAL(-1));
 		ClassDB::bind_method(D_METHOD("detach_channel_group_from_port", "channel_group"), &FmodSystem::detach_channel_group_from_port);
 
 		ClassDB::bind_method(D_METHOD("get_record_num_drivers"), &FmodSystem::get_record_num_drivers);
@@ -924,7 +924,7 @@ namespace godot {
 		return channels;
 	}
 
-	Ref<FmodSound> FmodSystem::create_sound_from_file(const String p_path, unsigned int mode) {
+	Ref<FmodSound> FmodSystem::create_sound_from_file(const String p_path, unsigned int mode) const {
 		ERR_FAIL_COND_V(!system, nullptr);
 
 		// 检查是否为资源文件路径，如果是则使用资源文件加载 FmodSound
@@ -950,7 +950,7 @@ namespace godot {
 		return fmod_sound;
 	}
 
-	Ref<FmodSound> FmodSystem::create_sound_from_memory(const PackedByteArray& data, unsigned int mode) {
+	Ref<FmodSound> FmodSystem::create_sound_from_memory(const PackedByteArray& data, unsigned int mode) const {
 		ERR_FAIL_COND_V(!system || data.is_empty(), Ref<FmodSound>());
 
 		FMOD::Sound* sound_ptr = nullptr;
@@ -960,6 +960,10 @@ namespace godot {
 		FMOD_CREATESOUNDEXINFO exinfo = {};
 		exinfo.cbsize = sizeof(exinfo);
 		exinfo.length = sound->data.size();
+
+		if (!mode & FMOD_MODE_OPENMEMORY) {
+			mode |= FMOD_MODE_OPENMEMORY;
+		}
 
 		FMOD_ERR_CHECK_V(system->createSound(
 			(const char*)sound->data.ptr(),
@@ -972,7 +976,7 @@ namespace godot {
 		return sound;
 	}
 
-	Ref<FmodSound> FmodSystem::create_sound_from_res(const String p_path, unsigned int mode) {
+	Ref<FmodSound> FmodSystem::create_sound_from_res(const String p_path, unsigned int mode) const {
 		ERR_FAIL_COND_V(!system, Ref<FmodSound>());
 
 		// 从文件加载
@@ -984,10 +988,10 @@ namespace godot {
 		ERR_FAIL_COND_V(data.is_empty(), nullptr);
 
 		// 以内存模式创建 FMOD Sound（添加 OPENMEMORY 标志）
-		return create_sound_from_memory(data, mode | FMOD_MODE_OPENMEMORY);
+		return create_sound_from_memory(data, mode);
 	}
 
-	Ref<FmodSound> FmodSystem::create_stream_from_file(const String p_path, unsigned int mode) {
+	Ref<FmodSound> FmodSystem::create_stream_from_file(const String p_path, unsigned int mode) const {
 		ERR_FAIL_COND_V(!system, Ref<FmodSound>());
 
 		// 转换字符串为对象，防止野指针
@@ -1099,7 +1103,7 @@ namespace godot {
 		return reverb;
 	}
 
-	Ref<FmodChannel> FmodSystem::play_sound(Ref<FmodSound> sound, Ref<FmodChannelGroup> channel_group, const bool paused) {
+	Ref<FmodChannel> FmodSystem::play_sound(Ref<FmodSound> sound, Ref<FmodChannelGroup> channel_group, const bool paused) const {
 		ERR_FAIL_COND_V(
 			!system || sound.is_null() || !sound->sound || channel_group.is_null() || !channel_group->channel_group,
 			Ref<FmodChannel>()
@@ -1124,7 +1128,7 @@ namespace godot {
 		return channel;
 	}
 
-	Ref<FmodChannel> FmodSystem::play_dsp(Ref<FmodDSP> dsp, Ref<FmodChannelGroup> channel_group, const bool paused) {
+	Ref<FmodChannel> FmodSystem::play_dsp(Ref<FmodDSP> dsp, Ref<FmodChannelGroup> channel_group, const bool paused) const {
 		ERR_FAIL_COND_V(
 			!system || dsp.is_null() || !dsp->dsp || channel_group.is_null() || !channel_group->channel_group,
 			Ref<FmodChannel>()
@@ -1230,7 +1234,7 @@ namespace godot {
 		return result;
 	}
 
-	void FmodSystem::set_reverb_porioerties(
+	void FmodSystem::set_reverb_properties(
 		const int instance,
 		const float decay_time,
 		const float early_delay,

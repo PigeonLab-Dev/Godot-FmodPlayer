@@ -31,7 +31,12 @@ namespace godot {
 		void set_parent(Ref<FmodChannelGroup> p_parent);
 		Ref<FmodChannelGroup> get_bus() const;
 		Ref<FmodChannelGroup> get_parent() const;
-		const String& get_bus_name() const;
+		String get_bus_name() const;
+
+		// 效果器管理
+		void add_effect(Ref<FmodAudioEffect> effect, int index = 0);
+		void remove_effect(int index);
+		Ref<FmodAudioEffect> get_effect(int index) const;
 
 		void set_volume_db(const float volume_db);
 		float get_volume_db() const;
@@ -46,11 +51,6 @@ namespace godot {
 		void set_bypass(bool p_bypass);
 		bool is_bypass() const;
 		void sync_bypass();
-
-		// 效果器管理
-		void add_effect(Ref<FmodAudioEffect> effect, int index = 0);
-		void remove_effect(int index);
-		Ref<FmodAudioEffect> get_effect(int index) const;
 	};
 }
 
