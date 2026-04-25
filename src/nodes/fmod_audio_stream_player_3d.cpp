@@ -10,6 +10,15 @@
 
 namespace godot {
 	void FmodAudioStreamPlayer3D::_bind_methods() {
+		BIND_ENUM_CONSTANT(ATTENUATION_INVERSE_DISTANCE)
+		BIND_ENUM_CONSTANT(ATTENUATION_INVERSE_SQUARE_DISTANCE)
+		BIND_ENUM_CONSTANT(ATTENUATION_LOGARITHMIC)
+		BIND_ENUM_CONSTANT(ATTENUATION_DISABLED)
+
+		BIND_ENUM_CONSTANT(DOPPLER_TRACKING_DISABLED)
+		BIND_ENUM_CONSTANT(DOPPLER_TRACKING_IDLE_STEP)
+		BIND_ENUM_CONSTANT(DOPPLER_TRACKING_PHYSICS_STEP)
+
 		ClassDB::bind_method(D_METHOD("play", "from_position"), &FmodAudioStreamPlayer3D::play, DEFVAL(0.0));
 		ClassDB::bind_method(D_METHOD("seek", "to_position"), &FmodAudioStreamPlayer3D::seek);
 		ClassDB::bind_method(D_METHOD("get_playback_position"), &FmodAudioStreamPlayer3D::get_playback_position);

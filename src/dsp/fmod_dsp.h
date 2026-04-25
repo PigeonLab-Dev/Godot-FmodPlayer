@@ -3,7 +3,7 @@
 
 #include "core/fmod_system.h"
 #include <godot_cpp/classes/ref_counted.hpp>
-#include <fmod_dsp.h>  // FMOD DSP 头文件
+#include <fmod_dsp.h>
 
 namespace godot {
 	class FmodDSPConnection;
@@ -14,7 +14,6 @@ namespace godot {
 	private:
 		bool callbacks_set = false;                                                     // 记录是否设置了回调
 
-		// GDScript 回调
 		Callable _create_callback;
 		Callable _release_callback;
 		Callable _reset_callback;

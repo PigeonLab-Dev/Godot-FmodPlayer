@@ -105,6 +105,12 @@ namespace godot {
 			const float back_left,
 			const float back_right
 		);															// 为每个扬声器设置输出音量
+		float set_mix_matrix(
+			int outchannels,
+			int inchannels,
+			int inchannel_hop = 0
+		);															// 设置一个二维声像矩阵，将信号从输入通道 (列) 映射到输出扬声器 (行)
+		Dictionary get_mix_matrix() const;							// 获取一个二维声像矩阵，将信号从输入通道 (列) 映射到输出扬声器 (行)
 
 		// 过滤
 		void set_reverb_properties(

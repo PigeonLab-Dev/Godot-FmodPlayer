@@ -119,6 +119,25 @@ namespace godot {
 		BIND_ENUM_CONSTANT(FMOD_TIME_UNIT_MODROW);
 		BIND_ENUM_CONSTANT(FMOD_TIME_UNIT_MODPATTERN);
 
+		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_DEFAULT);
+		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_NOINTERP);
+		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_LINEAR);
+		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_CUBIC);
+		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_SPLINE);
+		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_MAX);
+		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_FORCEINT);
+
+		BIND_ENUM_CONSTANT(FMOD_PORT_TYPE_MUSIC);
+		BIND_ENUM_CONSTANT(FMOD_PORT_TYPE_COPYRIGHT_MUSIC);
+		BIND_ENUM_CONSTANT(FMOD_PORT_TYPE_VOICE);
+		BIND_ENUM_CONSTANT(FMOD_PORT_TYPE_CONTROLLER);
+		BIND_ENUM_CONSTANT(FMOD_PORT_TYPE_PERSONAL);
+		BIND_ENUM_CONSTANT(FMOD_PORT_TYPE_VIBRATION);
+		BIND_ENUM_CONSTANT(FMOD_PORT_TYPE_AUX);
+		BIND_ENUM_CONSTANT(FMOD_PORT_TYPE_PASSTHROUGH);
+		BIND_ENUM_CONSTANT(FMOD_PORT_TYPE_VR_VIBRATION);
+		BIND_ENUM_CONSTANT(FMOD_PORT_TYPE_MAX);
+
 		ClassDB::bind_method(D_METHOD("system_is_valid"), &FmodSystem::system_is_valid);
 		ClassDB::bind_method(D_METHOD("system_is_null"), &FmodSystem::system_is_null);
 
@@ -165,12 +184,6 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("set_3d_num_listeners", "num_listeners"), &FmodSystem::set_3d_num_listeners);
 		ClassDB::bind_method(D_METHOD("get_3d_num_listeners"), &FmodSystem::get_3d_num_listeners);
 		ADD_PROPERTY(PropertyInfo(Variant::INT, "3d_num_listeners"), "set_3d_num_listeners", "get_3d_num_listeners");
-
-		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_DEFAULT);
-		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_NOINTERP);
-		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_LINEAR);
-		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_CUBIC);
-		BIND_ENUM_CONSTANT(FMOD_RESAMPLER_SPLINE);
 
 		ClassDB::bind_method(D_METHOD("set_max_mpeg_codecs", "max_codecs"), &FmodSystem::set_max_mpeg_codecs);
 		ClassDB::bind_method(D_METHOD("get_max_mpeg_codecs"), &FmodSystem::get_max_mpeg_codecs);
@@ -494,7 +507,7 @@ namespace godot {
 		FMOD_ERR_CHECK_V(system->getSoftwareFormat(&samplerate, &fmod_speaker_mode, &numrawspeakers), Dictionary());
 		Dictionary result;
 		result["sample_rate"] = samplerate;
-		result["speaker_mode"] = static_cast<int>(fmod_speaker_mode);
+		result["speaker_mode"] = static_cast<FmodSpeakerMode>(fmod_speaker_mode);
 		result["num_raw_speakers"] = numrawspeakers;
 		return result;
 	}
@@ -510,7 +523,7 @@ namespace godot {
 		int numbuffers;
 		FMOD_ERR_CHECK_V(system->getDSPBufferSize(&bufferlength, &numbuffers), Dictionary());
 		Dictionary result;
-		result["buffer_length"] = (uint32_t)bufferlength;
+		result["buffer_length"] = static_cast<uint32_t>(bufferlength);
 		result["num_buffers"] = numbuffers;
 		return result;
 	}
@@ -532,7 +545,7 @@ namespace godot {
 		FMOD_ERR_CHECK_V(system->getStreamBufferSize(&filebuffersize, &filebuffersizetype), Dictionary());
 		Dictionary result;
 		result["file_buffer_size"] = static_cast<uint64_t>(filebuffersize);
-		result["file_buffer_size_type"] = static_cast<uint64_t>(filebuffersizetype);
+		result["file_buffer_size_type"] = static_cast<FmodTimeUnit>(filebuffersizetype);
 		return result;
 	}
 	
@@ -548,7 +561,7 @@ namespace godot {
 		ERR_FAIL_COND_V(!system, Dictionary());
 		FMOD_SPEAKER fmod_speaker = static_cast<FMOD_SPEAKER>(speaker);
 		float x = 0.0f, y = 0.0f;
-		bool active;
+		bool active = false;
 		FMOD_ERR_CHECK_V(system->getSpeakerPosition(fmod_speaker, &x, &y, &active), Dictionary());
 		Dictionary result;
 		result["x"] = x;
@@ -961,7 +974,7 @@ namespace godot {
 		exinfo.cbsize = sizeof(exinfo);
 		exinfo.length = sound->data.size();
 
-		if (!mode & FMOD_MODE_OPENMEMORY) {
+		if (!(mode & FMOD_MODE_OPENMEMORY)) {
 			mode |= FMOD_MODE_OPENMEMORY;
 		}
 

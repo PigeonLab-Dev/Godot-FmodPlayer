@@ -35,6 +35,7 @@ namespace godot {
 	}
 
 	void FmodAudioStream::set_audio_data(const PackedByteArray& p_data) {
+		invalidate_sound();
 		audio_data = p_data;
 		data_loaded = !audio_data.is_empty();
 	}

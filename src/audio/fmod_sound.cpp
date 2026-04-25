@@ -113,6 +113,8 @@ namespace godot {
 
 	FmodSound::~FmodSound() {
 		if (sound) {
+			sound->setUserData(nullptr);
+			sound->release();
 			sound = nullptr;
 		}
 	}
@@ -155,8 +157,8 @@ namespace godot {
 		int bits;
 		FMOD_ERR_CHECK_V(sound->getFormat(&type, &format, &channels, &bits), Dictionary());
 		Dictionary info;
-		info["type"] = (int)type;
-		info["format"] = (int)format;
+		info["type"] = static_cast<int>(type);
+		info["format"] = static_cast<int>(format);
 		info["channels"] = channels;
 		info["bits"] = bits;
 		return info;
@@ -291,7 +293,7 @@ namespace godot {
 		bool starving = false, diskbusy = false;
 		FMOD_ERR_CHECK_V(sound->getOpenState(&openstate, &percentbuffered, &starving, &diskbusy), Dictionary());
 		Dictionary state;
-		state["open_state"] = (int)openstate;
+		state["open_state"] = static_cast<int>(openstate);
 		state["percent_buffered"] = percentbuffered;
 		state["starving"] = starving;
 		state["disk_busy"] = diskbusy;
@@ -378,7 +380,7 @@ namespace godot {
 		char name[512] = { 0 };
 		unsigned int offset = 0;
 
-		FMOD_TIMEUNIT fmod_time_unit = static_cast<FMOD_TIMEUNIT>((int)time_unit);
+		FMOD_TIMEUNIT fmod_time_unit = static_cast<FMOD_TIMEUNIT>(time_unit);
 		FMOD_RESULT result = sound->getSyncPointInfo(point, name, 512, &offset, fmod_time_unit);
 		FMOD_ERR_CHECK_V(result, Dictionary());
 
