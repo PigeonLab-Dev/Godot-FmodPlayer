@@ -48,6 +48,8 @@ namespace godot {
 
 		// 获取 Sound（延迟创建）
 		Ref<FmodSound> get_sound();
+		bool preload();
+		bool is_preloaded() const;
 
 		// 音频信息
 		double get_length() const;

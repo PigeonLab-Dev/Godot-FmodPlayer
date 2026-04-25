@@ -155,6 +155,13 @@
 				If [param from_position] is negative, playback starts from the beginning.
 			</description>
 		</method>
+		<method name="preload_stream">
+			<return type="bool" />
+			<description>
+				Preloads the assigned stream by creating its internal [FmodSound] before playback starts.
+				This reduces first-play latency when the stream is later played.
+			</description>
+		</method>
 		<method name="seek">
 			<return type="void" />
 			<param index="0" name="to_position" type="float" />
@@ -281,6 +288,19 @@
 				Pauses or resumes playback without changing position.
 			</description>
 		</method>
+		<method name="set_preload_on_set_stream">
+			<return type="void" />
+			<param index="0" name="enable" type="bool" />
+			<description>
+				If enabled, assigning [member stream] immediately preloads it.
+			</description>
+		</method>
+		<method name="is_preload_on_set_stream_enabled" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if streams are preloaded as soon as they are assigned.
+			</description>
+		</method>
 		<method name="set_unit_size">
 			<return type="void" />
 			<param index="0" name="size" type="float" />
@@ -343,6 +363,9 @@
 		</member>
 		<member name="playing" type="bool" setter="set_playing" getter="is_playing" default="false">
 			Current playback state. Can be set to start/stop playback.
+		</member>
+		<member name="preload_on_set_stream" type="bool" setter="set_preload_on_set_stream" getter="is_preload_on_set_stream_enabled" default="false">
+			If [code]true[/code], assigning a stream creates its internal [FmodSound] immediately instead of waiting for the first playback.
 		</member>
 		<member name="stream" type="FmodAudioStream" setter="set_stream" getter="get_stream">
 			The [FmodAudioStream] resource to play.

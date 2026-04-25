@@ -73,6 +73,8 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("set_pan", "pan"), &FmodChannelControl::set_pan);
 		ClassDB::bind_method(D_METHOD("set_mix_levels_input", "levels"), &FmodChannelControl::set_mix_levels_input);
 		ClassDB::bind_method(D_METHOD("set_mix_levels_output", "front_left", "front_right", "center", "lfe", "surround_left", "surround_right", "back_left", "back_right"), &FmodChannelControl::set_mix_levels_output);
+		ClassDB::bind_method(D_METHOD("set_mix_matrix", "matrix", "outchannels", "inchannels", "inchannel_hop"), &FmodChannelControl::set_mix_matrix, DEFVAL(0));
+		ClassDB::bind_method(D_METHOD("get_mix_matrix"), &FmodChannelControl::get_mix_matrix);
 
 		ClassDB::bind_method(D_METHOD("set_reverb_properties", "instance", "wet"), &FmodChannelControl::set_reverb_properties);
 		ClassDB::bind_method(D_METHOD("get_reverb_properties", "instance"), &FmodChannelControl::get_reverb_properties);
@@ -453,6 +455,65 @@ namespace godot {
 			back_left,
 			back_right
 		));
+	}
+
+	void FmodChannelControl::set_mix_matrix(
+		const PackedFloat32Array& matrix,
+		const int outchannels,
+		const int inchannels,
+		const int inchannel_hop
+	) {
+		ERR_FAIL_COND(!channel_control);
+		ERR_FAIL_COND_MSG(matrix.is_empty(), "Matrix data is empty");
+		ERR_FAIL_COND_MSG(outchannels <= 0, "outchannels must be > 0");
+		ERR_FAIL_COND_MSG(inchannels <= 0, "inchannels must be > 0");
+		ERR_FAIL_COND_MSG(inchannel_hop < 0, "inchannel_hop must be >= 0");
+		ERR_FAIL_COND_MSG(inchannel_hop > 0 && inchannel_hop < inchannels, "inchannel_hop must be 0 or >= inchannels");
+
+		const int effective_hop = inchannel_hop > 0 ? inchannel_hop : inchannels;
+		const int expected_size = (outchannels - 1) * effective_hop + inchannels;
+		ERR_FAIL_COND_MSG(matrix.size() < expected_size,
+			vformat("Matrix size (%d) is smaller than expected (%d)", matrix.size(), expected_size));
+
+		FMOD_ERR_CHECK(channel_control->setMixMatrix(
+			const_cast<float*>(matrix.ptr()),
+			outchannels,
+			inchannels,
+			inchannel_hop
+		));
+	}
+
+	Dictionary FmodChannelControl::get_mix_matrix() const {
+		ERR_FAIL_COND_V(!channel_control, Dictionary());
+
+		int outchannels = FMOD_MAX_CHANNEL_WIDTH;
+		int inchannels = FMOD_MAX_CHANNEL_WIDTH;
+		const int inchannel_hop = FMOD_MAX_CHANNEL_WIDTH;
+
+		PackedFloat32Array buffer;
+		buffer.resize(outchannels * inchannel_hop);
+
+		FMOD_ERR_CHECK_V(channel_control->getMixMatrix(
+			buffer.ptrw(),
+			&outchannels,
+			&inchannels,
+			inchannel_hop
+		), Dictionary());
+
+		PackedFloat32Array matrix;
+		matrix.resize(outchannels * inchannels);
+		for (int out = 0; out < outchannels; out++) {
+			for (int in = 0; in < inchannels; in++) {
+				matrix[out * inchannels + in] = buffer[out * inchannel_hop + in];
+			}
+		}
+
+		Dictionary result;
+		result["matrix"] = matrix;
+		result["outchannels"] = outchannels;
+		result["inchannels"] = inchannels;
+		result["inchannel_hop"] = inchannels;
+		return result;
 	}
 
 	void FmodChannelControl::set_reverb_properties(const int instance, const float wet) {

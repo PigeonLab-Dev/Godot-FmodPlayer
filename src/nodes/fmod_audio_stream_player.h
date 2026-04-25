@@ -2,7 +2,7 @@
 #define FMOD_AUDIO_STREAM_PLAYER_H
 
 #include "audio/fmod_audio_stream.h"
-#include "playback/fmod_channel_group.h"
+#include "nodes/fmod_audio_stream_player_internal.h"
 #include <godot_cpp/classes/node.hpp>
 
 namespace godot {
@@ -10,11 +10,8 @@ namespace godot {
 		GDCLASS(FmodAudioStreamPlayer, Node)
 
 	private:
-		Ref<FmodChannel> internal_channel = nullptr;
-		Ref<FmodChannelGroup> internal_channel_group = nullptr;
-
-		void _create_internal_channel(Ref<FmodAudioStream> stream);
-		void _on_internal_channel_ended();
+		FmodAudioStreamPlayerInternal* internal_player = nullptr;
+		void _on_internal_player_finished();
 
 	protected:
 		static void _bind_methods();
@@ -25,16 +22,10 @@ namespace godot {
 		
 		void _notification(int p_what);
 
-		Ref<FmodAudioStream> stream;
-		bool playing = false;
-		bool stream_paused = false;
-		float volume_db = 0.0;
-		float pitch = 1.0;
-		bool auto_play = false;
-		StringName bus;
-
 		void set_stream(Ref<FmodAudioStream> new_stream);
 		Ref<FmodAudioStream> get_stream() const;
+
+		bool preload_stream();
 
 		void play(const float from_position = 0.0);
 		void seek(const float to_position);
@@ -56,6 +47,9 @@ namespace godot {
 
 		void set_auto_play(const bool enable);
 		bool is_autoplay_enabled() const;
+
+		void set_preload_on_set_stream(const bool enable);
+		bool is_preload_on_set_stream_enabled() const;
 
 		void set_bus(const StringName& p_bus);
 		StringName get_bus() const;

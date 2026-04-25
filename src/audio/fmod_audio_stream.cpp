@@ -19,6 +19,8 @@ namespace godot {
 		ADD_PROPERTY(PropertyInfo(Variant::INT, "mode_flags", PROPERTY_HINT_FLAGS, "Stream,Sample,Loop,Loop Bidi"), "set_mode_flags", "get_mode_flags");
 
 		ClassDB::bind_method(D_METHOD("get_sound"), &FmodAudioStream::get_sound);
+		ClassDB::bind_method(D_METHOD("preload"), &FmodAudioStream::preload);
+		ClassDB::bind_method(D_METHOD("is_preloaded"), &FmodAudioStream::is_preloaded);
 		ClassDB::bind_method(D_METHOD("get_length"), &FmodAudioStream::get_length);
 		ClassDB::bind_method(D_METHOD("is_data_loaded"), &FmodAudioStream::is_data_loaded);
 		ClassDB::bind_method(D_METHOD("clear"), &FmodAudioStream::clear);
@@ -46,10 +48,7 @@ namespace godot {
 
 	void FmodAudioStream::set_mode_flags(int p_flags) {
 		create_mode_flags = p_flags;
-		// 清理现有 sound，下次 get_sound() 会使用新标志重新创建
-		if (sound.is_valid()) {
-			sound.unref();
-		}
+		invalidate_sound();
 	}
 
 	int FmodAudioStream::get_mode_flags() const {
@@ -57,11 +56,19 @@ namespace godot {
 	}
 
 	void FmodAudioStream::add_mode_flag(CreateMode p_flag) {
-		create_mode_flags |= p_flag;
+		unsigned int new_flags = create_mode_flags | p_flag;
+		if (new_flags != create_mode_flags) {
+			create_mode_flags = new_flags;
+			invalidate_sound();
+		}
 	}
 
 	void FmodAudioStream::remove_mode_flag(CreateMode p_flag) {
-		create_mode_flags &= ~p_flag;
+		unsigned int new_flags = create_mode_flags & ~p_flag;
+		if (new_flags != create_mode_flags) {
+			create_mode_flags = new_flags;
+			invalidate_sound();
+		}
 	}
 
 	bool FmodAudioStream::has_mode_flag(CreateMode p_flag) const {
@@ -117,6 +124,14 @@ namespace godot {
 		}
 
 		return sound;
+	}
+
+	bool FmodAudioStream::preload() {
+		return get_sound().is_valid();
+	}
+
+	bool FmodAudioStream::is_preloaded() const {
+		return sound.is_valid();
 	}
 
 	double FmodAudioStream::get_length() const {

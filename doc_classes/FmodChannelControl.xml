@@ -481,6 +481,23 @@
 				Allows custom routing to specific speaker outputs.
 			</description>
 		</method>
+		<method name="set_mix_matrix">
+			<return type="void" />
+			<param index="0" name="matrix" type="PackedFloat32Array" />
+			<param index="1" name="outchannels" type="int" />
+			<param index="2" name="inchannels" type="int" />
+			<param index="3" name="inchannel_hop" type="int" default="0" />
+			<description>
+				Sets a custom mix matrix that maps input channels (columns) to output speaker channels (rows).
+				The matrix is row-major. If [param inchannel_hop] is [code]0[/code], each row is assumed to contain [param inchannels] values.
+			</description>
+		</method>
+		<method name="get_mix_matrix" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns the current final mix matrix as a Dictionary with [code]matrix[/code], [code]outchannels[/code], [code]inchannels[/code], and [code]inchannel_hop[/code].
+			</description>
+		</method>
 	</methods>
 	<members>
 		<member name="gain" type="float" setter="set_low_pass_gain" getter="get_low_pass_gain" default="1.0">

@@ -54,6 +54,20 @@
 				Returns an empty reference if the file cannot be opened or read.
 			</description>
 		</method>
+		<method name="preload">
+			<return type="bool" />
+			<description>
+				Creates the internal [FmodSound] immediately using the current [member mode_flags].
+				Use this before playback to move FMOD sound creation and stream prebuffering out of the first [method FmodAudioStreamPlayer.play] call.
+				Returns [code]true[/code] if the sound is ready.
+			</description>
+		</method>
+		<method name="is_preloaded" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if the internal [FmodSound] has already been created.
+			</description>
+		</method>
 	</methods>
 	<members>
 		<member name="audio_data" type="PackedByteArray" setter="set_audio_data" getter="get_audio_data" default="PackedByteArray()">

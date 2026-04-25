@@ -3,8 +3,8 @@
 
 #include "audio/fmod_audio_stream.h"
 #include "core/fmod_server.h"
+#include "nodes/fmod_audio_stream_player_internal.h"
 #include "playback/fmod_channel.h"
-#include "playback/fmod_channel_group.h"
 #include <godot_cpp/classes/camera2d.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/node2d.hpp>
@@ -22,16 +22,7 @@ namespace godot {
 		GDCLASS(FmodAudioStreamPlayer2D, Node2D)
 
 	private:
-		Ref<FmodChannel> internal_channel = nullptr;
-		Ref<FmodChannelGroup> internal_channel_group = nullptr;
-
-		Ref<FmodAudioStream> stream;
-		bool playing = false;
-		bool stream_paused = false;
-		float volume_db = 0.0f;
-		float pitch = 1.0f;
-		bool auto_play = false;
-		StringName bus;
+		FmodAudioStreamPlayerInternal* internal_player = nullptr;
 
 		float max_distance = 2000.0f;
 		float attenuation = 1.0f;
@@ -44,8 +35,7 @@ namespace godot {
 		bool force_update_panning = false;
 		Vector2 last_position;
 
-		void _create_internal_channel(Ref<FmodAudioStream> stream);
-		void _on_internal_channel_ended();
+		void _on_internal_player_finished();
 		void _update_panning();
 
 		static void _listener_changed_callback(void *self) {
@@ -63,6 +53,8 @@ namespace godot {
 
 		void set_stream(Ref<FmodAudioStream> new_stream);
 		Ref<FmodAudioStream> get_stream() const;
+
+		bool preload_stream();
 
 		void play(const float from_position = 0.0f);
 		void seek(const float to_position);
@@ -87,6 +79,9 @@ namespace godot {
 
 		void set_autoplay(const bool enable);
 		bool is_autoplay_enabled() const;
+
+		void set_preload_on_set_stream(const bool enable);
+		bool is_preload_on_set_stream_enabled() const;
 
 		void set_max_distance(float p_pixels);
 		float get_max_distance() const;
