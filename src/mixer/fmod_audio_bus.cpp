@@ -9,9 +9,11 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_bus"), &FmodAudioBus::get_bus);
 		ClassDB::bind_method(D_METHOD("get_parent"), &FmodAudioBus::get_parent);
 		ClassDB::bind_method(D_METHOD("get_bus_name"), &FmodAudioBus::get_bus_name);
+		ClassDB::bind_method(D_METHOD("release"), &FmodAudioBus::release);
 
 		ClassDB::bind_method(D_METHOD("add_effect", "effect", "index"), &FmodAudioBus::add_effect, DEFVAL(0));
 		ClassDB::bind_method(D_METHOD("remove_effect", "index"), &FmodAudioBus::remove_effect);
+		ClassDB::bind_method(D_METHOD("get_effect_count"), &FmodAudioBus::get_effect_count);
 		ClassDB::bind_method(D_METHOD("get_effect", "index"), &FmodAudioBus::get_effect);
 
 		ClassDB::bind_method(D_METHOD("set_volume_db", "volume_db"), &FmodAudioBus::set_volume_db);
@@ -84,11 +86,23 @@ namespace godot {
 		return bus_name;
 	}
 
+	void FmodAudioBus::release() {
+		clear_effects();
+
+		if (bus.is_valid() && bus_name != "Master") {
+			bus->release();
+		}
+
+		bus.unref();
+		parent.unref();
+	}
+
 	void FmodAudioBus::add_effect(Ref<FmodAudioEffect> effect, int index) {
 		ERR_FAIL_COND(bus.is_null());
 		ERR_FAIL_COND_MSG(effect.is_null(), "Effect is null");
 
-		audio_effects.append(effect);
+		index = CLAMP(index, 0, audio_effects.size());
+		audio_effects.insert(index, effect);
 		effect->apply_to(bus);
 
 		// 如果当前总线为 bypass，立即禁用新添加的效果器
@@ -99,7 +113,7 @@ namespace godot {
 
 	void FmodAudioBus::remove_effect(int index) {
 		ERR_FAIL_COND(bus.is_null());
-		ERR_FAIL_COND_MSG(index < 0 || index > audio_effects.size(), "Index out of bounds");
+		ERR_FAIL_COND_MSG(index < 0 || index >= audio_effects.size(), "Index out of bounds");
 		Ref<FmodAudioEffect> effect = audio_effects[index];
 		if (effect.is_valid()) {
 			effect->remove_from_bus(bus);
@@ -107,9 +121,25 @@ namespace godot {
 		audio_effects.remove_at(index);
 	}
 
+	void FmodAudioBus::clear_effects() {
+		if (bus.is_valid()) {
+			for (int i = 0; i < audio_effects.size(); i++) {
+				Ref<FmodAudioEffect> effect = audio_effects[i];
+				if (effect.is_valid()) {
+					effect->remove_from_bus(bus);
+				}
+			}
+		}
+		audio_effects.clear();
+	}
+
+	int FmodAudioBus::get_effect_count() const {
+		return audio_effects.size();
+	}
+
 	Ref<FmodAudioEffect> FmodAudioBus::get_effect(int index) const {
 		ERR_FAIL_COND_V(bus.is_null(), Ref<FmodAudioEffect>());
-		ERR_FAIL_COND_V_MSG(index < 0 || index > audio_effects.size(), Ref<FmodAudioEffect>(), "Index out of bounds");
+		ERR_FAIL_COND_V_MSG(index < 0 || index >= audio_effects.size(), Ref<FmodAudioEffect>(), "Index out of bounds");
 		return audio_effects.get(index);
 	}
 

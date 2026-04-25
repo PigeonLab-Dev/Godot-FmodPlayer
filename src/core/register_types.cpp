@@ -53,48 +53,85 @@ using namespace godot;
 
 static FmodServer* fmod_server_instance = nullptr;
 
+static void add_fmod_project_setting(
+	const String& p_name,
+	const Variant& p_default_value,
+	Variant::Type p_type,
+	bool p_as_basic,
+	bool p_restart_if_changed,
+	int p_hint = PROPERTY_HINT_NONE,
+	const String& p_hint_string = String()
+) {
+	ProjectSettings* settings = ProjectSettings::get_singleton();
+	ERR_FAIL_COND(!settings);
+
+	if (!settings->has_setting(p_name)) {
+		settings->set_setting(p_name, p_default_value);
+	}
+	settings->set_initial_value(p_name, p_default_value);
+	settings->set_as_basic(p_name, p_as_basic);
+	settings->set_restart_if_changed(p_name, p_restart_if_changed);
+
+	Dictionary property_info;
+	property_info["name"] = p_name;
+	property_info["type"] = p_type;
+	if (p_hint != PROPERTY_HINT_NONE) {
+		property_info["hint"] = p_hint;
+		property_info["hint_string"] = p_hint_string;
+	}
+	settings->add_property_info(property_info);
+}
+
 void initialize_fmod_player_module(ModuleInitializationLevel p_level) {
 	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
-		ProjectSettings* settings = ProjectSettings::get_singleton();
-		
-#define ADD_SETTING_PROPERTY_INFO(m_name, m_value, m_initial_value, m_as_basic, m_restart_if_changed, m_type)	\
-	if (!settings->has_setting(m_name)) {																		\
-		settings->set_setting(m_name, m_value);																	\
-	}																											\
-	settings->set_initial_value(m_name, m_initial_value);														\
-	settings->set_as_basic(m_name, m_as_basic);																	\
-	settings->set_restart_if_changed(m_name, m_restart_if_changed);												\
-	{																											\
-		Dictionary _property_info;																				\
-		_property_info["name"] = m_name;																		\
-		_property_info["type"] = m_type;																		\
-		settings->add_property_info(_property_info);															\
-	}
 
-		// FMOD Profile 高级设置 - 仅在编辑器中初始化时启用 FMOD Profile
-		ADD_SETTING_PROPERTY_INFO("audio/fmod/enable_profile", true, true, true, true, Variant::BOOL)
-
-		// FMOD Network Proxy 高级设置 - 仅在编辑器中初始化时启用 FMOD 网络代理
-		ADD_SETTING_PROPERTY_INFO("audio/fmod/network_proxy", "", "", true, true, Variant::STRING)
-
-		// FMOD 启动横幅显示设置 - 控制初始化时是否打印 FMODPlayer ASCII 艺术字横幅
-		ADD_SETTING_PROPERTY_INFO("audio/fmod/show_startup_banner", true, true, true, false, Variant::BOOL)
-
-		// FMOD System 最大通道数高级设置 - 初始化时指定主系统的最大通道数
-		if (!settings->has_setting("audio/fmod/max_channels")) {
-			settings->set_setting("audio/fmod/max_channels", 32);
-		}
-		settings->set_initial_value("audio/fmod/max_channels", 32);
-		settings->set_as_basic("audio/fmod/max_channels", true);
-		settings->set_restart_if_changed("audio/fmod/max_channels", true);
-		Dictionary property_info_max_channels;
-		property_info_max_channels["name"] = "audio/fmod/max_channels";
-		property_info_max_channels["type"] = Variant::INT;
-		property_info_max_channels["hint"] = PROPERTY_HINT_RANGE;
-		property_info_max_channels["hint_string"] = "1,4095,1";
-		settings->add_property_info(property_info_max_channels);
-
-#undef ADD_SETTING_PROPERTY_INFO
+		add_fmod_project_setting("audio/fmod/show_startup_banner", true, Variant::BOOL, false, false);
+		add_fmod_project_setting("audio/fmod/max_channels", 32, Variant::INT, true, true, PROPERTY_HINT_RANGE, "1,4095,1");
+		add_fmod_project_setting("audio/fmod/software_channels", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,4095,1,or_greater");
+		add_fmod_project_setting("audio/fmod/output_type", FmodSystem::FMOD_OUTPUT_TYPE_AUTODETECT, Variant::INT, false, true, PROPERTY_HINT_ENUM, "Autodetect,Unknown,No Sound,WAV Writer,No Sound NRT,WAV Writer NRT,WASAPI,ASIO,PulseAudio,ALSA,CoreAudio,AudioTrack,OpenSL,AudioOut,Audio3D,WebAudio,NNAudio,WinSonic,AAudio,AudioWorklet,PHASE,OHAudio");
+		add_fmod_project_setting("audio/fmod/driver", -1, Variant::INT, false, true, PROPERTY_HINT_RANGE, "-1,128,1");
+		add_fmod_project_setting("audio/fmod/software_sample_rate", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,192000,1,or_greater");
+		add_fmod_project_setting("audio/fmod/speaker_mode", FmodSystem::FMOD_SPEAKER_MODE_DEFAULT, Variant::INT, false, true, PROPERTY_HINT_ENUM, "Default,Raw,Mono,Stereo,Quad,Surround,5.1,7.1,7.1.4");
+		add_fmod_project_setting("audio/fmod/num_raw_speakers", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,32,1");
+		add_fmod_project_setting("audio/fmod/dsp_buffer_size", 1024, Variant::INT, false, true, PROPERTY_HINT_RANGE, "64,8192,1,or_greater");
+		add_fmod_project_setting("audio/fmod/dsp_buffer_count", 4, Variant::INT, false, true, PROPERTY_HINT_RANGE, "2,16,1,or_greater");
+		add_fmod_project_setting("audio/fmod/stream_buffer_size", 16384, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,10485760,1,or_greater");
+		add_fmod_project_setting("audio/fmod/init_flags/stream_from_update", false, Variant::BOOL, false, true);
+		add_fmod_project_setting("audio/fmod/init_flags/mix_from_update", false, Variant::BOOL, false, true);
+		add_fmod_project_setting("audio/fmod/init_flags/3d_right_handed", false, Variant::BOOL, false, true);
+		add_fmod_project_setting("audio/fmod/init_flags/clip_output", false, Variant::BOOL, false, true);
+		add_fmod_project_setting("audio/fmod/init_flags/channel_lowpass", false, Variant::BOOL, false, true);
+		add_fmod_project_setting("audio/fmod/init_flags/channel_distance_filter", false, Variant::BOOL, false, true);
+		add_fmod_project_setting("audio/fmod/init_flags/vol0_becomes_virtual", false, Variant::BOOL, false, true);
+		add_fmod_project_setting("audio/fmod/init_flags/geometry_use_closest", false, Variant::BOOL, false, true);
+		add_fmod_project_setting("audio/fmod/init_flags/prefer_dolby_downmix", false, Variant::BOOL, false, true);
+		add_fmod_project_setting("audio/fmod/init_flags/thread_unsafe", false, Variant::BOOL, false, true);
+		add_fmod_project_setting("audio/fmod/init_flags/profile_meter_all", false, Variant::BOOL, false, true);
+		add_fmod_project_setting("audio/fmod/init_flags/memory_tracking", false, Variant::BOOL, false, true);
+		add_fmod_project_setting("audio/fmod/enable_profile", true, Variant::BOOL, true, true);
+		add_fmod_project_setting("audio/fmod/profile_port", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,65535,1");
+		add_fmod_project_setting("audio/fmod/network_proxy", "", Variant::STRING, true, true);
+		add_fmod_project_setting("audio/fmod/network_timeout", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,600000,1,or_greater");
+		add_fmod_project_setting("audio/fmod/3d/doppler_scale", 1.0, Variant::FLOAT, false, true, PROPERTY_HINT_RANGE, "0,10,0.01,or_greater");
+		add_fmod_project_setting("audio/fmod/3d/distance_factor", 1.0, Variant::FLOAT, false, true, PROPERTY_HINT_RANGE, "0.001,1000,0.001,or_greater");
+		add_fmod_project_setting("audio/fmod/3d/rolloff_scale", 1.0, Variant::FLOAT, false, true, PROPERTY_HINT_RANGE, "0,10,0.01,or_greater");
+		add_fmod_project_setting("audio/fmod/3d/num_listeners", 1, Variant::INT, false, true, PROPERTY_HINT_RANGE, "1,8,1");
+		add_fmod_project_setting("audio/fmod/3d/geometry_max_fade_time", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,10000,1,or_greater");
+		add_fmod_project_setting("audio/fmod/3d/distance_filter_center_freq", 0.0, Variant::FLOAT, false, true, PROPERTY_HINT_RANGE, "0,22000,1,or_greater");
+		add_fmod_project_setting("audio/fmod/advanced/default_decode_buffer_size", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,10000,1,or_greater");
+		add_fmod_project_setting("audio/fmod/advanced/dsp_buffer_pool_size", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,4096,1,or_greater");
+		add_fmod_project_setting("audio/fmod/advanced/resampler_method", FmodSystem::FMOD_RESAMPLER_DEFAULT, Variant::INT, false, true, PROPERTY_HINT_ENUM, "Default,No Interp,Linear,Cubic,Spline");
+		add_fmod_project_setting("audio/fmod/advanced/random_seed", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,2147483647,1,or_greater");
+		add_fmod_project_setting("audio/fmod/advanced/max_convolution_threads", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,256,1,or_greater");
+		add_fmod_project_setting("audio/fmod/advanced/max_spatial_objects", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,1024,1,or_greater");
+		add_fmod_project_setting("audio/fmod/advanced/vol0_virtual_vol", 0.0, Variant::FLOAT, false, true, PROPERTY_HINT_RANGE, "0,1,0.001");
+		add_fmod_project_setting("audio/fmod/advanced/max_mpeg_codecs", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,4096,1,or_greater");
+		add_fmod_project_setting("audio/fmod/advanced/max_adpcm_codecs", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,4096,1,or_greater");
+		add_fmod_project_setting("audio/fmod/advanced/max_xma_codecs", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,4096,1,or_greater");
+		add_fmod_project_setting("audio/fmod/advanced/max_vorbis_codecs", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,4096,1,or_greater");
+		add_fmod_project_setting("audio/fmod/advanced/max_at9_codecs", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,4096,1,or_greater");
+		add_fmod_project_setting("audio/fmod/advanced/max_fadpcm_codecs", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,4096,1,or_greater");
+		add_fmod_project_setting("audio/fmod/advanced/max_opus_codecs", 0, Variant::INT, false, true, PROPERTY_HINT_RANGE, "0,4096,1,or_greater");
 
 		GDREGISTER_CLASS(AudioImporterFmod);
 		GDREGISTER_CLASS(FmodAudioPreviewInspector);
@@ -160,18 +197,12 @@ void initialize_fmod_player_module(ModuleInitializationLevel p_level) {
 }
 
 void uninitialize_fmod_player_module(ModuleInitializationLevel p_level) {
-	if (p_level != MODULE_INITIALIZATION_LEVEL_EDITOR) {
-		return;
-	}
-
-	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
-		return;
-	}
-
-	if (fmod_server_instance) {
-		memdelete(fmod_server_instance);
-		fmod_server_instance = nullptr;
-		Engine::get_singleton()->unregister_singleton("FmodServer");
+	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
+		if (fmod_server_instance) {
+			Engine::get_singleton()->unregister_singleton("FmodServer");
+			memdelete(fmod_server_instance);
+			fmod_server_instance = nullptr;
+		}
 	}
 }
 

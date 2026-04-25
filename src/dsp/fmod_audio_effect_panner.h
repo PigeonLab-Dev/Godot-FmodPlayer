@@ -4,13 +4,11 @@
 #include "dsp/fmod_audio_effect.h"
 
 namespace godot {
-	// 模拟 Godot 的 AudioEffectPanner
-	// 使用 FMOD 的 PAN DSP 实现
 	class FmodAudioEffectPanner : public FmodAudioEffect {
 		GDCLASS(FmodAudioEffectPanner, FmodAudioEffect)
 
 	private:
-		float pan = 0.0f;												// 声像位置，范围 -1.0（左）到 1.0（右），默认 0.0
+		float pan = 0.0f;
 
 	protected:
 		static void _bind_methods();

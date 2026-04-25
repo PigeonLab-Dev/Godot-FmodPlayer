@@ -552,6 +552,8 @@ namespace godot {
 
 	void FmodChannelControl::remove_dsp(Ref<FmodDSP> dsp) {
 		ERR_FAIL_COND(!channel_control);
+		ERR_FAIL_COND_MSG(dsp.is_null(), "DSP is null");
+		ERR_FAIL_COND_MSG(!dsp->dsp, "DSP internal pointer is null");
 		FMOD_ERR_CHECK(channel_control->removeDSP(dsp->dsp));
 	}
 

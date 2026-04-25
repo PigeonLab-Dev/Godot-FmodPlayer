@@ -20,10 +20,11 @@ namespace godot {
         FmodChannelControl();
         virtual ~FmodChannelControl();
 
+		// 有效性检查
 		bool channel_control_is_valid() const;						// 检查底层 FMOD::ChannelControl 对象是否有效
 		bool channel_control_is_null() const;						// 检查底层 FMOD::ChannelControl 对象是否无效
 
-        // 播放
+        // 播放控制
         bool is_playing() const;									// 检查播放状态
 		void stop();												// 停止该频道 (或嵌套 ChannelGroups 中的所有频道) 的播放
 
@@ -36,7 +37,7 @@ namespace godot {
 		void set_pitch(float pitch);								// 设置相对音高/播放速率
 		float get_pitch() const;									// 获取相对音高/播放速率
 
-		// 音量等级
+		// 音量控制
 		float get_audibility() const;								// 根据所有影响最终输出音量的衰减因子计算出可听度
 
 		void set_volume_db(const float volume);						// 设置音量

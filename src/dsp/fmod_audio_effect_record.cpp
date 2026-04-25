@@ -3,11 +3,230 @@
 #include "core/fmod_system.h"
 #include "playback/fmod_channel_group.h"
 #include <godot_cpp/core/class_db.hpp>
-#include <godot_cpp/classes/audio_server.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
+#include <atomic>
 #include <cstring>
+#include <mutex>
+#include <new>
+#include <vector>
 
 namespace godot {
+	static constexpr uint32_t RECORD_DSP_USERDATA_MAGIC = 0x52454344;
+
+	struct FmodAudioEffectRecordSharedState {
+		std::atomic<bool> recording_active{ false };
+		std::vector<float> recording_buffer;
+		mutable std::mutex recording_mutex;
+		int buffer_size = 0;
+		int max_buffer_size = 0;
+		std::atomic<int> sample_rate{ 48000 };
+		int recording_channels = 2;
+	};
+
+	struct RecordDSPUserData {
+		uint32_t magic = RECORD_DSP_USERDATA_MAGIC;
+		std::shared_ptr<FmodAudioEffectRecordSharedState> record_state;
+	};
+
+	static FmodAudioEffectRecordSharedState* _get_record_state_from_dsp(FMOD_DSP_STATE* dsp_state) {
+		if (!dsp_state || !dsp_state->plugindata) {
+			return nullptr;
+		}
+
+		RecordDSPUserData* userdata = static_cast<RecordDSPUserData*>(dsp_state->plugindata);
+		if (userdata->magic != RECORD_DSP_USERDATA_MAGIC) {
+			return nullptr;
+		}
+
+		return userdata->record_state.get();
+	}
+
+	static FMOD_RESULT _record_passthrough(float* inbuffer, float* outbuffer, unsigned int length, int inchannels, int* outchannels) {
+		if (!outbuffer || !outchannels || *outchannels <= 0) {
+			return FMOD_ERR_INVALID_PARAM;
+		}
+
+		const int output_channels = *outchannels;
+		const size_t output_sample_count = static_cast<size_t>(length) * static_cast<size_t>(output_channels);
+
+		if (inbuffer && inchannels > 0) {
+			if (inchannels == output_channels) {
+				memcpy(outbuffer, inbuffer, output_sample_count * sizeof(float));
+			} else {
+				for (unsigned int frame = 0; frame < length; frame++) {
+					for (int channel = 0; channel < output_channels; channel++) {
+						const int input_channel = MIN(channel, inchannels - 1);
+						outbuffer[frame * output_channels + channel] = inbuffer[frame * inchannels + input_channel];
+					}
+				}
+			}
+		} else {
+			memset(outbuffer, 0, output_sample_count * sizeof(float));
+		}
+
+		return FMOD_OK;
+	}
+
+	static void _record_add_samples(FmodAudioEffectRecordSharedState* p_state, const float* buffer, unsigned int length, int channels) {
+		if (!p_state || !buffer || !p_state->recording_active.load()) {
+			return;
+		}
+
+		std::lock_guard<std::mutex> lock(p_state->recording_mutex);
+
+		if (p_state->recording_buffer.empty() || p_state->buffer_size >= p_state->max_buffer_size) {
+			return;
+		}
+
+		if (p_state->buffer_size == 0) {
+			p_state->recording_channels = channels >= 2 ? 2 : 1;
+		}
+
+		if (channels == 1) {
+			for (unsigned int i = 0; i < length && p_state->buffer_size < p_state->max_buffer_size; i++) {
+				p_state->recording_buffer[static_cast<size_t>(p_state->buffer_size++)] = buffer[i];
+			}
+		} else if (channels >= 2) {
+			for (unsigned int i = 0; i < length && p_state->buffer_size + 1 < p_state->max_buffer_size; i++) {
+				p_state->recording_buffer[static_cast<size_t>(p_state->buffer_size++)] = buffer[i * channels];
+				p_state->recording_buffer[static_cast<size_t>(p_state->buffer_size++)] = buffer[i * channels + 1];
+			}
+		}
+	}
+
+	static FMOD_RESULT _record_dsp_read(FmodAudioEffectRecordSharedState* p_state, FMOD_DSP_STATE* dsp_state, float* inbuffer, float* outbuffer, unsigned int length, int inchannels, int* outchannels) {
+		FMOD_RESULT result = _record_passthrough(inbuffer, outbuffer, length, inchannels, outchannels);
+		if (result != FMOD_OK) {
+			return result;
+		}
+
+		if (p_state && p_state->recording_active.load() && inbuffer && inchannels > 0) {
+			if (dsp_state && dsp_state->functions && dsp_state->functions->getsamplerate) {
+				int current_rate = 0;
+				if (dsp_state->functions->getsamplerate(dsp_state, &current_rate) == FMOD_OK && current_rate > 0) {
+					p_state->sample_rate.store(current_rate);
+				}
+			}
+			_record_add_samples(p_state, inbuffer, length, inchannels);
+		}
+
+		return FMOD_OK;
+	}
+
+	static FMOD_RESULT _record_dsp_process(FmodAudioEffectRecordSharedState* p_state,
+		FMOD_DSP_STATE* dsp_state,
+		unsigned int length,
+		const FMOD_DSP_BUFFER_ARRAY* inbufferarray,
+		FMOD_DSP_BUFFER_ARRAY* outbufferarray,
+		FMOD_DSP_PROCESS_OPERATION op) {
+
+		if (!inbufferarray || !outbufferarray ||
+			inbufferarray->numbuffers <= 0 || outbufferarray->numbuffers <= 0 ||
+			!inbufferarray->buffernumchannels || !outbufferarray->buffernumchannels ||
+			!inbufferarray->bufferchannelmask || !outbufferarray->bufferchannelmask) {
+			return FMOD_ERR_INVALID_PARAM;
+		}
+
+		if (op == FMOD_DSP_PROCESS_QUERY) {
+			outbufferarray->buffernumchannels[0] = inbufferarray->buffernumchannels[0];
+			outbufferarray->bufferchannelmask[0] = inbufferarray->bufferchannelmask[0];
+			outbufferarray->speakermode = inbufferarray->speakermode;
+			return FMOD_OK;
+		}
+
+		if (op != FMOD_DSP_PROCESS_PERFORM) {
+			return FMOD_OK;
+		}
+
+		if (!inbufferarray->buffers || !outbufferarray->buffers) {
+			return FMOD_ERR_INVALID_PARAM;
+		}
+
+		const int input_channels = inbufferarray->buffernumchannels[0];
+		int output_channels = outbufferarray->buffernumchannels[0];
+		const float* in_buffer = static_cast<const float*>(inbufferarray->buffers[0]);
+		float* out_buffer = static_cast<float*>(outbufferarray->buffers[0]);
+
+		if (!out_buffer || output_channels <= 0) {
+			return FMOD_ERR_INVALID_PARAM;
+		}
+
+		if (input_channels > 0 && in_buffer) {
+			if (input_channels == output_channels) {
+				memcpy(out_buffer, in_buffer, static_cast<size_t>(length) * static_cast<size_t>(output_channels) * sizeof(float));
+			} else {
+				for (unsigned int frame = 0; frame < length; frame++) {
+					for (int channel = 0; channel < output_channels; channel++) {
+						const int input_channel = MIN(channel, input_channels - 1);
+						out_buffer[frame * output_channels + channel] = in_buffer[frame * input_channels + input_channel];
+					}
+				}
+			}
+		} else {
+			memset(out_buffer, 0, static_cast<size_t>(length) * static_cast<size_t>(output_channels) * sizeof(float));
+			return FMOD_OK;
+		}
+
+		if (p_state && p_state->recording_active.load()) {
+			if (dsp_state && dsp_state->functions && dsp_state->functions->getsamplerate) {
+				int current_rate = 0;
+				if (dsp_state->functions->getsamplerate(dsp_state, &current_rate) == FMOD_OK && current_rate > 0) {
+					p_state->sample_rate.store(current_rate);
+				}
+			}
+			_record_add_samples(p_state, in_buffer, length, input_channels);
+		}
+
+		return FMOD_OK;
+	}
+
+	static FMOD_RESULT F_CALL record_dsp_create_callback(FMOD_DSP_STATE* dsp_state) {
+		if (!dsp_state) {
+			return FMOD_ERR_INVALID_PARAM;
+		}
+
+		void* userdata = nullptr;
+		if (dsp_state->functions && dsp_state->functions->getuserdata) {
+			dsp_state->functions->getuserdata(dsp_state, &userdata);
+		}
+
+		RecordDSPUserData* record_userdata = static_cast<RecordDSPUserData*>(userdata);
+		if (!record_userdata || record_userdata->magic != RECORD_DSP_USERDATA_MAGIC) {
+			dsp_state->plugindata = nullptr;
+			return FMOD_OK;
+		}
+
+		dsp_state->plugindata = record_userdata;
+		return FMOD_OK;
+	}
+
+	static FMOD_RESULT F_CALL record_dsp_release_callback(FMOD_DSP_STATE* dsp_state) {
+		if (dsp_state) {
+			RecordDSPUserData* userdata = static_cast<RecordDSPUserData*>(dsp_state->plugindata);
+			if (userdata && userdata->magic == RECORD_DSP_USERDATA_MAGIC) {
+				userdata->magic = 0;
+				delete userdata;
+			}
+			dsp_state->plugindata = nullptr;
+			dsp_state->instance = nullptr;
+		}
+		return FMOD_OK;
+	}
+
+	static FMOD_RESULT F_CALL record_dsp_read_callback(FMOD_DSP_STATE* dsp_state, float* inbuffer, float* outbuffer, unsigned int length, int inchannels, int* outchannels) {
+		return _record_dsp_read(_get_record_state_from_dsp(dsp_state), dsp_state, inbuffer, outbuffer, length, inchannels, outchannels);
+	}
+
+	static FMOD_RESULT F_CALL record_dsp_process_callback(FMOD_DSP_STATE* dsp_state,
+		unsigned int length,
+		const FMOD_DSP_BUFFER_ARRAY* inbufferarray,
+		FMOD_DSP_BUFFER_ARRAY* outbufferarray,
+		FMOD_BOOL inputsidle,
+		FMOD_DSP_PROCESS_OPERATION op) {
+
+		(void)inputsidle;
+		return _record_dsp_process(_get_record_state_from_dsp(dsp_state), dsp_state, length, inbufferarray, outbufferarray, op);
+	}
 
 	void FmodAudioEffectRecord::_bind_methods() {
 		BIND_ENUM_CONSTANT(FORMAT_8_BITS);
@@ -25,108 +244,37 @@ namespace godot {
 	}
 
 	FmodAudioEffectRecord::FmodAudioEffectRecord() {
+		record_state = std::make_shared<FmodAudioEffectRecordSharedState>();
 	}
 
 	FmodAudioEffectRecord::~FmodAudioEffectRecord() {
-		if (recording_active) {
-			_finish_recording();
+		if (record_state) {
+			record_state->recording_active.store(false);
 		}
+		remove_from_bus(bus);
+		record_state.reset();
 	}
 
 	void FmodAudioEffectRecord::apply_to(Ref<FmodChannelGroup> p_bus) {
 		ERR_FAIL_COND_MSG(p_bus.is_null(), "Invalid bus");
 
-		if (bus == p_bus && !dsp_chain.is_empty()) {
-			remove_from_bus(p_bus);
+		if (bus.is_valid()) {
+			remove_from_bus(bus);
 		}
 
 		bus = p_bus;
 
-		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+		Ref<FmodSystem> system = FmodServer::get_main_system();
 		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized");
 
-		// 创建自定义 DSP 用于录音
 		Ref<FmodDSP> record_dsp = create_custom_dsp(system);
-		if (!record_dsp.is_valid()) return;
+		if (!record_dsp.is_valid()) {
+			ERR_PRINT("FmodAudioEffectRecord: Failed to create custom DSP");
+			return;
+		}
 
-		bus->add_dsp(-1, record_dsp);
 		dsp_chain.push_back(record_dsp);
-
-		if (recording_active) {
-			_init_recording();
-		}
-	}
-
-	// 自定义 DSP 回调，专门用于 Record
-	static FMOD_RESULT F_CALL record_dsp_create_callback(FMOD_DSP_STATE* dsp_state) {
-		// 获取 userdata
-		void* userdata = nullptr;
-		if (dsp_state->functions && dsp_state->functions->getuserdata) {
-			dsp_state->functions->getuserdata(dsp_state, &userdata);
-		}
-		
-		// 分配自定义状态
-		godot::CustomDSPState* state = new godot::CustomDSPState();
-		if (userdata) {
-			state->effect = static_cast<godot::FmodAudioEffect*>(userdata);
-		}
-		dsp_state->instance = state;
-		
-		return FMOD_OK;
-	}
-	
-	static FMOD_RESULT F_CALL record_dsp_process_callback(
-		FMOD_DSP_STATE* dsp_state,
-		unsigned int length,
-		const FMOD_DSP_BUFFER_ARRAY* inbufferarray,
-		FMOD_DSP_BUFFER_ARRAY* outbufferarray,
-		FMOD_BOOL inputsidle,
-		FMOD_DSP_PROCESS_OPERATION op
-	) {
-		if (op == FMOD_DSP_PROCESS_QUERY) {
-			outbufferarray->buffernumchannels[0] = inbufferarray->buffernumchannels[0];
-			outbufferarray->bufferchannelmask[0] = inbufferarray->bufferchannelmask[0];
-			outbufferarray->speakermode = inbufferarray->speakermode;
-			return FMOD_OK;
-		}
-		
-		if (op != FMOD_DSP_PROCESS_PERFORM) {
-			return FMOD_OK;
-		}
-		
-		// 获取 effect 指针
-		if (!dsp_state->instance) {
-			// 没有状态，直接拷贝
-			int num_channels = inbufferarray->buffernumchannels[0];
-			memcpy(outbufferarray->buffers[0], inbufferarray->buffers[0], 
-				length * num_channels * sizeof(float));
-			return FMOD_OK;
-		}
-		
-		godot::CustomDSPState* state = static_cast<godot::CustomDSPState*>(dsp_state->instance);
-		if (state->effect) {
-			state->effect->_on_dsp_process(dsp_state, length, inbufferarray, outbufferarray, inputsidle, op);
-		} else {
-			// 直接拷贝
-			int num_channels = inbufferarray->buffernumchannels[0];
-			memcpy(outbufferarray->buffers[0], inbufferarray->buffers[0], 
-				length * num_channels * sizeof(float));
-		}
-		
-		return FMOD_OK;
-	}
-	
-	static FMOD_RESULT F_CALL record_dsp_release_callback(FMOD_DSP_STATE* dsp_state) {
-		if (dsp_state->instance) {
-			godot::CustomDSPState* state = static_cast<godot::CustomDSPState*>(dsp_state->instance);
-			if (state->effect) {
-				state->effect->_on_dsp_release(dsp_state);
-			} else {
-				delete state;
-			}
-			dsp_state->instance = nullptr;
-		}
-		return FMOD_OK;
+		bus->add_dsp(-1, record_dsp);
 	}
 
 	Ref<FmodDSP> FmodAudioEffectRecord::create_custom_dsp(Ref<FmodSystem> system) {
@@ -135,6 +283,34 @@ namespace godot {
 		FMOD::System* fmod_system = system->get_system();
 		ERR_FAIL_COND_V(!fmod_system, Ref<FmodDSP>());
 
+		FMOD_DSP_DESCRIPTION* base_desc = get_dsp_description();
+		ERR_FAIL_COND_V(!base_desc, Ref<FmodDSP>());
+
+		FMOD_DSP_DESCRIPTION desc;
+		memcpy(&desc, base_desc, sizeof(FMOD_DSP_DESCRIPTION));
+		if (!record_state) {
+			record_state = std::make_shared<FmodAudioEffectRecordSharedState>();
+		}
+
+		RecordDSPUserData* dsp_userdata = new RecordDSPUserData();
+		dsp_userdata->record_state = record_state;
+		desc.userdata = dsp_userdata;
+
+		FMOD::DSP* dsp_ptr = nullptr;
+		FMOD_RESULT result = fmod_system->createDSP(&desc, &dsp_ptr);
+		if (result != FMOD_OK || !dsp_ptr) {
+			delete dsp_userdata;
+			ERR_PRINT(vformat("Failed to create record DSP: %s", FMOD_ErrorString(result)));
+			return Ref<FmodDSP>();
+		}
+
+		Ref<FmodDSP> dsp;
+		dsp.instantiate();
+		dsp->setup(dsp_ptr);
+		return dsp;
+	}
+
+	FMOD_DSP_DESCRIPTION* FmodAudioEffectRecord::get_dsp_description() {
 		static FMOD_DSP_DESCRIPTION desc = {};
 		static bool initialized = false;
 
@@ -151,21 +327,7 @@ namespace godot {
 			initialized = true;
 		}
 
-		FMOD::DSP* dsp_ptr = nullptr;
-		FMOD_RESULT result = fmod_system->createDSP(&desc, &dsp_ptr);
-		if (result != FMOD_OK || !dsp_ptr) {
-			ERR_PRINT("Failed to create custom Record DSP");
-			return Ref<FmodDSP>();
-		}
-
-		Ref<FmodDSP> dsp;
-		dsp.instantiate();
-		// 直接设置 dsp 指针，不调用 setup，避免 setup 覆盖我们的回调
-		dsp->dsp = dsp_ptr;
-		// 设置 userdata 为 this（FmodAudioEffect*），回调需要这个来调用虚函数
-		dsp_ptr->setUserData(this);
-
-		return dsp;
+		return &desc;
 	}
 
 	void FmodAudioEffectRecord::_on_dsp_process(FMOD_DSP_STATE* dsp_state,
@@ -175,6 +337,13 @@ namespace godot {
 		FMOD_BOOL inputsidle,
 		FMOD_DSP_PROCESS_OPERATION op) {
 
+		if (!inbufferarray || !outbufferarray || inbufferarray->numbuffers <= 0 || outbufferarray->numbuffers <= 0 ||
+			!inbufferarray->buffernumchannels || !outbufferarray->buffernumchannels ||
+			!inbufferarray->bufferchannelmask || !outbufferarray->bufferchannelmask ||
+			!inbufferarray->buffers || !outbufferarray->buffers) {
+			return;
+		}
+
 		if (op == FMOD_DSP_PROCESS_QUERY) {
 			outbufferarray->buffernumchannels[0] = inbufferarray->buffernumchannels[0];
 			outbufferarray->bufferchannelmask[0] = inbufferarray->bufferchannelmask[0];
@@ -182,69 +351,85 @@ namespace godot {
 			return;
 		}
 
-		if (op == FMOD_DSP_PROCESS_PERFORM) {
-			int num_channels = inbufferarray->buffernumchannels[0];
-			const float* in_buffer = inbufferarray->buffers[0];
-			float* out_buffer = outbufferarray->buffers[0];
-
-			// 拷贝输入到输出（旁路）
-			memcpy(out_buffer, in_buffer, length * num_channels * sizeof(float));
-
-			// 如果正在录制，添加样本到缓冲区
-			if (recording_active) {
-				_add_samples(in_buffer, length, num_channels);
-			}
+		if (op != FMOD_DSP_PROCESS_PERFORM) {
+			return;
 		}
+
+		int num_channels = inbufferarray->buffernumchannels[0];
+		const float* in_buffer = static_cast<const float*>(inbufferarray->buffers[0]);
+		float* out_buffer = static_cast<float*>(outbufferarray->buffers[0]);
+
+		if (num_channels <= 0 || !out_buffer) {
+			return;
+		}
+
+		size_t sample_count = static_cast<size_t>(length) * static_cast<size_t>(num_channels);
+		if (in_buffer) {
+			memcpy(out_buffer, in_buffer, sample_count * sizeof(float));
+		} else {
+			memset(out_buffer, 0, sample_count * sizeof(float));
+			return;
+		}
+
+		std::shared_ptr<FmodAudioEffectRecordSharedState> state = record_state;
+		if (state && state->recording_active.load()) {
+			if (dsp_state && dsp_state->functions && dsp_state->functions->getsamplerate) {
+				int current_rate = 0;
+				if (dsp_state->functions->getsamplerate(dsp_state, &current_rate) == FMOD_OK && current_rate > 0) {
+					state->sample_rate.store(current_rate);
+				}
+			}
+			_record_add_samples(state.get(), in_buffer, length, num_channels);
+		}
+	}
+
+	FMOD_RESULT FmodAudioEffectRecord::_on_dsp_read(FMOD_DSP_STATE* dsp_state, float* inbuffer, float* outbuffer, unsigned int length, int inchannels, int* outchannels) {
+		return _record_dsp_read(record_state.get(), dsp_state, inbuffer, outbuffer, length, inchannels, outchannels);
 	}
 
 	void FmodAudioEffectRecord::_init_recording() {
-		recording_buffer.clear();
-		// 最大支持 5 分钟 48kHz 立体声
-		max_buffer_size = 48000 * 60 * 5 * 2;
-		buffer_size = 0;
+		if (!record_state) {
+			record_state = std::make_shared<FmodAudioEffectRecordSharedState>();
+		}
+
+		std::lock_guard<std::mutex> lock(record_state->recording_mutex);
+
+		record_state->sample_rate.store(48000);
+		record_state->recording_channels = 2;
+		record_state->max_buffer_size = record_state->sample_rate.load() * 60 * 5 * record_state->recording_channels;
+		record_state->buffer_size = 0;
+		record_state->recording_buffer.clear();
+		record_state->recording_buffer.resize(static_cast<size_t>(record_state->max_buffer_size));
 	}
 
 	void FmodAudioEffectRecord::_finish_recording() {
-		// 缓冲区数据保留，直到下次开始录制或调用 get_recording
+		// Keep the buffer available for get_recording().
 	}
 
 	void FmodAudioEffectRecord::_add_samples(const float* buffer, unsigned int length, int channels) {
-		if (!recording_active) return;
-
-		// 将多声道混合为单声道或立体声
-		if (channels == 1) {
-			// 单声道直接存储
-			for (unsigned int i = 0; i < length && buffer_size < max_buffer_size; i++) {
-				recording_buffer.push_back(buffer[i]);
-				buffer_size++;
-			}
-		} else if (channels >= 2) {
-			// 立体声，存储左右声道
-			for (unsigned int i = 0; i < length && buffer_size + 1 < max_buffer_size; i++) {
-				// 左声道
-				recording_buffer.push_back(buffer[i * channels]);
-				// 右声道
-				recording_buffer.push_back(buffer[i * channels + 1]);
-				buffer_size += 2;
-			}
-		}
+		_record_add_samples(record_state.get(), buffer, length, channels);
 	}
 
 	void FmodAudioEffectRecord::set_recording_active(bool p_record) {
-		if (recording_active == p_record) {
+		if (!record_state) {
+			record_state = std::make_shared<FmodAudioEffectRecordSharedState>();
+		}
+
+		if (record_state->recording_active.load() == p_record) {
 			return;
 		}
 
 		if (p_record) {
 			_init_recording();
+			record_state->recording_active.store(true);
 		} else {
+			record_state->recording_active.store(false);
 			_finish_recording();
 		}
-		recording_active = p_record;
 	}
 
 	bool FmodAudioEffectRecord::is_recording_active() const {
-		return recording_active;
+		return record_state && record_state->recording_active.load();
 	}
 
 	void FmodAudioEffectRecord::set_format(Format p_format) {
@@ -260,47 +445,53 @@ namespace godot {
 	}
 
 	Ref<AudioStreamWAV> FmodAudioEffectRecord::_create_wav_from_buffer() const {
-		if (recording_buffer.is_empty() || buffer_size == 0) {
-			return Ref<AudioStreamWAV>();
+		std::vector<float> samples;
+		int sample_count = 0;
+		int channels = 2;
+		int rate = 48000;
+
+		{
+			if (!record_state) {
+				return Ref<AudioStreamWAV>();
+			}
+
+			std::lock_guard<std::mutex> lock(record_state->recording_mutex);
+			if (record_state->recording_buffer.empty() || record_state->buffer_size <= 0) {
+				return Ref<AudioStreamWAV>();
+			}
+
+			sample_count = record_state->buffer_size;
+			channels = record_state->recording_channels;
+			rate = record_state->sample_rate.load();
+			samples.assign(record_state->recording_buffer.begin(), record_state->recording_buffer.begin() + sample_count);
 		}
 
 		Ref<AudioStreamWAV> wav;
 		wav.instantiate();
 
-		// 假设 48kHz 采样率
-		int sample_rate = 48000;
-		wav->set_mix_rate(sample_rate);
-		wav->set_format(static_cast<AudioStreamWAV::Format>(format));
+		wav->set_mix_rate(rate);
 		wav->set_loop_mode(AudioStreamWAV::LOOP_DISABLED);
-		wav->set_stereo(true);
+		wav->set_stereo(channels > 1);
 
 		PackedByteArray data;
 
 		switch (format) {
 			case FORMAT_8_BITS: {
-				data.resize(buffer_size);
-				for (int i = 0; i < buffer_size; i++) {
-					// float -1.0~1.0 转换为 8-bit 无符号 0~255，128 为中心点
-					int32_t sample = static_cast<int32_t>(CLAMP(recording_buffer[i] * 127.0f + 128.0f, 0.0f, 255.0f));
+				wav->set_format(AudioStreamWAV::FORMAT_8_BITS);
+				data.resize(sample_count);
+				for (int i = 0; i < sample_count; i++) {
+					int32_t sample = static_cast<int32_t>(CLAMP(samples[static_cast<size_t>(i)] * 127.0f + 128.0f, 0.0f, 255.0f));
 					data[i] = static_cast<uint8_t>(sample);
 				}
 				break;
 			}
-			case FORMAT_16_BITS: {
-				data.resize(buffer_size * 2);
-				for (int i = 0; i < buffer_size; i++) {
-					// float -1.0~1.0 转换为 16-bit
-					int16_t sample = static_cast<int16_t>(CLAMP(recording_buffer[i] * 32767.0f, -32768.0f, 32767.0f));
-					data[i * 2] = sample & 0xFF;
-					data[i * 2 + 1] = (sample >> 8) & 0xFF;
-				}
-				break;
-			}
+			case FORMAT_16_BITS:
 			case FORMAT_IMA_ADPCM: {
-				// IMA ADPCM 压缩需要专门的编码器，这里简化为 16-bit
-				data.resize(buffer_size * 2);
-				for (int i = 0; i < buffer_size; i++) {
-					int16_t sample = static_cast<int16_t>(CLAMP(recording_buffer[i] * 32767.0f, -32768.0f, 32767.0f));
+				// The captured buffer is PCM float data, so expose IMA requests as valid 16-bit WAV data.
+				wav->set_format(AudioStreamWAV::FORMAT_16_BITS);
+				data.resize(sample_count * 2);
+				for (int i = 0; i < sample_count; i++) {
+					int16_t sample = static_cast<int16_t>(CLAMP(samples[static_cast<size_t>(i)] * 32767.0f, -32768.0f, 32767.0f));
 					data[i * 2] = sample & 0xFF;
 					data[i * 2 + 1] = (sample >> 8) & 0xFF;
 				}

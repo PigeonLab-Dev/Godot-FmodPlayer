@@ -2,6 +2,7 @@
 #include "core/fmod_server.h"
 #include "core/fmod_system.h"
 #include "playback/fmod_channel_group.h"
+#include <fmod_dsp_effects.h>
 #include <godot_cpp/core/class_db.hpp>
 #include <cmath>
 
@@ -16,6 +17,27 @@ namespace godot {
 			case FmodAudioEffectSpectrumAnalyzer::FFT_SIZE_4096: return 4096;
 			default: return 1024;
 		}
+	}
+
+	static float _get_system_sample_rate() {
+		FmodServer* server = FmodServer::get_singleton();
+		if (!server) {
+			return 48000.0f;
+		}
+
+		Ref<FmodSystem> system = server->get_main_system();
+		if (system.is_null() || system->get_system() == nullptr) {
+			return 48000.0f;
+		}
+
+		int rate = 0;
+		FMOD_SPEAKERMODE speaker_mode = FMOD_SPEAKERMODE_DEFAULT;
+		int raw_speakers = 0;
+		if (system->get_system()->getSoftwareFormat(&rate, &speaker_mode, &raw_speakers) == FMOD_OK && rate > 0) {
+			return static_cast<float>(rate);
+		}
+
+		return 48000.0f;
 	}
 
 	void FmodAudioEffectSpectrumAnalyzer::_bind_methods() {
@@ -33,6 +55,10 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_buffer_length"), &FmodAudioEffectSpectrumAnalyzer::get_buffer_length);
 		ClassDB::bind_method(D_METHOD("set_fft_size", "fft_size"), &FmodAudioEffectSpectrumAnalyzer::set_fft_size);
 		ClassDB::bind_method(D_METHOD("get_fft_size"), &FmodAudioEffectSpectrumAnalyzer::get_fft_size);
+		ClassDB::bind_method(D_METHOD("update_spectrum"), &FmodAudioEffectSpectrumAnalyzer::update_spectrum);
+		ClassDB::bind_method(D_METHOD("get_bin_count"), &FmodAudioEffectSpectrumAnalyzer::get_bin_count);
+		ClassDB::bind_method(D_METHOD("get_rms"), &FmodAudioEffectSpectrumAnalyzer::get_rms);
+		ClassDB::bind_method(D_METHOD("get_centroid"), &FmodAudioEffectSpectrumAnalyzer::get_centroid);
 		ClassDB::bind_method(D_METHOD("get_magnitude_for_frequency_range", "begin", "end", "mode"), &FmodAudioEffectSpectrumAnalyzer::get_magnitude_for_frequency_range, DEFVAL(MAGNITUDE_MAX));
 
 		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "buffer_length", PROPERTY_HINT_RANGE, "0.1,10,0.1,suffix:s"), "set_buffer_length", "get_buffer_length");
@@ -53,41 +79,33 @@ namespace godot {
 		}
 
 		bus = p_bus;
+		sample_rate = _get_system_sample_rate();
 
 		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
 		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized");
 
-		// 创建 FFT DSP
-		Ref<FmodDSP> fft_dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_FFT);
-		if (!fft_dsp.is_valid()) return;
+		fft_dsp = system->create_dsp_by_type(FmodDSP::DSP_TYPE_FFT);
+		if (!fft_dsp.is_valid()) {
+			return;
+		}
 
-		// FMOD FFT DSP 参数：
-		// 0 = Size (int) - FFT 窗口大小: 128, 256, 512, 1024, 2048, 4096, 8192, 16384
-		// 1 = Type (int) - 窗口形状: 0=rect, 1=tri, 2=hamming, 3=hanning, 4=blackman, 5=blackman harris
-		// 2 = Band Start Freq (float) - 分析频段起始频率
-		// 3 = Band Stop Freq (float) - 分析频段截止频率
-		// 4 = Spectrum Data (data) - 频谱数据
-		// 5 = RMS (float) - 分析频段内的信号 RMS
-		// 6 = Centroid (float) - 频谱质心
-		// 7 = Immediate Mode (bool) - 立即渲染模式
-		// 8 = Downmix mode (int) - 0=不混音, 1=混音为单声道
-		// 9 = Channel (int) - 要分析的通道，-1=全部
-
-		// 设置 FFT 大小
-		fft_dsp->set_parameter_int(0, _fft_size_to_value(fft_size));
-
-		// 设置窗口类型为 Hanning (默认)
-		fft_dsp->set_parameter_int(1, 3);
-
-		// 分析全频段
-		fft_dsp->set_parameter_float(2, 0.0f);
-		fft_dsp->set_parameter_float(3, 22000.0f);
-
-		// 混音为单声道以获得更稳定的分析结果
-		fft_dsp->set_parameter_int(8, 1);
+		fft_dsp->set_parameter_int(FMOD_DSP_FFT_WINDOWSIZE, _fft_size_to_value(fft_size));
+		fft_dsp->set_parameter_int(FMOD_DSP_FFT_WINDOW, FMOD_DSP_FFT_WINDOW_HANNING);
+		fft_dsp->set_parameter_float(FMOD_DSP_FFT_BAND_START_FREQ, 0.0f);
+		fft_dsp->set_parameter_float(FMOD_DSP_FFT_BAND_STOP_FREQ, sample_rate * 0.5f);
+		fft_dsp->set_parameter_int(FMOD_DSP_FFT_DOWNMIX, FMOD_DSP_FFT_DOWNMIX_NONE);
+		fft_dsp->set_parameter_int(FMOD_DSP_FFT_CHANNEL, -1);
 
 		bus->add_dsp(-1, fft_dsp);
 		dsp_chain.push_back(fft_dsp);
+	}
+
+	void FmodAudioEffectSpectrumAnalyzer::remove_from_bus(Ref<FmodChannelGroup> p_bus) {
+		FmodAudioEffect::remove_from_bus(p_bus);
+		fft_dsp.unref();
+		spectrum_data.clear();
+		current_rms = 0.0f;
+		current_centroid = 0.0f;
 	}
 
 	void FmodAudioEffectSpectrumAnalyzer::set_buffer_length(float p_buffer_length) {
@@ -101,6 +119,9 @@ namespace godot {
 	void FmodAudioEffectSpectrumAnalyzer::set_fft_size(FFTSize p_fft_size) {
 		if (p_fft_size >= FFT_SIZE_256 && p_fft_size < FFT_SIZE_MAX) {
 			fft_size = p_fft_size;
+			if (fft_dsp.is_valid()) {
+				fft_dsp->set_parameter_int(FMOD_DSP_FFT_WINDOWSIZE, _fft_size_to_value(fft_size));
+			}
 		}
 	}
 
@@ -108,56 +129,111 @@ namespace godot {
 		return fft_size;
 	}
 
+	void FmodAudioEffectSpectrumAnalyzer::update_spectrum() {
+		if (fft_dsp.is_null() || fft_dsp->dsp == nullptr) {
+			return;
+		}
+
+		sample_rate = _get_system_sample_rate();
+
+		void* raw_fft_data = nullptr;
+		unsigned int raw_fft_data_length = 0;
+		FMOD_RESULT result = fft_dsp->dsp->getParameterData(FMOD_DSP_FFT_SPECTRUMDATA, &raw_fft_data, &raw_fft_data_length, nullptr, 0);
+		if (result != FMOD_OK || raw_fft_data == nullptr) {
+			return;
+		}
+
+		FMOD_DSP_PARAMETER_FFT* fft_data = static_cast<FMOD_DSP_PARAMETER_FFT*>(raw_fft_data);
+		if (fft_data->length <= 0 || fft_data->numchannels <= 0) {
+			return;
+		}
+
+		spectrum_data.resize(fft_data->length);
+		for (int i = 0; i < fft_data->length; i++) {
+			float left = (fft_data->spectrum[0] != nullptr) ? fft_data->spectrum[0][i] : 0.0f;
+			float right = left;
+
+			if (fft_data->numchannels > 1 && fft_data->spectrum[1] != nullptr) {
+				right = fft_data->spectrum[1][i];
+			}
+
+			spectrum_data.write[i] = Vector2(left, right);
+		}
+
+		float value = 0.0f;
+		if (fft_dsp->dsp->getParameterFloat(FMOD_DSP_FFT_RMS, &value, nullptr, 0) == FMOD_OK) {
+			current_rms = value;
+		}
+
+		if (fft_dsp->dsp->getParameterFloat(FMOD_DSP_FFT_SPECTRAL_CENTROID, &value, nullptr, 0) == FMOD_OK) {
+			current_centroid = value;
+		}
+	}
+
+	int FmodAudioEffectSpectrumAnalyzer::get_bin_count() const {
+		const_cast<FmodAudioEffectSpectrumAnalyzer*>(this)->update_spectrum();
+		return spectrum_data.size();
+	}
+
+	float FmodAudioEffectSpectrumAnalyzer::get_rms() const {
+		const_cast<FmodAudioEffectSpectrumAnalyzer*>(this)->update_spectrum();
+		return current_rms;
+	}
+
+	float FmodAudioEffectSpectrumAnalyzer::get_centroid() const {
+		const_cast<FmodAudioEffectSpectrumAnalyzer*>(this)->update_spectrum();
+		return current_centroid;
+	}
+
 	Vector2 FmodAudioEffectSpectrumAnalyzer::get_magnitude_for_frequency_range(float p_begin, float p_end, MagnitudeMode p_mode) const {
-		if (spectrum_data.is_empty() || p_begin >= p_end) {
+		if (p_begin > p_end) {
+			float temp = p_begin;
+			p_begin = p_end;
+			p_end = temp;
+		}
+
+		const_cast<FmodAudioEffectSpectrumAnalyzer*>(this)->update_spectrum();
+
+		if (spectrum_data.is_empty() || p_begin == p_end) {
 			return Vector2();
 		}
 
-		// 简单的线性插值查找频率对应的幅度
-		// 假设频谱数据是均匀分布的，从 0 到 sample_rate/2
-		// 这里使用简化的实现
-
-		float sample_rate = 48000.0f; // 假设默认采样率
-		float nyquist = sample_rate / 2.0f;
+		float nyquist = MAX(sample_rate * 0.5f, 1.0f);
 		int num_bins = spectrum_data.size();
 
-		if (num_bins <= 0) {
-			return Vector2();
-		}
-
-		// 计算频率对应的 bin 索引
-		int begin_bin = static_cast<int>((p_begin / nyquist) * num_bins);
-		int end_bin = static_cast<int>((p_end / nyquist) * num_bins);
+		int begin_bin = static_cast<int>(std::floor((MAX(p_begin, 0.0f) / nyquist) * num_bins));
+		int end_bin = static_cast<int>(std::ceil((MAX(p_end, 0.0f) / nyquist) * num_bins));
 
 		begin_bin = CLAMP(begin_bin, 0, num_bins - 1);
 		end_bin = CLAMP(end_bin, 0, num_bins - 1);
 
-		if (begin_bin >= end_bin) {
-			end_bin = begin_bin + 1;
+		Vector2 max_magnitude;
+		Vector2 avg_magnitude;
+		int count = 0;
+
+		for (int i = begin_bin; i <= end_bin; i++) {
+			Vector2 magnitude = spectrum_data[i];
+			max_magnitude.x = MAX(max_magnitude.x, magnitude.x);
+			max_magnitude.y = MAX(max_magnitude.y, magnitude.y);
+			avg_magnitude += magnitude;
+			count++;
 		}
 
-		float max_magnitude = 0.0f;
-		float avg_magnitude = 0.0f;
-
-		for (int i = begin_bin; i < end_bin && i < num_bins; i++) {
-			float mag = spectrum_data[i].length();
-			max_magnitude = MAX(max_magnitude, mag);
-			avg_magnitude += mag;
+		if (count > 0) {
+			avg_magnitude /= static_cast<float>(count);
 		}
 
-		avg_magnitude /= (end_bin - begin_bin);
-
-		if (p_mode == MAGNITUDE_MAX) {
-			return Vector2(max_magnitude, max_magnitude);
-		} else {
-			return Vector2(avg_magnitude, avg_magnitude);
-		}
+		return p_mode == MAGNITUDE_MAX ? max_magnitude : avg_magnitude;
 	}
 
-	void FmodAudioEffectSpectrumAnalyzer::_update_spectrum_data(const float* spectrum, int num_bins, float sample_rate) {
+	void FmodAudioEffectSpectrumAnalyzer::_update_spectrum_data(const float* spectrum, int num_bins, float p_sample_rate) {
+		if (spectrum == nullptr || num_bins <= 0) {
+			return;
+		}
+
+		sample_rate = p_sample_rate > 0.0f ? p_sample_rate : sample_rate;
 		spectrum_data.resize(num_bins);
 		for (int i = 0; i < num_bins; i++) {
-			// FMOD FFT 数据通常是幅度值
 			spectrum_data.write[i] = Vector2(spectrum[i], spectrum[i]);
 		}
 	}

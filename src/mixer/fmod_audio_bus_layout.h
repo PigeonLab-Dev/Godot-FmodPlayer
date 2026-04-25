@@ -13,11 +13,13 @@ namespace godot {
 
 	private:
 		HashMap<String, Ref<FmodAudioBus>> audio_buses_map;
+		String audio_server_layout_signature;
 
 		void _clear_buses_except_master();
 		Ref<FmodAudioBus> _ensure_master_bus();
 		void _sync_bus_effects(Ref<FmodAudioBus> bus, int audio_server_bus_index);
 		void _update_solo_mute();
+		String _build_audio_server_layout_signature() const;
 
 	protected:
 		static void _bind_methods();
@@ -44,11 +46,14 @@ namespace godot {
 		// 效果器管理
 		void add_bus_effect(const String& bus_name, Ref<FmodAudioEffect> effect, const int index = 0);
 		void remove_bus_effect(const String& bus_name, const int index);
+		int get_bus_effect_count(const String& bus_name) const;
 		Ref<FmodAudioEffect> get_bus_effect(const String& bus_name, const int index) const;
 
 		// 与 Godot AudioServer 同步
 		void sync_from_audio_server();
+		bool sync_from_audio_server_if_changed();
 		void sync_bus_state(const String& bus_name, int audio_server_bus_index) const;
+		void clear();
 	};
 }
 

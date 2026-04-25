@@ -40,6 +40,189 @@ static godot::SubViewport* _get_editor_viewport_3d(int p_index = 0) {
 #endif
 
 namespace godot {
+	static bool _get_fmod_setting_bool(ProjectSettings* p_settings, const String& p_name, bool p_default_value = false) {
+		if (!p_settings || !p_settings->has_setting(p_name)) {
+			return p_default_value;
+		}
+		return p_settings->get_setting(p_name);
+	}
+
+	static int _get_fmod_setting_int(ProjectSettings* p_settings, const String& p_name, int p_default_value = 0) {
+		if (!p_settings || !p_settings->has_setting(p_name)) {
+			return p_default_value;
+		}
+		return p_settings->get_setting(p_name);
+	}
+
+	static float _get_fmod_setting_float(ProjectSettings* p_settings, const String& p_name, float p_default_value = 0.0f) {
+		if (!p_settings || !p_settings->has_setting(p_name)) {
+			return p_default_value;
+		}
+		return p_settings->get_setting(p_name);
+	}
+
+	static String _get_fmod_setting_string(ProjectSettings* p_settings, const String& p_name, const String& p_default_value = String()) {
+		if (!p_settings || !p_settings->has_setting(p_name)) {
+			return p_default_value;
+		}
+		return p_settings->get_setting(p_name);
+	}
+
+	static void _append_init_flag(ProjectSettings* p_settings, const String& p_name, FmodSystem::FmodInitFlags p_flag, unsigned int& r_flags) {
+		if (_get_fmod_setting_bool(p_settings, p_name)) {
+			r_flags |= static_cast<unsigned int>(p_flag);
+		}
+	}
+
+	static void _apply_main_system_settings_before_init(Ref<FmodSystem> p_system, ProjectSettings* p_settings) {
+		ERR_FAIL_COND(p_system.is_null() || p_system->system_is_null());
+
+		const int output_type = _get_fmod_setting_int(p_settings, "audio/fmod/output_type", FmodSystem::FMOD_OUTPUT_TYPE_AUTODETECT);
+		if (output_type != FmodSystem::FMOD_OUTPUT_TYPE_AUTODETECT) {
+			p_system->set_output(static_cast<FmodSystem::FmodOutputType>(output_type));
+		}
+
+		const int driver = _get_fmod_setting_int(p_settings, "audio/fmod/driver", -1);
+		if (driver >= 0) {
+			p_system->set_driver(driver);
+		}
+
+		const int software_channels = _get_fmod_setting_int(p_settings, "audio/fmod/software_channels", 0);
+		if (software_channels > 0) {
+			p_system->set_software_channels(software_channels);
+		}
+
+		const int sample_rate = _get_fmod_setting_int(p_settings, "audio/fmod/software_sample_rate", 0);
+		const int speaker_mode = _get_fmod_setting_int(p_settings, "audio/fmod/speaker_mode", FmodSystem::FMOD_SPEAKER_MODE_DEFAULT);
+		const int num_raw_speakers = _get_fmod_setting_int(p_settings, "audio/fmod/num_raw_speakers", 0);
+		if (sample_rate > 0 || speaker_mode != FmodSystem::FMOD_SPEAKER_MODE_DEFAULT || num_raw_speakers > 0) {
+			p_system->set_software_format(sample_rate, static_cast<FmodSystem::FmodSpeakerMode>(speaker_mode), num_raw_speakers);
+		}
+
+		const int dsp_buffer_size = _get_fmod_setting_int(p_settings, "audio/fmod/dsp_buffer_size", 1024);
+		const int dsp_buffer_count = _get_fmod_setting_int(p_settings, "audio/fmod/dsp_buffer_count", 4);
+		if (dsp_buffer_size > 0 && dsp_buffer_count > 0) {
+			p_system->set_dsp_buffer_size(dsp_buffer_size, dsp_buffer_count);
+		}
+
+		const int profile_port = _get_fmod_setting_int(p_settings, "audio/fmod/profile_port", 0);
+		if (profile_port > 0) {
+			p_system->set_profile_port(profile_port);
+		}
+
+		const int default_decode_buffer_size = _get_fmod_setting_int(p_settings, "audio/fmod/advanced/default_decode_buffer_size", 0);
+		if (default_decode_buffer_size > 0) {
+			p_system->set_default_decode_buffer_size(default_decode_buffer_size);
+		}
+
+		const int dsp_buffer_pool_size = _get_fmod_setting_int(p_settings, "audio/fmod/advanced/dsp_buffer_pool_size", 0);
+		if (dsp_buffer_pool_size > 0) {
+			p_system->set_dsp_buffer_pool_size(dsp_buffer_pool_size);
+		}
+
+		const int resampler_method = _get_fmod_setting_int(p_settings, "audio/fmod/advanced/resampler_method", FmodSystem::FMOD_RESAMPLER_DEFAULT);
+		if (resampler_method != FmodSystem::FMOD_RESAMPLER_DEFAULT) {
+			p_system->set_resampler_method(static_cast<FmodSystem::FmodResamplerMethod>(resampler_method));
+		}
+
+		const int random_seed = _get_fmod_setting_int(p_settings, "audio/fmod/advanced/random_seed", 0);
+		if (random_seed > 0) {
+			p_system->set_random_seed(random_seed);
+		}
+
+		const int max_convolution_threads = _get_fmod_setting_int(p_settings, "audio/fmod/advanced/max_convolution_threads", 0);
+		if (max_convolution_threads > 0) {
+			p_system->set_max_convolution_threads(max_convolution_threads);
+		}
+
+		const int max_spatial_objects = _get_fmod_setting_int(p_settings, "audio/fmod/advanced/max_spatial_objects", 0);
+		if (max_spatial_objects > 0) {
+			p_system->set_max_spatial_objects(max_spatial_objects);
+		}
+
+		const float vol0_virtual_vol = _get_fmod_setting_float(p_settings, "audio/fmod/advanced/vol0_virtual_vol", 0.0f);
+		if (vol0_virtual_vol > 0.0f) {
+			p_system->set_vol0_virtual_vol(vol0_virtual_vol);
+		}
+
+		const int geometry_max_fade_time = _get_fmod_setting_int(p_settings, "audio/fmod/3d/geometry_max_fade_time", 0);
+		if (geometry_max_fade_time > 0) {
+			p_system->set_geometry_max_fade_time(geometry_max_fade_time);
+		}
+
+		const float distance_filter_center_freq = _get_fmod_setting_float(p_settings, "audio/fmod/3d/distance_filter_center_freq", 0.0f);
+		if (distance_filter_center_freq > 0.0f) {
+			p_system->set_distance_filter_center_freq(distance_filter_center_freq);
+		}
+
+		const int max_mpeg_codecs = _get_fmod_setting_int(p_settings, "audio/fmod/advanced/max_mpeg_codecs", 0);
+		if (max_mpeg_codecs > 0) {
+			p_system->set_max_mpeg_codecs(max_mpeg_codecs);
+		}
+
+		const int max_adpcm_codecs = _get_fmod_setting_int(p_settings, "audio/fmod/advanced/max_adpcm_codecs", 0);
+		if (max_adpcm_codecs > 0) {
+			p_system->set_max_adpcm_codecs(max_adpcm_codecs);
+		}
+
+		const int max_xma_codecs = _get_fmod_setting_int(p_settings, "audio/fmod/advanced/max_xma_codecs", 0);
+		if (max_xma_codecs > 0) {
+			p_system->set_max_xma_codecs(max_xma_codecs);
+		}
+
+		const int max_vorbis_codecs = _get_fmod_setting_int(p_settings, "audio/fmod/advanced/max_vorbis_codecs", 0);
+		if (max_vorbis_codecs > 0) {
+			p_system->set_max_vorbis_codecs(max_vorbis_codecs);
+		}
+
+		const int max_at9_codecs = _get_fmod_setting_int(p_settings, "audio/fmod/advanced/max_at9_codecs", 0);
+		if (max_at9_codecs > 0) {
+			p_system->set_max_at9_codecs(max_at9_codecs);
+		}
+
+		const int max_fadpcm_codecs = _get_fmod_setting_int(p_settings, "audio/fmod/advanced/max_fadpcm_codecs", 0);
+		if (max_fadpcm_codecs > 0) {
+			p_system->set_max_fadpcm_codecs(max_fadpcm_codecs);
+		}
+
+		const int max_opus_codecs = _get_fmod_setting_int(p_settings, "audio/fmod/advanced/max_opus_codecs", 0);
+		if (max_opus_codecs > 0) {
+			p_system->set_max_opus_codecs(max_opus_codecs);
+		}
+	}
+
+	static void _apply_main_system_settings_after_init(Ref<FmodSystem> p_system, ProjectSettings* p_settings) {
+		ERR_FAIL_COND(p_system.is_null() || p_system->system_is_null());
+
+		const int stream_buffer_size = _get_fmod_setting_int(p_settings, "audio/fmod/stream_buffer_size", 16384);
+		if (stream_buffer_size > 0) {
+			p_system->set_stream_buffer_size(stream_buffer_size);
+		}
+
+		const String network_proxy = _get_fmod_setting_string(p_settings, "audio/fmod/network_proxy");
+		if (!network_proxy.is_empty()) {
+			p_system->set_network_proxy(network_proxy);
+		}
+
+		const int network_timeout = _get_fmod_setting_int(p_settings, "audio/fmod/network_timeout", 0);
+		if (network_timeout > 0) {
+			p_system->set_network_timeout(network_timeout);
+		}
+
+		p_system->set_doppler_scale(_get_fmod_setting_float(p_settings, "audio/fmod/3d/doppler_scale", 1.0f));
+		p_system->set_distance_factor(_get_fmod_setting_float(p_settings, "audio/fmod/3d/distance_factor", 1.0f));
+		p_system->set_rolloff_scale(_get_fmod_setting_float(p_settings, "audio/fmod/3d/rolloff_scale", 1.0f));
+		p_system->set_3d_num_listeners(CLAMP(_get_fmod_setting_int(p_settings, "audio/fmod/3d/num_listeners", 1), 1, 8));
+	}
+
+	static void _add_custom_monitor_if_missing(Performance* p_perf, const StringName& p_name, const Callable& p_callable) {
+		ERR_FAIL_NULL(p_perf);
+
+		if (!p_perf->has_custom_monitor(p_name)) {
+			p_perf->add_custom_monitor(p_name, p_callable);
+		}
+	}
+
 	FmodServer* FmodServer::singleton = nullptr;
 	Ref<FmodSystem> FmodServer::main_system;
 	Ref<FmodAudioBusLayout> FmodServer::audio_bus_layout = Ref<FmodAudioBusLayout>();
@@ -61,19 +244,26 @@ namespace godot {
 
 		ProjectSettings* settings = ProjectSettings::get_singleton();
 
-		int max_channels = 32;
-		if (settings && settings->has_setting("audio/fmod/max_channels")) {
-			max_channels = settings->get_setting("audio/fmod/max_channels");
-		}
+		const int max_channels = CLAMP(_get_fmod_setting_int(settings, "audio/fmod/max_channels", 32), 1, 4095);
 
-		bool enable_profile = true;
-		FmodSystem::FmodInitFlags mode = FmodSystem::FMOD_INIT_FLAG_NORMAL;
+		bool enable_profile = false;
+		unsigned int mode_flags = FmodSystem::FMOD_INIT_FLAG_NORMAL;
+		_append_init_flag(settings, "audio/fmod/init_flags/stream_from_update", FmodSystem::FMOD_INIT_FLAG_STREAM_FROM_UPDATE, mode_flags);
+		_append_init_flag(settings, "audio/fmod/init_flags/mix_from_update", FmodSystem::FMOD_INIT_FLAG_MIX_FROM_UPDATE, mode_flags);
+		_append_init_flag(settings, "audio/fmod/init_flags/3d_right_handed", FmodSystem::FMOD_INIT_FLAG_3D_RIGHTHANDED, mode_flags);
+		_append_init_flag(settings, "audio/fmod/init_flags/clip_output", FmodSystem::FMOD_INIT_FLAG_CLIP_OUTPUT, mode_flags);
+		_append_init_flag(settings, "audio/fmod/init_flags/channel_lowpass", FmodSystem::FMOD_INIT_FLAG_CHANNEL_LOWPASS, mode_flags);
+		_append_init_flag(settings, "audio/fmod/init_flags/channel_distance_filter", FmodSystem::FMOD_INIT_FLAG_CHANNEL_DISTANCEFILTER, mode_flags);
+		_append_init_flag(settings, "audio/fmod/init_flags/vol0_becomes_virtual", FmodSystem::FMOD_INIT_FLAG_VOL0_BECOMES_VIRTUAL, mode_flags);
+		_append_init_flag(settings, "audio/fmod/init_flags/geometry_use_closest", FmodSystem::FMOD_INIT_FLAG_GEOMETRY_USECLOSEST, mode_flags);
+		_append_init_flag(settings, "audio/fmod/init_flags/prefer_dolby_downmix", FmodSystem::FMOD_INIT_FLAG_PREFER_DOLBY_DOWNMIX, mode_flags);
+		_append_init_flag(settings, "audio/fmod/init_flags/thread_unsafe", FmodSystem::FMOD_INIT_FLAG_THREAD_UNSAFE, mode_flags);
+		_append_init_flag(settings, "audio/fmod/init_flags/profile_meter_all", FmodSystem::FMOD_INIT_FLAG_PROFILE_METER_ALL, mode_flags);
+		_append_init_flag(settings, "audio/fmod/init_flags/memory_tracking", FmodSystem::FMOD_INIT_FLAG_MEMORY_TRACKING, mode_flags);
 		if (Engine::get_singleton()->is_editor_hint()) {
-			if (settings && settings->has_setting("audio/fmod/enable_profile")) {
-				enable_profile = settings->get_setting("audio/fmod/enable_profile");
-			}
+			enable_profile = _get_fmod_setting_bool(settings, "audio/fmod/enable_profile", true);
 			if (enable_profile) {
-				mode = FmodSystem::FMOD_INIT_FLAG_PROFILE_ENABLE;
+				mode_flags |= FmodSystem::FMOD_INIT_FLAG_PROFILE_ENABLE;
 			}
 		}
 
@@ -82,17 +272,11 @@ namespace godot {
 			UtilityFunctions::print_rich("[b][color=WHITE][bgcolor=RED]Failed to init main system![/bgcolor][/color][/b]");
 			return;
 		}
-		main_system->init(max_channels, mode);
+		_apply_main_system_settings_before_init(main_system, settings);
+		main_system->init(max_channels, static_cast<FmodSystem::FmodInitFlags>(mode_flags));
+		_apply_main_system_settings_after_init(main_system, settings);
 
-		if (Engine::get_singleton()->is_editor_hint() && enable_profile && settings && settings->has_setting("audio/fmod/network_proxy")) {
-			String proxy = settings->get_setting("audio/fmod/network_proxy");
-			main_system->set_network_proxy(proxy);
-		}
-
-		bool show_startup_banner = true;
-		if (settings && settings->has_setting("audio/fmod/show_startup_banner")) {
-			show_startup_banner = settings->get_setting("audio/fmod/show_startup_banner");
-		}
+		const bool show_startup_banner = _get_fmod_setting_bool(settings, "audio/fmod/show_startup_banner", true);
 		if (show_startup_banner) {
 			UtilityFunctions::print("    _____                    _ ____  _                       ");
 			UtilityFunctions::print("   |  ___| __ ___   ___   __| |  _ \\| | __ _ _   _  ___ _ __ ");
@@ -112,14 +296,25 @@ namespace godot {
 
 		// 初始化总线布局
 		audio_bus_layout.instantiate();
+		_register_performance_monitors();
 	}
 
 	FmodServer::~FmodServer() {
 		ERR_FAIL_COND(singleton != this);
+
 		singleton = nullptr;
 
 		// 释放 FMODSystem
-		main_system->release();
+		// Release DSPs and bus wrappers while the FMOD system is still alive.
+		if (audio_bus_layout.is_valid()) {
+			audio_bus_layout->clear();
+			audio_bus_layout.unref();
+		}
+
+		if (main_system.is_valid() && !main_system->system_is_null()) {
+			main_system->release();
+		}
+		main_system.unref();
 
 		// 注销自定义监视器
 		Performance* perf = Performance::get_singleton();
@@ -148,43 +343,75 @@ namespace godot {
 		return singleton;
 	}
 
+	void FmodServer::_register_performance_monitors() {
+		Performance* perf = Performance::get_singleton();
+		ERR_FAIL_NULL(perf);
+
+		_add_custom_monitor_if_missing(perf, "FmodCPUUsage/DSP", callable_mp(this, &FmodServer::_get_dsp));
+		_add_custom_monitor_if_missing(perf, "FmodCPUUsage/Stream", callable_mp(this, &FmodServer::_get_stream));
+		_add_custom_monitor_if_missing(perf, "FmodCPUUsage/Geometry", callable_mp(this, &FmodServer::_get_geometry));
+		_add_custom_monitor_if_missing(perf, "FmodCPUUsage/Update", callable_mp(this, &FmodServer::_get_update));
+		_add_custom_monitor_if_missing(perf, "FmodCPUUsage/Convolution1", callable_mp(this, &FmodServer::_get_convolution1));
+		_add_custom_monitor_if_missing(perf, "FmodCPUUsage/Convolution2", callable_mp(this, &FmodServer::_get_convolution2));
+		_add_custom_monitor_if_missing(perf, "FmodFileUsage/SampleBytesRead", callable_mp(this, &FmodServer::_get_sample_bytes_read));
+		_add_custom_monitor_if_missing(perf, "FmodFileUsage/StreamBytesRead", callable_mp(this, &FmodServer::_get_stream_bytes_read));
+		_add_custom_monitor_if_missing(perf, "FmodFileUsage/OtherBytesRead", callable_mp(this, &FmodServer::_get_other_bytes_read));
+	}
+
 	void FmodServer::_connect_update() {
+		bool retry_needed = false;
+
+		Performance* perf = Performance::get_singleton();
+		if (perf) {
+			_register_performance_monitors();
+		}
+		else {
+			retry_needed = true;
+		}
+
 		SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop());
 		if (tree) {
-			tree->connect("process_frame", callable_mp(get_singleton(), &FmodServer::_update_fmod));
-
-			Performance* perf = Performance::get_singleton();
-			if (perf) {
-				perf->add_custom_monitor("FmodCPUUsage/DSP", callable_mp(this, &FmodServer::_get_dsp));
-				perf->add_custom_monitor("FmodCPUUsage/Stream", callable_mp(this, &FmodServer::_get_stream));
-				perf->add_custom_monitor("FmodCPUUsage/Geometry", callable_mp(this, &FmodServer::_get_geometry));
-				perf->add_custom_monitor("FmodCPUUsage/Update", callable_mp(this, &FmodServer::_get_update));
-				perf->add_custom_monitor("FmodCPUUsage/Convolution1", callable_mp(this, &FmodServer::_get_convolution1));
-				perf->add_custom_monitor("FmodCPUUsage/Convolution2", callable_mp(this, &FmodServer::_get_convolution2));
-				perf->add_custom_monitor("FmodFileUsage/SampleBytesRead", callable_mp(this, &FmodServer::_get_sample_bytes_read));
-				perf->add_custom_monitor("FmodFileUsage/StreamBytesRead", callable_mp(this, &FmodServer::_get_stream_bytes_read));
-				perf->add_custom_monitor("FmodFileUsage/OtherBytesRead", callable_mp(this, &FmodServer::_get_other_bytes_read));
-			}
-			else {
-				WARN_PRINT("Failed to get Performance!");
-			}
-
-			AudioServer* audio_server = AudioServer::get_singleton();
-			if (audio_server) {
-				audio_server->connect("bus_layout_changed", callable_mp(this, &FmodServer::_build_bus_layout), CONNECT_DEFERRED);
-				_build_bus_layout();
-			}
-			else {
-				WARN_PRINT("Failed to get AudioServer!");
+			if (!update_connected) {
+				tree->connect("process_frame", callable_mp(this, &FmodServer::_update_fmod));
+				update_connected = true;
 			}
 		}
 		else {
-			ERR_PRINT("Failed to get SceneTree!");
+			retry_needed = true;
+		}
+
+		AudioServer* audio_server = AudioServer::get_singleton();
+		if (audio_server) {
+			if (!audio_server_connected) {
+				audio_server->connect("bus_layout_changed", callable_mp(this, &FmodServer::_build_bus_layout), CONNECT_DEFERRED);
+				audio_server_connected = true;
+				_build_bus_layout();
+			}
+		}
+		else {
+			retry_needed = true;
+		}
+
+		if (retry_needed) {
+			if (connect_retry_count < 300) {
+				connect_retry_count++;
+				call_deferred("_connect_update");
+			}
+			else {
+				WARN_PRINT("FmodServer: Some editor/runtime services were not ready; Performance monitors that were available have still been registered.");
+			}
+		}
+		else {
+			connect_retry_count = 0;
 		}
 	}
 
 	void FmodServer::_update_fmod() {
 		if (!singleton || main_system.is_null()) return;
+
+		if (audio_bus_layout.is_valid()) {
+			audio_bus_layout->sync_from_audio_server_if_changed();
+		}
 		
 		// 更新监听者位置
 		SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop());

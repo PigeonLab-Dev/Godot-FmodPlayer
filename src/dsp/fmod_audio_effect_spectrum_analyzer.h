@@ -30,17 +30,19 @@ namespace godot {
 	private:
 		float buffer_length = 2.0f;
 		FFTSize fft_size = FFT_SIZE_1024;
+		Ref<FmodDSP> fft_dsp;
 
-		// 频谱数据缓冲区
 		Vector<Vector2> spectrum_data;
 		float current_rms = 0.0f;
 		float current_centroid = 0.0f;
+		float sample_rate = 48000.0f;
 
 	public:
 		FmodAudioEffectSpectrumAnalyzer();
 		virtual ~FmodAudioEffectSpectrumAnalyzer();
 
 		virtual void apply_to(Ref<FmodChannelGroup> p_bus) override;
+		virtual void remove_from_bus(Ref<FmodChannelGroup> p_bus) override;
 
 		void set_buffer_length(float p_buffer_length);
 		float get_buffer_length() const;
@@ -48,11 +50,14 @@ namespace godot {
 		void set_fft_size(FFTSize p_fft_size);
 		FFTSize get_fft_size() const;
 
-		// 获取指定频率范围的幅度
+		void update_spectrum();
+		int get_bin_count() const;
+		float get_rms() const;
+		float get_centroid() const;
+
 		Vector2 get_magnitude_for_frequency_range(float p_begin, float p_end, MagnitudeMode p_mode = MAGNITUDE_MAX) const;
 
-		// 内部方法：从 FFT DSP 更新数据
-		void _update_spectrum_data(const float* spectrum, int num_bins, float sample_rate);
+		void _update_spectrum_data(const float* spectrum, int num_bins, float p_sample_rate);
 		void _update_rms(float rms);
 		void _update_centroid(float centroid);
 	};

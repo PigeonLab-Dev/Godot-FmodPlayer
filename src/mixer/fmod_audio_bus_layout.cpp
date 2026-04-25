@@ -39,8 +39,52 @@
 #include <godot_cpp/classes/audio_effect_spectrum_analyzer.hpp>
 #include <godot_cpp/classes/audio_effect_stereo_enhance.hpp>
 #include <godot_cpp/classes/audio_server.hpp>
+#include <godot_cpp/variant/typed_array.hpp>
 
 namespace godot {
+	namespace {
+		void _append_audio_effect_signature(String& r_signature, Ref<AudioEffect> p_effect) {
+			if (p_effect.is_null()) {
+				r_signature += "|effect:null";
+				return;
+			}
+
+			r_signature += vformat("|class=%s", p_effect->get_class());
+
+			TypedArray<Dictionary> properties = p_effect->get_property_list();
+			for (int i = 0; i < properties.size(); i++) {
+				Dictionary property = properties[i];
+				StringName property_name = property.get("name", StringName());
+				if (property_name == StringName()) {
+					continue;
+				}
+
+				Variant value = p_effect->get(property_name);
+				r_signature += vformat(";%s=%s", String(property_name), value.stringify());
+			}
+		}
+
+		class FmodDSPGraphLock {
+			Ref<FmodSystem> system;
+			bool locked = false;
+
+		public:
+			FmodDSPGraphLock(Ref<FmodSystem> p_system) {
+				system = p_system;
+				if (system.is_valid() && !system->system_is_null()) {
+					system->lock_dsp();
+					locked = true;
+				}
+			}
+
+			~FmodDSPGraphLock() {
+				if (locked && system.is_valid() && !system->system_is_null()) {
+					system->unlock_dsp();
+				}
+			}
+		};
+	}
+
 	void FmodAudioBusLayout::_bind_methods() {
 		ClassDB::bind_method(D_METHOD("create_audio_bus", "name", "parent"), &FmodAudioBusLayout::create_audio_bus, DEFVAL(Ref<FmodAudioBus>()));
 		ClassDB::bind_method(D_METHOD("get_audio_bus", "name"), &FmodAudioBusLayout::get_audio_bus);
@@ -61,19 +105,40 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("add_bus_effect", "bus_name", "effect", "index"), &FmodAudioBusLayout::add_bus_effect, DEFVAL(0));
 		ClassDB::bind_method(D_METHOD("remove_bus_effect", "bus_name", "index"), &FmodAudioBusLayout::remove_bus_effect);
+		ClassDB::bind_method(D_METHOD("get_bus_effect_count", "bus_name"), &FmodAudioBusLayout::get_bus_effect_count);
 		ClassDB::bind_method(D_METHOD("get_bus_effect", "bus_name", "index"), &FmodAudioBusLayout::get_bus_effect);
 		
 		ClassDB::bind_method(D_METHOD("sync_from_audio_server"), &FmodAudioBusLayout::sync_from_audio_server);
+		ClassDB::bind_method(D_METHOD("sync_from_audio_server_if_changed"), &FmodAudioBusLayout::sync_from_audio_server_if_changed);
 	}
 
 	void FmodAudioBusLayout::_clear_buses_except_master() {
+		AudioServer* audio_server = AudioServer::get_singleton();
+		ERR_FAIL_COND(!audio_server);
+
 		Vector<String> buses_to_remove;
 		for (const auto& pair : audio_buses_map) {
-			if (pair.key != "Master") {
+			if (pair.key == "Master") {
+				continue;
+			}
+
+			bool bus_exists_in_audio_server = false;
+			for (int i = 0; i < audio_server->get_bus_count(); i++) {
+				if (audio_server->get_bus_name(i) == pair.key) {
+					bus_exists_in_audio_server = true;
+					break;
+				}
+			}
+
+			if (!bus_exists_in_audio_server) {
 				buses_to_remove.append(pair.key);
 			}
 		}
 		for (const auto& bus_name : buses_to_remove) {
+			Ref<FmodAudioBus> bus = audio_buses_map[bus_name];
+			if (bus.is_valid()) {
+				bus->release();
+			}
 			audio_buses_map.erase(bus_name);
 		}
 	}
@@ -95,6 +160,9 @@ namespace godot {
 		ERR_FAIL_COND(bus->get_bus().is_null());
 		AudioServer* audio_server = AudioServer::get_singleton();
 		ERR_FAIL_COND(!audio_server);
+
+		bus->clear_effects();
+
 		const int32_t effect_count = audio_server->get_bus_effect_count(audio_server_bus_index);
 		for (int32_t i = 0; i < effect_count; i++) {
 			if (!audio_server->is_bus_effect_enabled(audio_server_bus_index, i)) continue;
@@ -472,11 +540,48 @@ namespace godot {
 		bus->remove_effect(index);
 	}
 
+	int FmodAudioBusLayout::get_bus_effect_count(const String& bus_name) const {
+		ERR_FAIL_COND_V_MSG(!audio_buses_map.has(bus_name), 0, vformat("Bus not found: %s", bus_name));
+		Ref<FmodAudioBus> bus = get_audio_bus(bus_name);
+		ERR_FAIL_COND_V_MSG(bus.is_null(), 0, "Bus is invalid");
+		return bus->get_effect_count();
+	}
+
 	Ref<FmodAudioEffect> FmodAudioBusLayout::get_bus_effect(const String& bus_name, const int index) const {
 		ERR_FAIL_COND_V_MSG(!audio_buses_map.has(bus_name), Ref<FmodAudioEffect>(), vformat("Bus not found: %s", bus_name));
 		Ref<FmodAudioBus> bus = get_audio_bus(bus_name);
 		ERR_FAIL_COND_V_MSG(bus.is_null(), Ref<FmodAudioEffect>(), "Bus is invalid");
 		return bus->get_effect(index);
+	}
+
+	String FmodAudioBusLayout::_build_audio_server_layout_signature() const {
+		AudioServer* audio_server = AudioServer::get_singleton();
+		if (!audio_server) {
+			return String();
+		}
+
+		String signature = vformat("bus_count=%d", audio_server->get_bus_count());
+		for (int bus_index = 0; bus_index < audio_server->get_bus_count(); bus_index++) {
+			signature += vformat("|bus=%d,name=%s,send=%s,volume=%s,mute=%s,solo=%s,bypass=%s",
+				bus_index,
+				audio_server->get_bus_name(bus_index),
+				audio_server->get_bus_send(bus_index),
+				Variant(audio_server->get_bus_volume_db(bus_index)).stringify(),
+				Variant(audio_server->is_bus_mute(bus_index)).stringify(),
+				Variant(audio_server->is_bus_solo(bus_index)).stringify(),
+				Variant(audio_server->is_bus_bypassing_effects(bus_index)).stringify());
+
+			const int32_t effect_count = audio_server->get_bus_effect_count(bus_index);
+			signature += vformat(",effect_count=%d", effect_count);
+			for (int32_t effect_index = 0; effect_index < effect_count; effect_index++) {
+				signature += vformat("|effect=%d,enabled=%s",
+					effect_index,
+					Variant(audio_server->is_bus_effect_enabled(bus_index, effect_index)).stringify());
+				_append_audio_effect_signature(signature, audio_server->get_bus_effect(bus_index, effect_index));
+			}
+		}
+
+		return signature;
 	}
 
 	void FmodAudioBusLayout::sync_from_audio_server() {
@@ -487,6 +592,8 @@ namespace godot {
 		if (!audio_server) return;
 
 		// 清空旧的总线映射（保留 Master）
+		FmodDSPGraphLock dsp_lock(system);
+
 		_clear_buses_except_master();
 
 		// 确保 Master 总线存在
@@ -504,8 +611,14 @@ namespace godot {
 			if (bus_name == "Master") continue;
 
 			Ref<FmodAudioBus> new_bus;
-			new_bus.instantiate();
-			new_bus->init_bus(bus_name);
+			if (audio_buses_map.has(bus_name)) {
+				new_bus = audio_buses_map[bus_name];
+			}
+
+			if (new_bus.is_null() || new_bus->get_bus().is_null()) {
+				new_bus.instantiate();
+				new_bus->init_bus(bus_name);
+			}
 			
 			// 检查 bus 是否成功创建
 			if (new_bus.is_null() || new_bus->get_bus().is_null()) {
@@ -527,14 +640,22 @@ namespace godot {
 
 			// 设置父子关系
 			String parent_send = audio_server->get_bus_send(i);
+			Ref<FmodChannelGroup> parent_group;
 			if (temp_buses.has(parent_send)) {
-				Ref<FmodChannelGroup> parent_group = temp_buses[parent_send]->get_bus();
+				parent_group = temp_buses[parent_send]->get_bus();
 				if (parent_group.is_valid()) {
-					parent_group->add_group(bus->get_bus());
+					Ref<FmodChannelGroup> current_parent = bus->get_bus()->get_parent_group();
+					if (current_parent.is_null() || current_parent->get_name() != parent_group->get_name()) {
+						parent_group->add_group(bus->get_bus());
+					}
 				}
 			} else if (master_bus.is_valid() && master_bus->get_bus().is_valid()) {
 				// 默认添加到 Master
-				master_bus->get_bus()->add_group(bus->get_bus());
+				parent_group = master_bus->get_bus();
+				Ref<FmodChannelGroup> current_parent = bus->get_bus()->get_parent_group();
+				if (current_parent.is_null() || current_parent->get_name() != parent_group->get_name()) {
+					parent_group->add_group(bus->get_bus());
+				}
 			}
 		}
 
@@ -553,6 +674,17 @@ namespace godot {
 		// 应用 solo 静音
 		// bypass 已在每个 bus 的 set_bypass 中通过 sync_bypass 应用，无需额外操作
 		_update_solo_mute();
+		audio_server_layout_signature = _build_audio_server_layout_signature();
+	}
+
+	bool FmodAudioBusLayout::sync_from_audio_server_if_changed() {
+		String current_signature = _build_audio_server_layout_signature();
+		if (current_signature == audio_server_layout_signature) {
+			return false;
+		}
+
+		sync_from_audio_server();
+		return true;
 	}
 
 	void FmodAudioBusLayout::sync_bus_state(const String& bus_name, int audio_server_bus_index) const {
@@ -566,5 +698,15 @@ namespace godot {
 		bus->set_mute(audio_server->is_bus_mute(audio_server_bus_index));
 		bus->set_solo(audio_server->is_bus_solo(audio_server_bus_index));
 		bus->set_bypass(audio_server->is_bus_bypassing_effects(audio_server_bus_index));
+	}
+
+	void FmodAudioBusLayout::clear() {
+		for (const auto& pair : audio_buses_map) {
+			if (pair.value.is_valid()) {
+				pair.value->release();
+			}
+		}
+		audio_buses_map.clear();
+		audio_server_layout_signature = String();
 	}
 }

@@ -32,10 +32,13 @@ namespace godot {
 		Ref<FmodChannelGroup> get_bus() const;
 		Ref<FmodChannelGroup> get_parent() const;
 		String get_bus_name() const;
+		void release();
 
 		// 效果器管理
 		void add_effect(Ref<FmodAudioEffect> effect, int index = 0);
 		void remove_effect(int index);
+		void clear_effects();
+		int get_effect_count() const;
 		Ref<FmodAudioEffect> get_effect(int index) const;
 
 		void set_volume_db(const float volume_db);

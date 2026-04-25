@@ -4,6 +4,27 @@
 #include <string.h>
 
 namespace godot {
+	namespace {
+		void release_owned_dsp_chain(Vector<Ref<FmodDSP>>& p_dsp_chain, Ref<FmodChannelGroup> p_bus) {
+			for (int i = 0; i < p_dsp_chain.size(); i++) {
+				Ref<FmodDSP> dsp = p_dsp_chain[i];
+				if (!dsp.is_valid()) {
+					continue;
+				}
+
+				if (p_bus.is_valid() && dsp->dsp) {
+					p_bus->remove_dsp(dsp);
+				}
+
+				if (dsp->dsp) {
+					dsp->release();
+				}
+			}
+
+			p_dsp_chain.clear();
+		}
+	}
+
 	void FmodAudioEffect::_bind_methods() {
 		ClassDB::bind_method(D_METHOD("apply_to", "bus"), &FmodAudioEffect::apply_to);
 		ClassDB::bind_method(D_METHOD("remove_from_bus", "bus"), &FmodAudioEffect::remove_from_bus);
@@ -14,14 +35,7 @@ namespace godot {
 	}
 
 	FmodAudioEffect::~FmodAudioEffect() {
-		if (bus.is_valid()) {
-			for (int i = 0; i < dsp_chain.size(); i++) {
-				if (dsp_chain[i].is_valid()) {
-					bus->remove_dsp(dsp_chain[i]);
-				}
-			}
-			dsp_chain.clear();
-		}
+		release_owned_dsp_chain(dsp_chain, bus);
 	}
 
 	void FmodAudioEffect::apply_to(Ref<FmodChannelGroup> p_bus) {
@@ -29,14 +43,7 @@ namespace godot {
 	}
 
 	void FmodAudioEffect::remove_from_bus(Ref<FmodChannelGroup> p_bus) {
-		if (p_bus.is_valid()) {
-			for (int i = 0; i < dsp_chain.size(); i++) {
-				if (dsp_chain[i].is_valid()) {
-					p_bus->remove_dsp(dsp_chain[i]);
-				}
-			}
-		}
-		dsp_chain.clear();
+		release_owned_dsp_chain(dsp_chain, p_bus);
 		bus.unref();
 	}
 

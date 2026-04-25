@@ -2,8 +2,12 @@
 #define FMOD_AUDIO_EFFECT_REVERB_H
 
 #include "dsp/fmod_audio_effect.h"
+#include <atomic>
+#include <memory>
 
 namespace godot {
+	struct FmodAudioEffectReverbSharedState;
+
 	class FmodAudioEffectReverb : public FmodAudioEffect {
 		GDCLASS(FmodAudioEffectReverb, FmodAudioEffect)
 
@@ -11,20 +15,31 @@ namespace godot {
 		static void _bind_methods();
 
 	private:
-		float damping = 0.5f;
-		float dry = 1.0f;
-		float hipass = 0.0f;
-		float predelay_feedback = 0.4f;
-		float predelay_msec = 150.0f;
-		float room_size = 0.8f;
-		float spread = 1.0f;
-		float wet = 0.5f;
+		std::atomic<float> damping{ 0.5f };
+		std::atomic<float> dry{ 1.0f };
+		std::atomic<float> hipass{ 0.0f };
+		std::atomic<float> predelay_feedback{ 0.4f };
+		std::atomic<float> predelay_msec{ 150.0f };
+		std::atomic<float> room_size{ 0.8f };
+		std::atomic<float> spread{ 1.0f };
+		std::atomic<float> wet{ 0.5f };
+		std::shared_ptr<FmodAudioEffectReverbSharedState> reverb_state;
 
 	public:
 		FmodAudioEffectReverb();
 		virtual ~FmodAudioEffectReverb();
 
 		virtual void apply_to(Ref<FmodChannelGroup> p_bus) override;
+		virtual Ref<FmodDSP> create_custom_dsp(Ref<FmodSystem> system) override;
+		virtual FMOD_DSP_DESCRIPTION* get_dsp_description() override;
+		virtual void _on_dsp_create(FMOD_DSP_STATE* dsp_state) override;
+		virtual void _on_dsp_process(FMOD_DSP_STATE* dsp_state,
+			unsigned int length,
+			const FMOD_DSP_BUFFER_ARRAY* inbufferarray,
+			FMOD_DSP_BUFFER_ARRAY* outbufferarray,
+			FMOD_BOOL inputsidle,
+			FMOD_DSP_PROCESS_OPERATION op) override;
+		virtual void _on_dsp_release(FMOD_DSP_STATE* dsp_state) override;
 
 		void set_damping(float p_damping);
 		float get_damping() const;

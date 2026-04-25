@@ -3,9 +3,11 @@
 
 #include "dsp/fmod_audio_effect.h"
 #include <godot_cpp/classes/audio_stream_wav.hpp>
-#include <godot_cpp/templates/vector.hpp>
+#include <memory>
 
 namespace godot {
+	struct FmodAudioEffectRecordSharedState;
+
 	class FmodAudioEffectRecord : public FmodAudioEffect {
 		GDCLASS(FmodAudioEffectRecord, FmodAudioEffect)
 
@@ -18,18 +20,8 @@ namespace godot {
 
 	private:
 		Format format = FORMAT_16_BITS;
-		bool recording_active = false;
-		
-		// 录制缓冲区
-		Vector<float> recording_buffer;
-		int buffer_size = 0;
-		int max_buffer_size = 0;
-		
-		// 用于自定义 DSP 的数据
-		struct RecordDSPState {
-			FmodAudioEffectRecord* effect;
-		};
-		
+		std::shared_ptr<FmodAudioEffectRecordSharedState> record_state;
+
 		void _init_recording();
 		void _finish_recording();
 		Ref<AudioStreamWAV> _create_wav_from_buffer() const;
@@ -44,6 +36,7 @@ namespace godot {
 		virtual void apply_to(Ref<FmodChannelGroup> p_bus) override;
 
 		virtual Ref<FmodDSP> create_custom_dsp(Ref<FmodSystem> system) override;
+		virtual FMOD_DSP_DESCRIPTION* get_dsp_description() override;
 		virtual void _on_dsp_process(FMOD_DSP_STATE* dsp_state,
 			unsigned int length,
 			const FMOD_DSP_BUFFER_ARRAY* inbufferarray,
@@ -58,9 +51,9 @@ namespace godot {
 		Format get_format() const;
 
 		Ref<AudioStreamWAV> get_recording() const;
-		
-		// 添加样本到缓冲区（从 DSP 回调调用）
+
 		void _add_samples(const float* buffer, unsigned int length, int channels);
+		FMOD_RESULT _on_dsp_read(FMOD_DSP_STATE* dsp_state, float* inbuffer, float* outbuffer, unsigned int length, int inchannels, int* outchannels);
 	};
 }
 

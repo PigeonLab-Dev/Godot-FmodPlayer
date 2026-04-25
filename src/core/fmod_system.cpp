@@ -529,11 +529,12 @@ namespace godot {
 	}
 
 	void FmodSystem::set_stream_buffer_size(const unsigned int file_buffer_size, FmodTimeUnit file_buffer_size_type) {
-		ERR_FAIL_COND_MSG(
-			!system || file_buffer_size_type != FMOD_TIME_UNIT_MS || file_buffer_size_type != FMOD_TIME_UNIT_PCM ||
-			file_buffer_size != FMOD_TIME_UNIT_PCMBYTES || FMOD_TIME_UNIT_RAWBYTES
-			, "system is null or file_buffer_size_type is invalid"
-		);
+		const bool valid_time_unit =
+			file_buffer_size_type == FMOD_TIME_UNIT_MS ||
+			file_buffer_size_type == FMOD_TIME_UNIT_PCM ||
+			file_buffer_size_type == FMOD_TIME_UNIT_PCMBYTES ||
+			file_buffer_size_type == FMOD_TIME_UNIT_RAWBYTES;
+		ERR_FAIL_COND_MSG(!system || !valid_time_unit, "system is null or file_buffer_size_type is invalid");
 		FMOD_TIMEUNIT fmod_file_buffer_size_type = static_cast<FMOD_TIMEUNIT>(file_buffer_size_type);
 		FMOD_ERR_CHECK(system->setStreamBufferSize(file_buffer_size, fmod_file_buffer_size_type));
 	}

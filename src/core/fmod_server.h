@@ -13,7 +13,12 @@ namespace godot {
 		static FmodServer* singleton;
 
 	private:
+		bool update_connected = false;
+		bool audio_server_connected = false;
+		int connect_retry_count = 0;
+
 		void _build_bus_layout();
+		void _register_performance_monitors();
 
 		double _get_dsp() const;
 		double _get_stream() const;
