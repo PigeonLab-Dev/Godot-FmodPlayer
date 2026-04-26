@@ -3,8 +3,11 @@
 
 #include "dsp/fmod_audio_effect.h"
 #include "core/fmod_system.h"
+#include <memory>
 
 namespace godot {
+	struct FmodAudioEffectDelaySharedState;
+
 	class FmodAudioEffectDelay : public FmodAudioEffect {
 		GDCLASS(FmodAudioEffectDelay, FmodAudioEffect)
 
@@ -26,9 +29,9 @@ namespace godot {
 		float feedback_level = -6.0f;
 		float feedback_lowpass = 16000.0f;
 
-	private:
-		void _create_tap_dsp(Ref<FmodSystem> system, float delay_ms, float level_db, float pan, float wet_scale, bool is_first_tap);
-		void _create_feedback_dsp(Ref<FmodSystem> system, float delay_ms, float level_db, float lowpass_hz);
+		std::shared_ptr<FmodAudioEffectDelaySharedState> delay_state;
+
+		void _sync_shared_state();
 
 	protected:
 		static void _bind_methods();
@@ -38,6 +41,8 @@ namespace godot {
 		virtual ~FmodAudioEffectDelay();
 
 		virtual void apply_to(Ref<FmodChannelGroup> p_bus) override;
+		virtual Ref<FmodDSP> create_custom_dsp(Ref<FmodSystem> system) override;
+		virtual FMOD_DSP_DESCRIPTION* get_dsp_description() override;
 
 		void set_dry(float p_dry);
 		float get_dry();

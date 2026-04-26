@@ -18,6 +18,8 @@ FmodAudioStreamPlayer2D = "icons/FmodAudioStreamPlayer2D.svg"
 FmodAudioStreamPlayer3D = "icons/FmodAudioStreamPlayer3D.svg"
 FmodAudioStream = "icons/FmodAudioStream.svg"
 FmodAudioBusLayout = "icons/FmodAudioBusLayout.svg"
+FmodGeometryInstance3D = "icons/FmodGeometryInstance3D.svg"
+FmodReverbZone3D = "icons/FmodReverbZone3D.svg"
 
 [dependencies]
 windows.debug.x86_64 = {

@@ -207,7 +207,7 @@ namespace godot {
 					buffer_length = 1.0; // 使用默认值
 				}
 				fmod_capture->set_buffer_length(buffer_length);
-				//bus->add_effect(fmod_capture, i);
+				bus->add_effect(fmod_capture, i);
 				continue;
 			}
 

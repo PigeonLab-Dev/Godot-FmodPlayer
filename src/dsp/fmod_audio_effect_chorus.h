@@ -2,8 +2,11 @@
 #define FMOD_AUDIO_EFFECT_CHORUS_H
 
 #include "dsp/fmod_audio_effect.h"
+#include <memory>
 
 namespace godot {
+	struct FmodAudioEffectChorusSharedState;
+
 	class FmodAudioEffectChorus : public FmodAudioEffect {
 		GDCLASS(FmodAudioEffectChorus, FmodAudioEffect)
 
@@ -15,7 +18,7 @@ namespace godot {
 		static constexpr int32_t CYCLES_FRAC = 16;
 		static constexpr int32_t CYCLES_MASK = (1 << CYCLES_FRAC) - 1;
 		static constexpr int32_t MAX_CHANNELS = 4;
-		static constexpr int32_t MS_CUTOFF_MAX = 22000;					// 匹配 FMOD DSP_LOWPASS 的最大值
+		static constexpr int32_t MS_CUTOFF_MAX = 16000;
 
 	protected:
 		static void _bind_methods();
@@ -23,37 +26,29 @@ namespace godot {
 
 	private:
 		struct Voice {
-			float delay;
-			float rate;
-			float depth;
-			float level;
-			float cutoff;
-			float pan;
-
-			Voice() {
-				delay = 12.0;
-				rate = 1;
-				depth = 0;
-				level = 0;
-				cutoff = MS_CUTOFF_MAX;
-				pan = 0;
-			}
-
+			float delay = 12.0f;
+			float rate = 1.0f;
+			float depth = 0.0f;
+			float level = 0.0f;
+			float cutoff = static_cast<float>(MS_CUTOFF_MAX);
+			float pan = 0.0f;
 		} voice[MAX_VOICES];
 
 		int voice_count = 2;
-
 		float wet = 0.5f;
 		float dry = 1.0f;
 
-	private:
-		void _create_merged_chorus_dsp(Ref<FmodSystem> system);
+		std::shared_ptr<FmodAudioEffectChorusSharedState> chorus_state;
+
+		void _sync_shared_state();
 
 	public:
 		FmodAudioEffectChorus();
 		virtual ~FmodAudioEffectChorus();
 
 		virtual void apply_to(Ref<FmodChannelGroup> p_bus) override;
+		virtual Ref<FmodDSP> create_custom_dsp(Ref<FmodSystem> system) override;
+		virtual FMOD_DSP_DESCRIPTION* get_dsp_description() override;
 
 		void set_voice_count(int p_voices);
 		int get_voice_count() const;
@@ -85,4 +80,3 @@ namespace godot {
 }
 
 #endif // !FMOD_AUDIO_EFFECT_CHORUS_H
-

@@ -3,6 +3,7 @@
 
 #include "dsp/fmod_audio_effect.h"
 #include <godot_cpp/classes/audio_stream_wav.hpp>
+#include <godot_cpp/variant/packed_vector2_array.hpp>
 #include <memory>
 
 namespace godot {
@@ -51,6 +52,7 @@ namespace godot {
 		Format get_format() const;
 
 		Ref<AudioStreamWAV> get_recording() const;
+		PackedVector2Array get_waveform_snapshot(int p_width = 512, float p_seconds = 5.0f) const;
 
 		void _add_samples(const float* buffer, unsigned int length, int channels);
 		FMOD_RESULT _on_dsp_read(FMOD_DSP_STATE* dsp_state, float* inbuffer, float* outbuffer, unsigned int length, int inchannels, int* outchannels);

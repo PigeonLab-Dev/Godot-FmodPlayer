@@ -9,6 +9,8 @@ namespace godot {
 		BIND_ENUM_CONSTANT(MODE_SAMPLE);
 		BIND_ENUM_CONSTANT(MODE_LOOP);
 		BIND_ENUM_CONSTANT(MODE_LOOP_BIDI);
+		BIND_ENUM_CONSTANT(MODE_2D);
+		BIND_ENUM_CONSTANT(MODE_3D);
 
 		ClassDB::bind_method(D_METHOD("set_audio_data", "data"), &FmodAudioStream::set_audio_data);
 		ClassDB::bind_method(D_METHOD("get_audio_data"), &FmodAudioStream::get_audio_data);
@@ -16,7 +18,7 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_mode_flags", "flags"), &FmodAudioStream::set_mode_flags);
 		ClassDB::bind_method(D_METHOD("get_mode_flags"), &FmodAudioStream::get_mode_flags);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "mode_flags", PROPERTY_HINT_FLAGS, "Stream,Sample,Loop,Loop Bidi"), "set_mode_flags", "get_mode_flags");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "mode_flags", PROPERTY_HINT_FLAGS, "Stream,Sample,Loop,Loop Bidi,2D,3D"), "set_mode_flags", "get_mode_flags");
 
 		ClassDB::bind_method(D_METHOD("get_sound"), &FmodAudioStream::get_sound);
 		ClassDB::bind_method(D_METHOD("preload"), &FmodAudioStream::preload);
@@ -75,17 +77,7 @@ namespace godot {
 		return (create_mode_flags & p_flag) != 0;
 	}
 
-	Ref<FmodSound> FmodAudioStream::_create_sound() {
-		if (!data_loaded || audio_data.is_empty()) {
-			return Ref<FmodSound>();
-		}
-
-		Ref<FmodSystem> system = FmodServer::get_main_system();
-		if (system.is_null() || system->system_is_null()) {
-			return Ref<FmodSound>();
-		}
-
-		// 转换创建标志为 FMOD 标志
+	unsigned int FmodAudioStream::_get_fmod_mode_flags() const {
 		unsigned int fmod_mode = FmodSystem::FMOD_MODE_OPENMEMORY;
 
 		if (has_mode_flag(MODE_STREAM)) {
@@ -102,16 +94,27 @@ namespace godot {
 			fmod_mode |= FmodSystem::FMOD_MODE_LOOP_BIDI;
 		}
 
-		// 处理 2D/3D 模式（默认 2D）
 		if (has_mode_flag(MODE_3D)) {
 			fmod_mode |= FmodSystem::FMOD_MODE_3D;
 		}
 		else {
-			// 默认使用 2D 模式
 			fmod_mode |= FmodSystem::FMOD_MODE_2D;
 		}
 
-		return system->create_sound_from_memory(audio_data, fmod_mode);
+		return fmod_mode;
+	}
+
+	Ref<FmodSound> FmodAudioStream::_create_sound() {
+		if (!data_loaded || audio_data.is_empty()) {
+			return Ref<FmodSound>();
+		}
+
+		Ref<FmodSystem> system = FmodServer::get_main_system();
+		if (system.is_null() || system->system_is_null()) {
+			return Ref<FmodSound>();
+		}
+
+		return system->create_sound_from_memory(audio_data, _get_fmod_mode_flags());
 	}
 
 	Ref<FmodSound> FmodAudioStream::get_sound() {
@@ -148,7 +151,7 @@ namespace godot {
 	Ref<FmodAudioStream> FmodAudioStream::load_from_file(const String& p_path, int p_flags) {
 		Ref<FileAccess> file = FileAccess::open(p_path, FileAccess::READ);
 		ERR_FAIL_COND_V_MSG(file.is_null(), Ref<FmodAudioStream>(), "Cannot open audio file: " + p_path);
-		
+
 		PackedByteArray data = file->get_buffer(file->get_length());
 		file->close();
 		ERR_FAIL_COND_V_MSG(data.is_empty(), Ref<FmodAudioStream>(), "Failed to read audio file: " + p_path);

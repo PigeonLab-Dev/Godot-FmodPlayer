@@ -31,6 +31,8 @@ namespace godot {
 		Ref<FmodSound> sound;
 		unsigned int create_mode_flags = MODE_STREAM;
 
+		unsigned int _get_fmod_mode_flags() const;
+
 	public:
 		FmodAudioStream();
 		virtual ~FmodAudioStream();

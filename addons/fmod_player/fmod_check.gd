@@ -83,9 +83,9 @@ func _load_main_plugin():
 	if main_script:
 		main_plugin = main_script.new()
 		main_plugin.set_editor_interface(get_editor_interface())
-		main_plugin._enter_tree()
+		add_child(main_plugin)
 
 func _unload_main_plugin():
 	if main_plugin:
-		main_plugin._exit_tree()
+		main_plugin.queue_free()
 		main_plugin = null

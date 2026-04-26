@@ -1,22 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="FmodGeometryInstance3D" inherits="Node3D" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+<class name="FmodGeometryInstance3D" inherits="StaticBody3D" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
 	<brief_description>
-		A 3D node that automatically creates FMOD geometry for audio occlusion from MeshInstance3D or CollisionShape3D parents.
+		Static 3D audio occlusion geometry for FMOD.
 	</brief_description>
 	<description>
-		FmodGeometryInstance3D is a helper node that automatically generates [FmodGeometry] objects for 3D audio occlusion. When attached as a child of a [MeshInstance3D] or [CollisionShape3D], it creates collision geometry that blocks or attenuates sound between sources and listeners.
-		Key features:
-		- Automatic geometry generation from mesh or collision shape
-		- Configurable occlusion parameters (direct and reverb occlusion)
-		- Double-sided polygon support
-		- Auto-rebuild on mesh changes (editor mode)
-		- Debug gizmo visualization
-		- Runtime geometry updates
-		Usage:
-		1. Add FmodGeometryInstance3D as a child of a MeshInstance3D or CollisionShape3D
-		2. The geometry is automatically built when the node enters the scene tree
-		3. Adjust occlusion parameters in the inspector
-		[b]Note:[/b] Geometry occlusion requires [constant FmodSystem.FMOD_INIT_FLAG_CHANNEL_LOWPASS] to be set during system initialization.
+		FmodGeometryInstance3D creates an FMOD Geometry object from child [CollisionShape3D] nodes, a selected [MeshInstance3D], or a [Mesh] resource. It is designed to be placed in the scene as a solid audio occluder: add this node, add collision shapes below it, then tune direct and reverb occlusion in the Inspector.
+		The node keeps the FMOD geometry transform synchronized with its global transform at runtime.
 	</description>
 	<tutorials>
 	</tutorials>
@@ -24,166 +13,113 @@
 		<method name="clear_geometry">
 			<return type="void" />
 			<description>
-				Clears and releases the internal FMOD geometry object.
-				This removes the occlusion effect but keeps the node in the scene tree.
-				Emits [signal geometry_cleared] when complete.
-			</description>
-		</method>
-		<method name="detect_source_node">
-			<return type="void" />
-			<description>
-				Manually triggers detection of the parent source node (MeshInstance3D or CollisionShape3D).
-				This is called automatically when the node enters the tree, but can be called manually if the parent changes.
-			</description>
-		</method>
-		<method name="get_active" qualifiers="const">
-			<return type="bool" />
-			<description>
-				Returns [code]true[/code] if the geometry is currently active and contributing to occlusion calculations.
-			</description>
-		</method>
-		<method name="get_auto_rebuild" qualifiers="const">
-			<return type="bool" />
-			<description>
-				Returns [code]true[/code] if auto-rebuild is enabled.
-				When enabled, the geometry is automatically rebuilt when mesh properties change.
-			</description>
-		</method>
-		<method name="get_direct_occlusion" qualifiers="const">
-			<return type="float" />
-			<description>
-				Returns the direct occlusion factor (0.0 to 1.0).
-				Higher values block more direct sound between source and listener.
-			</description>
-		</method>
-		<method name="get_double_sided" qualifiers="const">
-			<return type="bool" />
-			<description>
-				Returns [code]true[/code] if polygons are double-sided.
-				Double-sided polygons block sound from both directions.
+				Releases the internal [FmodGeometry].
 			</description>
 		</method>
 		<method name="get_geometry" qualifiers="const">
 			<return type="FmodGeometry" />
 			<description>
-				Returns the internal [FmodGeometry] object.
-				Returns [code]null[/code] if no geometry has been created.
+				Returns the internal [FmodGeometry], or [code]null[/code] when no geometry has been built.
 			</description>
 		</method>
-		<method name="get_reverb_occlusion" qualifiers="const">
-			<return type="float" />
+		<method name="get_polygon_count" qualifiers="const">
+			<return type="int" />
 			<description>
-				Returns the reverb occlusion factor (0.0 to 1.0).
-				Higher values reduce the amount of reverb applied to occluded sounds.
+				Returns the number of polygons successfully added to FMOD.
 			</description>
 		</method>
-		<method name="get_show_debug_gizmo" qualifiers="const">
-			<return type="bool" />
+		<method name="get_vertex_count" qualifiers="const">
+			<return type="int" />
 			<description>
-				Returns [code]true[/code] if the debug gizmo is enabled for visualization.
+				Returns the number of vertices successfully added to FMOD.
 			</description>
 		</method>
 		<method name="has_valid_geometry" qualifiers="const">
 			<return type="bool" />
 			<description>
-				Returns [code]true[/code] if valid FMOD geometry has been created and is ready for use.
+				Returns whether the internal FMOD geometry object exists.
 			</description>
 		</method>
 		<method name="rebuild_geometry">
 			<return type="void" />
 			<description>
-				Rebuilds the FMOD geometry from the source node.
-				This clears any existing geometry and creates new polygons based on the current mesh/collision shape.
-				Emits [signal geometry_rebuilt] and [signal geometry_created] when complete.
+				Rebuilds the FMOD geometry from the configured source.
 			</description>
 		</method>
-		<method name="set_active">
+		<method name="sync_geometry_transform">
 			<return type="void" />
-			<param index="0" name="value" type="bool" />
 			<description>
-				Enables or disables the geometry.
-				When inactive, the geometry does not contribute to occlusion calculations.
-			</description>
-		</method>
-		<method name="set_auto_rebuild">
-			<return type="void" />
-			<param index="0" name="value" type="bool" />
-			<description>
-				Enables or disables auto-rebuild.
-				When enabled, the geometry is automatically rebuilt when the source mesh changes (editor mode only).
-			</description>
-		</method>
-		<method name="set_direct_occlusion">
-			<return type="void" />
-			<param index="0" name="value" type="float" />
-			<description>
-				Sets the direct occlusion factor (0.0 to 1.0).
-				[code]0.0[/code] = transparent (no occlusion), [code]1.0[/code] = fully opaque.
-				If auto-rebuild is enabled, the geometry will be rebuilt when this changes.
-			</description>
-		</method>
-		<method name="set_double_sided">
-			<return type="void" />
-			<param index="0" name="value" type="bool" />
-			<description>
-				Sets whether polygons are double-sided.
-				If [code]true[/code], sound is blocked from both sides of the polygon.
-				If auto-rebuild is enabled, the geometry will be rebuilt when this changes.
-			</description>
-		</method>
-		<method name="set_reverb_occlusion">
-			<return type="void" />
-			<param index="0" name="value" type="float" />
-			<description>
-				Sets the reverb occlusion factor (0.0 to 1.0).
-				[code]0.0[/code] = no reverb reduction, [code]1.0[/code] = full reverb reduction.
-				If auto-rebuild is enabled, the geometry will be rebuilt when this changes.
-			</description>
-		</method>
-		<method name="set_show_debug_gizmo">
-			<return type="void" />
-			<param index="0" name="value" type="bool" />
-			<description>
-				Enables or disables the debug gizmo for visualization.
-				The gizmo shows the geometry wireframe in the editor viewport.
+				Synchronizes the FMOD geometry transform with this node's global transform.
 			</description>
 		</method>
 	</methods>
 	<members>
 		<member name="active" type="bool" setter="set_active" getter="get_active" default="true">
-			Whether the geometry is active and contributes to occlusion calculations.
+			Whether this FMOD geometry contributes to occlusion.
 		</member>
 		<member name="auto_rebuild" type="bool" setter="set_auto_rebuild" getter="get_auto_rebuild" default="true">
-			If [code]true[/code], automatically rebuilds geometry when the source mesh changes.
+			Rebuilds geometry automatically when relevant exported properties change.
 		</member>
 		<member name="direct_occlusion" type="float" setter="set_direct_occlusion" getter="get_direct_occlusion" default="0.5">
-			Direct sound occlusion factor (0.0 to 1.0). Higher values block more direct sound.
+			Direct sound occlusion factor from [code]0.0[/code] to [code]1.0[/code].
 		</member>
 		<member name="double_sided" type="bool" setter="set_double_sided" getter="get_double_sided" default="true">
-			If [code]true[/code], polygons block sound from both sides.
+			If enabled, polygons occlude sound from both sides.
+		</member>
+		<member name="mesh" type="Mesh" setter="set_mesh" getter="get_mesh">
+			Mesh source used when [member source_mode] is [constant SOURCE_MESH_RESOURCE].
+		</member>
+		<member name="primitive_segments" type="int" setter="set_primitive_segments" getter="get_primitive_segments" default="16">
+			Segment count used when converting sphere and cylinder collision shapes.
+		</member>
+		<member name="recursive_source_scan" type="bool" setter="set_recursive_source_scan" getter="get_recursive_source_scan" default="true">
+			If enabled, child collision shapes are collected recursively.
 		</member>
 		<member name="reverb_occlusion" type="float" setter="set_reverb_occlusion" getter="get_reverb_occlusion" default="0.5">
-			Reverb occlusion factor (0.0 to 1.0). Higher values reduce more reverb.
+			Reverb occlusion factor from [code]0.0[/code] to [code]1.0[/code].
 		</member>
 		<member name="show_debug_gizmo" type="bool" setter="set_show_debug_gizmo" getter="get_show_debug_gizmo" default="true">
-			If [code]true[/code], shows a debug gizmo in the editor viewport.
+			Whether editor gizmo visualization is enabled.
+		</member>
+		<member name="source_mode" type="int" setter="set_source_mode" getter="get_source_mode" enum="FmodGeometryInstance3D.SourceMode" default="1">
+			Source used to build FMOD polygons.
+		</member>
+		<member name="source_node_path" type="NodePath" setter="set_source_node_path" getter="get_source_node_path">
+			Optional source node path for mesh or collision shape conversion.
+		</member>
+		<member name="sync_transform" type="bool" setter="set_sync_transform" getter="get_sync_transform" default="true">
+			If enabled, this node's global transform is applied to the FMOD geometry every frame.
 		</member>
 	</members>
 	<signals>
 		<signal name="geometry_cleared">
 			<description>
-				Emitted when the geometry has been cleared via [method clear_geometry].
+				Emitted after the internal geometry has been released.
 			</description>
 		</signal>
 		<signal name="geometry_created">
 			<description>
-				Emitted when new geometry has been successfully created.
+				Emitted after a new FMOD geometry object has been created.
 			</description>
 		</signal>
 		<signal name="geometry_rebuilt">
 			<description>
-				Emitted when geometry has been rebuilt via [method rebuild_geometry].
+				Emitted after geometry has been rebuilt.
 			</description>
 		</signal>
 	</signals>
+	<constants>
+		<constant name="SOURCE_AUTO" value="0" enum="SourceMode">
+			Chooses the source type automatically.
+		</constant>
+		<constant name="SOURCE_COLLISION_SHAPES" value="1" enum="SourceMode">
+			Builds from [CollisionShape3D] nodes.
+		</constant>
+		<constant name="SOURCE_MESH_INSTANCE" value="2" enum="SourceMode">
+			Builds from a [MeshInstance3D].
+		</constant>
+		<constant name="SOURCE_MESH_RESOURCE" value="3" enum="SourceMode">
+			Builds from a [Mesh] resource.
+		</constant>
+	</constants>
 </class>

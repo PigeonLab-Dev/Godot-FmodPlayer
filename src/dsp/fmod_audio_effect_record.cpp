@@ -238,6 +238,7 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("set_format", "format"), &FmodAudioEffectRecord::set_format);
 		ClassDB::bind_method(D_METHOD("get_format"), &FmodAudioEffectRecord::get_format);
 		ClassDB::bind_method(D_METHOD("get_recording"), &FmodAudioEffectRecord::get_recording);
+		ClassDB::bind_method(D_METHOD("get_waveform_snapshot", "width", "seconds"), &FmodAudioEffectRecord::get_waveform_snapshot, DEFVAL(512), DEFVAL(5.0f));
 
 		ADD_PROPERTY(PropertyInfo(Variant::INT, "format", PROPERTY_HINT_ENUM, "8-bit,16-bit,IMA ADPCM"), "set_format", "get_format");
 		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "recording_active"), "set_recording_active", "is_recording_active");
@@ -442,6 +443,64 @@ namespace godot {
 
 	Ref<AudioStreamWAV> FmodAudioEffectRecord::get_recording() const {
 		return _create_wav_from_buffer();
+	}
+
+	PackedVector2Array FmodAudioEffectRecord::get_waveform_snapshot(int p_width, float p_seconds) const {
+		PackedVector2Array snapshot;
+		if (!record_state || p_width <= 0) {
+			return snapshot;
+		}
+
+		std::lock_guard<std::mutex> lock(record_state->recording_mutex);
+		if (record_state->recording_buffer.empty() || record_state->buffer_size <= 0) {
+			return snapshot;
+		}
+
+		const int channels = MAX(record_state->recording_channels, 1);
+		const int frame_count = record_state->buffer_size / channels;
+		if (frame_count <= 0) {
+			return snapshot;
+		}
+
+		int visible_frames = frame_count;
+		const int rate = record_state->sample_rate.load();
+		if (p_seconds > 0.0f && rate > 0) {
+			visible_frames = MIN(frame_count, MAX(1, static_cast<int>(p_seconds * static_cast<float>(rate))));
+		}
+
+		const int start_frame = MAX(0, frame_count - visible_frames);
+		snapshot.resize(p_width * 2);
+		Vector2* snapshot_write = snapshot.ptrw();
+
+		for (int x = 0; x < p_width; x++) {
+			const int bucket_start = start_frame + (visible_frames * x) / p_width;
+			int bucket_end = start_frame + (visible_frames * (x + 1)) / p_width;
+			bucket_end = MAX(bucket_end, bucket_start + 1);
+			bucket_end = MIN(bucket_end, frame_count);
+
+			float min_sample = 0.0f;
+			float max_sample = 0.0f;
+
+			for (int frame = bucket_start; frame < bucket_end; frame++) {
+				const int sample_index = frame * channels;
+				float mixed_sample = 0.0f;
+
+				for (int channel = 0; channel < channels; channel++) {
+					mixed_sample += record_state->recording_buffer[static_cast<size_t>(sample_index + channel)];
+				}
+				mixed_sample /= static_cast<float>(channels);
+				mixed_sample = CLAMP(mixed_sample, -1.0f, 1.0f);
+
+				min_sample = MIN(min_sample, mixed_sample);
+				max_sample = MAX(max_sample, mixed_sample);
+			}
+
+			const float x_position = p_width > 1 ? static_cast<float>(x) / static_cast<float>(p_width - 1) : 0.0f;
+			snapshot_write[x * 2] = Vector2(x_position, min_sample);
+			snapshot_write[x * 2 + 1] = Vector2(x_position, max_sample);
+		}
+
+		return snapshot;
 	}
 
 	Ref<AudioStreamWAV> FmodAudioEffectRecord::_create_wav_from_buffer() const {

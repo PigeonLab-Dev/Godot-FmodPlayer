@@ -34,6 +34,8 @@ namespace godot {
 
 		// 播放状态
 		bool is_playing = false;
+		bool is_pausing = false;
+		bool is_dragging = false;
 		float playback_position = 0.0f;
 		float stream_duration = 0.0f;
 
@@ -48,9 +50,12 @@ namespace godot {
 		void _on_indicator_gui_input(const Ref<InputEvent>& p_event);
 		void _update_playback_position(float p_position);
 		void _update_time_labels();
+		void _queue_preview_redraw();
+		void _seek_to(float p_x);
 
-		void _on_play_pressed();
-		void _on_stop_pressed();
+		void _play();
+		void _stop();
+		void _on_finished();
 		void _update_preview();
 		void _process_playback();
 

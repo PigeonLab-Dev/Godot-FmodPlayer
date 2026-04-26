@@ -3,6 +3,7 @@
 
 #include "core/fmod_utils.hpp"
 #include <godot_cpp/classes/ref_counted.hpp>
+#include <godot_cpp/core/class_db.hpp>
 
 namespace godot {
 	class FmodReverb3D : public RefCounted {
@@ -11,22 +12,15 @@ namespace godot {
 	private:
 		FMOD::Reverb3D* reverb_3d = nullptr;
 
-		FMOD_REVERB_PROPERTIES properties = {
-			1500.0f,
-			7.0f,
-			11.0f,
-			5000.0f,
-			50.0f,
-			50.0f,
-			100.0f,
-			250.0f,
-			0.0f,
-			200000.0f,
-			50.0f,
-			-6.0f
-		};
+		FMOD_REVERB_PROPERTIES properties = FMOD_PRESET_GENERIC;
+		Vector3 position;
+		float min_distance = 5.0f;
+		float max_distance = 20.0f;
+		bool active = true;
 
 		void _apply_properties();
+		void _apply_3d_attributes();
+		void _apply_active();
 
 	protected:
 		static void _bind_methods();
@@ -39,6 +33,9 @@ namespace godot {
 		bool reverb_3d_is_null() const;									// 检查多边形是否无效
 
 		void setup(FMOD::Reverb3D* p_reverb_3d);
+
+		void set_properties(const Dictionary& p_properties);
+		Dictionary get_properties() const;
 
 		// 概述
 		void set_3d_attributes(

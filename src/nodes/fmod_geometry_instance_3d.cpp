@@ -1,18 +1,38 @@
 #include "nodes/fmod_geometry_instance_3d.h"
+
 #include "core/fmod_server.h"
 #include "core/fmod_system.h"
 
-#include <godot_cpp/classes/engine.hpp>
-#include <godot_cpp/classes/mesh.hpp>
+#include <godot_cpp/classes/array_mesh.hpp>
 #include <godot_cpp/classes/box_shape3d.hpp>
-#include <godot_cpp/classes/sphere_shape3d.hpp>
-#include <godot_cpp/classes/cylinder_shape3d.hpp>
-#include <godot_cpp/classes/convex_polygon_shape3d.hpp>
 #include <godot_cpp/classes/concave_polygon_shape3d.hpp>
-#include <godot_cpp/core/memory.hpp>
+#include <godot_cpp/classes/convex_polygon_shape3d.hpp>
+#include <godot_cpp/classes/cylinder_shape3d.hpp>
+#include <godot_cpp/classes/engine.hpp>
+#include <godot_cpp/classes/shape3d.hpp>
+#include <godot_cpp/classes/sphere_shape3d.hpp>
+#include <godot_cpp/core/math.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 
 namespace godot {
 	void FmodGeometryInstance3D::_bind_methods() {
+		BIND_ENUM_CONSTANT(SOURCE_AUTO);
+		BIND_ENUM_CONSTANT(SOURCE_COLLISION_SHAPES);
+		BIND_ENUM_CONSTANT(SOURCE_MESH_INSTANCE);
+		BIND_ENUM_CONSTANT(SOURCE_MESH_RESOURCE);
+
+		ClassDB::bind_method(D_METHOD("set_source_mode", "mode"), &FmodGeometryInstance3D::set_source_mode);
+		ClassDB::bind_method(D_METHOD("get_source_mode"), &FmodGeometryInstance3D::get_source_mode);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "source_mode", PROPERTY_HINT_ENUM, "Auto,Collision Shapes,Mesh Instance,Mesh Resource"), "set_source_mode", "get_source_mode");
+
+		ClassDB::bind_method(D_METHOD("set_source_node_path", "path"), &FmodGeometryInstance3D::set_source_node_path);
+		ClassDB::bind_method(D_METHOD("get_source_node_path"), &FmodGeometryInstance3D::get_source_node_path);
+		ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "source_node_path", PROPERTY_HINT_NODE_PATH_VALID_TYPES, "Node3D,MeshInstance3D,CollisionShape3D"), "set_source_node_path", "get_source_node_path");
+
+		ClassDB::bind_method(D_METHOD("set_mesh", "mesh"), &FmodGeometryInstance3D::set_mesh);
+		ClassDB::bind_method(D_METHOD("get_mesh"), &FmodGeometryInstance3D::get_mesh);
+		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "mesh", PROPERTY_HINT_RESOURCE_TYPE, "Mesh"), "set_mesh", "get_mesh");
+
 		ClassDB::bind_method(D_METHOD("set_direct_occlusion", "value"), &FmodGeometryInstance3D::set_direct_occlusion);
 		ClassDB::bind_method(D_METHOD("get_direct_occlusion"), &FmodGeometryInstance3D::get_direct_occlusion);
 		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "direct_occlusion", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_direct_occlusion", "get_direct_occlusion");
@@ -33,6 +53,18 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_auto_rebuild"), &FmodGeometryInstance3D::get_auto_rebuild);
 		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_rebuild"), "set_auto_rebuild", "get_auto_rebuild");
 
+		ClassDB::bind_method(D_METHOD("set_sync_transform", "value"), &FmodGeometryInstance3D::set_sync_transform);
+		ClassDB::bind_method(D_METHOD("get_sync_transform"), &FmodGeometryInstance3D::get_sync_transform);
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "sync_transform"), "set_sync_transform", "get_sync_transform");
+
+		ClassDB::bind_method(D_METHOD("set_recursive_source_scan", "value"), &FmodGeometryInstance3D::set_recursive_source_scan);
+		ClassDB::bind_method(D_METHOD("get_recursive_source_scan"), &FmodGeometryInstance3D::get_recursive_source_scan);
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "recursive_source_scan"), "set_recursive_source_scan", "get_recursive_source_scan");
+
+		ClassDB::bind_method(D_METHOD("set_primitive_segments", "segments"), &FmodGeometryInstance3D::set_primitive_segments);
+		ClassDB::bind_method(D_METHOD("get_primitive_segments"), &FmodGeometryInstance3D::get_primitive_segments);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "primitive_segments", PROPERTY_HINT_RANGE, "6,64,1"), "set_primitive_segments", "get_primitive_segments");
+
 		ClassDB::bind_method(D_METHOD("set_show_debug_gizmo", "value"), &FmodGeometryInstance3D::set_show_debug_gizmo);
 		ClassDB::bind_method(D_METHOD("get_show_debug_gizmo"), &FmodGeometryInstance3D::get_show_debug_gizmo);
 		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "show_debug_gizmo"), "set_show_debug_gizmo", "get_show_debug_gizmo");
@@ -40,6 +72,9 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("rebuild_geometry"), &FmodGeometryInstance3D::rebuild_geometry);
 		ClassDB::bind_method(D_METHOD("clear_geometry"), &FmodGeometryInstance3D::clear_geometry);
 		ClassDB::bind_method(D_METHOD("has_valid_geometry"), &FmodGeometryInstance3D::has_valid_geometry);
+		ClassDB::bind_method(D_METHOD("sync_geometry_transform"), &FmodGeometryInstance3D::sync_geometry_transform);
+		ClassDB::bind_method(D_METHOD("get_polygon_count"), &FmodGeometryInstance3D::get_polygon_count);
+		ClassDB::bind_method(D_METHOD("get_vertex_count"), &FmodGeometryInstance3D::get_vertex_count);
 		ClassDB::bind_method(D_METHOD("get_geometry"), &FmodGeometryInstance3D::get_geometry);
 
 		ADD_SIGNAL(MethodInfo("geometry_created"));
@@ -47,33 +82,7 @@ namespace godot {
 		ADD_SIGNAL(MethodInfo("geometry_rebuilt"));
 	}
 
-	void FmodGeometryInstance3D::_notification(int p_what) {
-		switch (p_what) {
-			case NOTIFICATION_ENTER_TREE:
-				_enter_tree();
-				break;
-			case NOTIFICATION_READY:
-				_ready();
-				break;
-			case NOTIFICATION_EXIT_TREE:
-				_exit_tree();
-				break;
-			case NOTIFICATION_PROCESS:
-				_process(get_process_delta_time());
-				break;
-			#ifdef TOOLS_ENABLED
-			case NOTIFICATION_EDITOR_PRE_SAVE:
-				// 编辑器保存前，确保几何体已创建
-				if (!has_valid_geometry() && auto_rebuild) {
-					rebuild_geometry();
-				}
-				break;
-			#endif
-		}
-	}
-
 	FmodGeometryInstance3D::FmodGeometryInstance3D() {
-		// 默认设置为处理（用于网格变化检测）
 		set_process(true);
 	}
 
@@ -81,96 +90,116 @@ namespace godot {
 		clear_geometry();
 	}
 
-	void FmodGeometryInstance3D::_enter_tree() {
-		detect_source_node();
-	}
+	void FmodGeometryInstance3D::_notification(int p_what) {
+		switch (p_what) {
+			case NOTIFICATION_READY: {
+				if (auto_rebuild) {
+					call_deferred("rebuild_geometry");
+				}
+			} break;
 
-	void FmodGeometryInstance3D::_ready() {
-		if (auto_rebuild) {
-			rebuild_geometry();
-		}
-	}
+			case NOTIFICATION_PROCESS: {
+				if (sync_transform && has_valid_geometry()) {
+					sync_geometry_transform();
+				}
+			} break;
 
-	void FmodGeometryInstance3D::_exit_tree() {
-		clear_geometry();
-	}
+			case NOTIFICATION_EXIT_TREE: {
+				clear_geometry();
+			} break;
 
-	void FmodGeometryInstance3D::_process(double delta) {
-		#ifdef TOOLS_ENABLED
-		// 编辑器模式下检测网格变化
-		if (Engine::get_singleton()->is_editor_hint() && auto_rebuild && has_valid_geometry()) {
-			if (cached_mesh_instance && cached_mesh_instance->get_mesh().is_valid()) {
-				Ref<Mesh> mesh = cached_mesh_instance->get_mesh();
-				uint32_t current_version = mesh->get_rid().get_id();
-				if (current_version != last_mesh_version) {
-					last_mesh_version = current_version;
+			#ifdef TOOLS_ENABLED
+			case NOTIFICATION_EDITOR_PRE_SAVE: {
+				if (auto_rebuild && !has_valid_geometry()) {
 					rebuild_geometry();
 				}
-			}
+			} break;
+			#endif
 		}
-		#endif
-	}
-
-	void FmodGeometryInstance3D::detect_source_node() {
-		Node* parent = get_parent();
-		
-		if (is_valid_source_node(parent)) {
-			if (parent->is_class("MeshInstance3D")) {
-				cached_mesh_instance = Object::cast_to<MeshInstance3D>(parent);
-				cached_collision_shape = nullptr;
-			} else if (parent->is_class("CollisionShape3D")) {
-				cached_collision_shape = Object::cast_to<CollisionShape3D>(parent);
-				cached_mesh_instance = nullptr;
-			}
-		} else {
-			// 尝试查找祖父节点（如果是嵌套的）
-			Node* grandparent = parent ? parent->get_parent() : nullptr;
-			if (is_valid_source_node(grandparent)) {
-				if (grandparent->is_class("MeshInstance3D")) {
-					cached_mesh_instance = Object::cast_to<MeshInstance3D>(grandparent);
-					cached_collision_shape = nullptr;
-				} else if (grandparent->is_class("CollisionShape3D")) {
-					cached_collision_shape = Object::cast_to<CollisionShape3D>(grandparent);
-					cached_mesh_instance = nullptr;
-				}
-			}
-		}
-	}
-
-	bool FmodGeometryInstance3D::is_valid_source_node(Node* node) const {
-		if (!node) return false;
-		return node->is_class("MeshInstance3D") || node->is_class("CollisionShape3D");
 	}
 
 	void FmodGeometryInstance3D::rebuild_geometry() {
 		clear_geometry();
-		
+
+		std::vector<PackedVector3Array> polygons;
 		bool success = false;
-		
-		if (cached_mesh_instance) {
-			success = build_from_mesh_instance(cached_mesh_instance);
-		} else if (cached_collision_shape) {
-			success = build_from_collision_shape(cached_collision_shape);
-		} else {
-			// 重新检测
-			detect_source_node();
-			if (cached_mesh_instance) {
-				success = build_from_mesh_instance(cached_mesh_instance);
-			} else if (cached_collision_shape) {
-				success = build_from_collision_shape(cached_collision_shape);
+
+		Node *configured_source = _get_configured_source_node();
+		SourceMode effective_mode = source_mode;
+
+		if (effective_mode == SOURCE_AUTO) {
+			if (configured_source) {
+				if (Object::cast_to<MeshInstance3D>(configured_source)) {
+					effective_mode = SOURCE_MESH_INSTANCE;
+				} else {
+					effective_mode = SOURCE_COLLISION_SHAPES;
+				}
+			} else if (mesh.is_valid()) {
+				effective_mode = SOURCE_MESH_RESOURCE;
+			} else {
+				effective_mode = SOURCE_COLLISION_SHAPES;
 			}
 		}
-		
-		if (success) {
-			emit_signal("geometry_rebuilt");
-			emit_signal("geometry_created");
+
+		if (effective_mode == SOURCE_MESH_RESOURCE) {
+			success = _build_from_mesh(mesh, Transform3D(), polygons);
+		} else if (effective_mode == SOURCE_MESH_INSTANCE) {
+			MeshInstance3D *mesh_instance = Object::cast_to<MeshInstance3D>(configured_source);
+			if (!mesh_instance && source_node_path.is_empty()) {
+				mesh_instance = Object::cast_to<MeshInstance3D>(get_parent());
+			}
+			success = _build_from_mesh_instance(mesh_instance, polygons);
+		} else {
+			Node *root = configured_source ? configured_source : this;
+			success = _build_from_collision_shapes(root, polygons);
+
+			if (!success && source_mode == SOURCE_AUTO) {
+				MeshInstance3D *mesh_instance = Object::cast_to<MeshInstance3D>(get_parent());
+				success = _build_from_mesh_instance(mesh_instance, polygons);
+			}
 		}
+
+		if (!success || polygons.empty()) {
+			UtilityFunctions::push_warning("FmodGeometryInstance3D found no usable geometry.");
+			return;
+		}
+
+		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
+		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized.");
+
+		int max_vertices = 0;
+		for (const PackedVector3Array &polygon : polygons) {
+			max_vertices += polygon.size();
+		}
+
+		geometry = system->create_geometry((int)polygons.size(), max_vertices);
+		ERR_FAIL_COND_MSG(geometry.is_null(), "Failed to create FMOD geometry.");
+
+		for (const PackedVector3Array &polygon : polygons) {
+			int index = geometry->add_polygon(direct_occlusion, reverb_occlusion, double_sided, polygon);
+			if (index >= 0) {
+				polygon_count++;
+				vertex_count += polygon.size();
+			}
+		}
+
+		geometry->set_active(active);
+		sync_geometry_transform();
+
+		emit_signal("geometry_created");
+		emit_signal("geometry_rebuilt");
+
+		#ifdef TOOLS_ENABLED
+		update_gizmos();
+		#endif
 	}
 
 	void FmodGeometryInstance3D::clear_geometry() {
 		if (geometry.is_valid()) {
 			geometry->release();
 			geometry.unref();
+			polygon_count = 0;
+			vertex_count = 0;
 			emit_signal("geometry_cleared");
 		}
 	}
@@ -179,130 +208,336 @@ namespace godot {
 		return geometry.is_valid() && geometry->geometry_is_valid();
 	}
 
-	bool FmodGeometryInstance3D::build_from_mesh_instance(MeshInstance3D* mesh_instance) {
-		ERR_FAIL_COND_V(!mesh_instance, false);
-		
-		Ref<Mesh> mesh = mesh_instance->get_mesh();
-		if (!mesh.is_valid()) {
-			UtilityFunctions::push_warning("MeshInstance3D has no mesh: " + mesh_instance->get_name());
-			return false;
+	void FmodGeometryInstance3D::sync_geometry_transform() {
+		if (!has_valid_geometry()) {
+			return;
 		}
-		
-		Transform3D world_transform = mesh_instance->get_global_transform();
-		return build_from_mesh(mesh, world_transform);
-	}
-
-	bool FmodGeometryInstance3D::build_from_collision_shape(CollisionShape3D* collision_shape) {
-		ERR_FAIL_COND_V(!collision_shape, false);
-		
-		Ref<Shape3D> shape = collision_shape->get_shape();
-		if (!shape.is_valid()) {
-			UtilityFunctions::push_warning("CollisionShape3D has no shape: " + collision_shape->get_name());
-			return false;
-		}
-		
-		// TODO: 实现从 Shape3D 创建几何体的逻辑
-		// 暂时不支持，返回 false
-		UtilityFunctions::push_warning("Building geometry from CollisionShape3D is not yet fully implemented");
-		return false;
-	}
-
-	bool FmodGeometryInstance3D::build_from_mesh(Ref<Mesh> mesh, const Transform3D& transform) {
-		ERR_FAIL_COND_V(!mesh.is_valid(), false);
-		
-		Ref<FmodSystem> system = FmodServer::get_singleton()->get_main_system();
-		ERR_FAIL_COND_V(system.is_null(), false);
-		
-		geometry = system->create_geometry();
-		ERR_FAIL_COND_V(!geometry.is_valid(), false);
-		
-		// 获取所有三角形
-		PackedVector3Array triangles = get_mesh_triangles(mesh);
-		
-		if (triangles.size() < 3) {
-			UtilityFunctions::push_warning("Mesh has no valid triangles");
-			return false;
-		}
-		
-		// 转换坐标并添加到几何体
-		int polygon_count = 0;
-		for (int i = 0; i < triangles.size(); i += 3) {
-			PackedVector3Array poly;
-			poly.resize(3);
-			
-			for (int j = 0; j < 3; j++) {
-				Vector3 world_pos = transform.xform(triangles[i + j]);
-				poly[j] = godot_to_fmod_vector(world_pos);
-			}
-			
-			int result = geometry->add_polygon(direct_occlusion, reverb_occlusion, double_sided, poly);
-			if (result >= 0) {
-				polygon_count++;
-			}
-		}
-		
-		// 设置激活状态
+		geometry->set_transform(get_global_transform());
 		geometry->set_active(active);
-		
-		// 记录网格版本（用于变化检测）
-		#ifdef TOOLS_ENABLED
-		last_mesh_version = mesh->get_rid().get_id();
-		#endif
-		
-		return true;
 	}
 
-	PackedVector3Array FmodGeometryInstance3D::get_mesh_triangles(Ref<Mesh> mesh) {
+	PackedVector3Array FmodGeometryInstance3D::get_mesh_triangles(Ref<Mesh> p_mesh) {
 		PackedVector3Array result;
-		
-		if (!mesh.is_valid()) return result;
-		
-		for (int s = 0; s < mesh->get_surface_count(); s++) {
-			Array arrays = mesh->surface_get_arrays(s);
-			if (arrays.is_empty()) continue;
-			
+
+		if (!p_mesh.is_valid()) {
+			return result;
+		}
+
+		for (int surface = 0; surface < p_mesh->get_surface_count(); surface++) {
+			Array arrays = p_mesh->surface_get_arrays(surface);
+			if (arrays.is_empty()) {
+				continue;
+			}
+
 			PackedVector3Array vertices = arrays[Mesh::ARRAY_VERTEX];
 			PackedInt32Array indices = arrays[Mesh::ARRAY_INDEX];
-			
-			if (vertices.is_empty()) continue;
-			
+
+			if (vertices.is_empty()) {
+				continue;
+			}
+
 			if (indices.is_empty()) {
-				// 无索引，假设是三角形列表
-				for (int i = 0; i < vertices.size(); i++) {
+				for (int i = 0; i + 2 < vertices.size(); i += 3) {
 					result.append(vertices[i]);
+					result.append(vertices[i + 1]);
+					result.append(vertices[i + 2]);
 				}
 			} else {
-				// 使用索引
-				for (int i = 0; i < indices.size(); i++) {
+				for (int i = 0; i + 2 < indices.size(); i += 3) {
 					result.append(vertices[indices[i]]);
+					result.append(vertices[indices[i + 1]]);
+					result.append(vertices[indices[i + 2]]);
 				}
 			}
 		}
-		
+
 		return result;
 	}
 
-	Vector3 FmodGeometryInstance3D::godot_to_fmod_vector(const Vector3& v) {
-		// FMOD 使用左手坐标系，Godot 使用右手坐标系
-		// 翻转 Z 轴
-		return Vector3(v.x, v.y, -v.z);
+	Node *FmodGeometryInstance3D::_get_configured_source_node() const {
+		if (source_node_path.is_empty() || !is_inside_tree()) {
+			return nullptr;
+		}
+		return get_node_or_null(source_node_path);
 	}
 
-	Vector3 FmodGeometryInstance3D::fmod_to_godot_vector(const Vector3& v) {
-		return Vector3(v.x, v.y, -v.z);
-	}
+	void FmodGeometryInstance3D::_collect_collision_shapes(Node *p_root, std::vector<CollisionShape3D *> &r_shapes) const {
+		if (!p_root) {
+			return;
+		}
 
-	// === 属性设置器/获取器 ===
-	void FmodGeometryInstance3D::set_direct_occlusion(float p_value) {
-		direct_occlusion = Math::clamp(p_value, 0.0f, 1.0f);
-		if (has_valid_geometry()) {
-			// 更新所有多边形的属性
-			// 注意：这需要遍历所有多边形，可能较耗时
-			// 暂时简单处理：重建几何体
-			if (auto_rebuild) {
-				rebuild_geometry();
+		CollisionShape3D *shape = Object::cast_to<CollisionShape3D>(p_root);
+		if (shape && !shape->is_disabled()) {
+			r_shapes.push_back(shape);
+			if (!recursive_source_scan) {
+				return;
 			}
 		}
+
+		for (int i = 0; i < p_root->get_child_count(); i++) {
+			Node *child = p_root->get_child(i);
+			if (!child) {
+				continue;
+			}
+
+			if (recursive_source_scan) {
+				_collect_collision_shapes(child, r_shapes);
+			} else {
+				CollisionShape3D *child_shape = Object::cast_to<CollisionShape3D>(child);
+				if (child_shape && !child_shape->is_disabled()) {
+					r_shapes.push_back(child_shape);
+				}
+			}
+		}
+	}
+
+	bool FmodGeometryInstance3D::_build_from_collision_shapes(Node *p_root, std::vector<PackedVector3Array> &r_polygons) const {
+		std::vector<CollisionShape3D *> shapes;
+		_collect_collision_shapes(p_root, shapes);
+
+		for (CollisionShape3D *shape : shapes) {
+			_build_from_collision_shape(shape, r_polygons);
+		}
+
+		return !r_polygons.empty();
+	}
+
+	bool FmodGeometryInstance3D::_build_from_collision_shape(CollisionShape3D *p_collision_shape, std::vector<PackedVector3Array> &r_polygons) const {
+		if (!p_collision_shape) {
+			return false;
+		}
+
+		Ref<Shape3D> shape = p_collision_shape->get_shape();
+		if (!shape.is_valid()) {
+			UtilityFunctions::push_warning("CollisionShape3D has no Shape3D: " + p_collision_shape->get_name());
+			return false;
+		}
+
+		Transform3D to_geometry_local = get_global_transform().affine_inverse() * p_collision_shape->get_global_transform();
+		return _build_from_shape(shape, to_geometry_local, r_polygons);
+	}
+
+	bool FmodGeometryInstance3D::_build_from_mesh_instance(MeshInstance3D *p_mesh_instance, std::vector<PackedVector3Array> &r_polygons) const {
+		if (!p_mesh_instance) {
+			return false;
+		}
+
+		Ref<Mesh> source_mesh = p_mesh_instance->get_mesh();
+		if (!source_mesh.is_valid()) {
+			UtilityFunctions::push_warning("MeshInstance3D has no Mesh: " + p_mesh_instance->get_name());
+			return false;
+		}
+
+		Transform3D to_geometry_local = get_global_transform().affine_inverse() * p_mesh_instance->get_global_transform();
+		return _build_from_mesh(source_mesh, to_geometry_local, r_polygons);
+	}
+
+	bool FmodGeometryInstance3D::_build_from_mesh(const Ref<Mesh> &p_mesh, const Transform3D &p_to_geometry_local, std::vector<PackedVector3Array> &r_polygons) const {
+		PackedVector3Array triangles = get_mesh_triangles(p_mesh);
+		if (triangles.size() < 3) {
+			return false;
+		}
+
+		for (int i = 0; i + 2 < triangles.size(); i += 3) {
+			_append_triangle(triangles[i], triangles[i + 1], triangles[i + 2], p_to_geometry_local, r_polygons);
+		}
+
+		return true;
+	}
+
+	bool FmodGeometryInstance3D::_build_from_shape(const Ref<Shape3D> &p_shape, const Transform3D &p_to_geometry_local, std::vector<PackedVector3Array> &r_polygons) const {
+		if (!p_shape.is_valid()) {
+			return false;
+		}
+
+		BoxShape3D *box = Object::cast_to<BoxShape3D>(p_shape.ptr());
+		if (box) {
+			_append_box(box->get_size(), p_to_geometry_local, r_polygons);
+			return true;
+		}
+
+		SphereShape3D *sphere = Object::cast_to<SphereShape3D>(p_shape.ptr());
+		if (sphere) {
+			_append_sphere(sphere->get_radius(), p_to_geometry_local, r_polygons);
+			return true;
+		}
+
+		CylinderShape3D *cylinder = Object::cast_to<CylinderShape3D>(p_shape.ptr());
+		if (cylinder) {
+			_append_cylinder(cylinder->get_radius(), cylinder->get_height(), p_to_geometry_local, r_polygons);
+			return true;
+		}
+
+		ConcavePolygonShape3D *concave = Object::cast_to<ConcavePolygonShape3D>(p_shape.ptr());
+		if (concave) {
+			PackedVector3Array faces = concave->get_faces();
+			for (int i = 0; i + 2 < faces.size(); i += 3) {
+				_append_triangle(faces[i], faces[i + 1], faces[i + 2], p_to_geometry_local, r_polygons);
+			}
+			return faces.size() >= 3;
+		}
+
+		ConvexPolygonShape3D *convex = Object::cast_to<ConvexPolygonShape3D>(p_shape.ptr());
+		if (convex) {
+			Ref<ArrayMesh> debug_mesh = p_shape->get_debug_mesh();
+			if (debug_mesh.is_valid()) {
+				Ref<Mesh> debug_as_mesh = debug_mesh;
+				return _build_from_mesh(debug_as_mesh, p_to_geometry_local, r_polygons);
+			}
+
+			PackedVector3Array points = convex->get_points();
+			if (!points.is_empty()) {
+				Vector3 min = points[0];
+				Vector3 max = points[0];
+				for (int i = 1; i < points.size(); i++) {
+					min.x = MIN(min.x, points[i].x);
+					min.y = MIN(min.y, points[i].y);
+					min.z = MIN(min.z, points[i].z);
+					max.x = MAX(max.x, points[i].x);
+					max.y = MAX(max.y, points[i].y);
+					max.z = MAX(max.z, points[i].z);
+				}
+				_append_box(max - min, p_to_geometry_local * Transform3D(Basis(), (min + max) * 0.5f), r_polygons);
+				return true;
+			}
+		}
+
+		Ref<ArrayMesh> debug_mesh = p_shape->get_debug_mesh();
+		if (debug_mesh.is_valid()) {
+			Ref<Mesh> debug_as_mesh = debug_mesh;
+			return _build_from_mesh(debug_as_mesh, p_to_geometry_local, r_polygons);
+		}
+
+		UtilityFunctions::push_warning("Unsupported Shape3D for FmodGeometryInstance3D: " + p_shape->get_class());
+		return false;
+	}
+
+	void FmodGeometryInstance3D::_append_box(const Vector3 &p_size, const Transform3D &p_xform, std::vector<PackedVector3Array> &r_polygons) const {
+		Vector3 h = p_size * 0.5f;
+		Vector3 v[8] = {
+			Vector3(-h.x, -h.y, -h.z),
+			Vector3(h.x, -h.y, -h.z),
+			Vector3(h.x, h.y, -h.z),
+			Vector3(-h.x, h.y, -h.z),
+			Vector3(-h.x, -h.y, h.z),
+			Vector3(h.x, -h.y, h.z),
+			Vector3(h.x, h.y, h.z),
+			Vector3(-h.x, h.y, h.z),
+		};
+
+		_append_triangle(v[0], v[1], v[2], p_xform, r_polygons);
+		_append_triangle(v[0], v[2], v[3], p_xform, r_polygons);
+		_append_triangle(v[5], v[4], v[7], p_xform, r_polygons);
+		_append_triangle(v[5], v[7], v[6], p_xform, r_polygons);
+		_append_triangle(v[4], v[0], v[3], p_xform, r_polygons);
+		_append_triangle(v[4], v[3], v[7], p_xform, r_polygons);
+		_append_triangle(v[1], v[5], v[6], p_xform, r_polygons);
+		_append_triangle(v[1], v[6], v[2], p_xform, r_polygons);
+		_append_triangle(v[3], v[2], v[6], p_xform, r_polygons);
+		_append_triangle(v[3], v[6], v[7], p_xform, r_polygons);
+		_append_triangle(v[4], v[5], v[1], p_xform, r_polygons);
+		_append_triangle(v[4], v[1], v[0], p_xform, r_polygons);
+	}
+
+	void FmodGeometryInstance3D::_append_sphere(float p_radius, const Transform3D &p_xform, std::vector<PackedVector3Array> &r_polygons) const {
+		int segments = CLAMP(primitive_segments, 6, 64);
+		int rings = MAX(3, segments / 2);
+
+		for (int y = 0; y < rings; y++) {
+			float phi0 = -Math_PI * 0.5f + Math_PI * (float)y / (float)rings;
+			float phi1 = -Math_PI * 0.5f + Math_PI * (float)(y + 1) / (float)rings;
+
+			for (int x = 0; x < segments; x++) {
+				float theta0 = Math_TAU * (float)x / (float)segments;
+				float theta1 = Math_TAU * (float)(x + 1) / (float)segments;
+
+				Vector3 a(Math::cos(phi0) * Math::cos(theta0), Math::sin(phi0), Math::cos(phi0) * Math::sin(theta0));
+				Vector3 b(Math::cos(phi0) * Math::cos(theta1), Math::sin(phi0), Math::cos(phi0) * Math::sin(theta1));
+				Vector3 c(Math::cos(phi1) * Math::cos(theta1), Math::sin(phi1), Math::cos(phi1) * Math::sin(theta1));
+				Vector3 d(Math::cos(phi1) * Math::cos(theta0), Math::sin(phi1), Math::cos(phi1) * Math::sin(theta0));
+
+				_append_triangle(a * p_radius, b * p_radius, c * p_radius, p_xform, r_polygons);
+				_append_triangle(a * p_radius, c * p_radius, d * p_radius, p_xform, r_polygons);
+			}
+		}
+	}
+
+	void FmodGeometryInstance3D::_append_cylinder(float p_radius, float p_height, const Transform3D &p_xform, std::vector<PackedVector3Array> &r_polygons) const {
+		int segments = CLAMP(primitive_segments, 6, 64);
+		float half_height = p_height * 0.5f;
+		Vector3 top_center(0.0f, half_height, 0.0f);
+		Vector3 bottom_center(0.0f, -half_height, 0.0f);
+
+		for (int i = 0; i < segments; i++) {
+			float a0 = Math_TAU * (float)i / (float)segments;
+			float a1 = Math_TAU * (float)(i + 1) / (float)segments;
+			Vector3 bottom0(Math::cos(a0) * p_radius, -half_height, Math::sin(a0) * p_radius);
+			Vector3 bottom1(Math::cos(a1) * p_radius, -half_height, Math::sin(a1) * p_radius);
+			Vector3 top0(Math::cos(a0) * p_radius, half_height, Math::sin(a0) * p_radius);
+			Vector3 top1(Math::cos(a1) * p_radius, half_height, Math::sin(a1) * p_radius);
+
+			_append_triangle(bottom0, bottom1, top1, p_xform, r_polygons);
+			_append_triangle(bottom0, top1, top0, p_xform, r_polygons);
+			_append_triangle(top_center, top0, top1, p_xform, r_polygons);
+			_append_triangle(bottom_center, bottom1, bottom0, p_xform, r_polygons);
+		}
+	}
+
+	void FmodGeometryInstance3D::_append_triangle(const Vector3 &p_a, const Vector3 &p_b, const Vector3 &p_c, const Transform3D &p_xform, std::vector<PackedVector3Array> &r_polygons) const {
+		Vector3 a = p_xform.xform(p_a);
+		Vector3 b = p_xform.xform(p_b);
+		Vector3 c = p_xform.xform(p_c);
+		if ((b - a).cross(c - a).length_squared() < 0.00000001f) {
+			return;
+		}
+
+		PackedVector3Array polygon;
+		polygon.resize(3);
+		polygon[0] = a;
+		polygon[1] = b;
+		polygon[2] = c;
+		r_polygons.push_back(polygon);
+	}
+
+	void FmodGeometryInstance3D::_rebuild_if_live() {
+		if (auto_rebuild && is_inside_tree()) {
+			rebuild_geometry();
+		}
+	}
+
+	void FmodGeometryInstance3D::set_source_mode(SourceMode p_mode) {
+		if (p_mode < SOURCE_AUTO || p_mode > SOURCE_MESH_RESOURCE) {
+			return;
+		}
+		source_mode = p_mode;
+		_rebuild_if_live();
+	}
+
+	FmodGeometryInstance3D::SourceMode FmodGeometryInstance3D::get_source_mode() const {
+		return source_mode;
+	}
+
+	void FmodGeometryInstance3D::set_source_node_path(const NodePath &p_path) {
+		source_node_path = p_path;
+		_rebuild_if_live();
+	}
+
+	NodePath FmodGeometryInstance3D::get_source_node_path() const {
+		return source_node_path;
+	}
+
+	void FmodGeometryInstance3D::set_mesh(const Ref<Mesh> &p_mesh) {
+		mesh = p_mesh;
+		_rebuild_if_live();
+	}
+
+	Ref<Mesh> FmodGeometryInstance3D::get_mesh() const {
+		return mesh;
+	}
+
+	void FmodGeometryInstance3D::set_direct_occlusion(float p_value) {
+		direct_occlusion = CLAMP(p_value, 0.0f, 1.0f);
+		_rebuild_if_live();
 	}
 
 	float FmodGeometryInstance3D::get_direct_occlusion() const {
@@ -310,10 +545,8 @@ namespace godot {
 	}
 
 	void FmodGeometryInstance3D::set_reverb_occlusion(float p_value) {
-		reverb_occlusion = Math::clamp(p_value, 0.0f, 1.0f);
-		if (has_valid_geometry() && auto_rebuild) {
-			rebuild_geometry();
-		}
+		reverb_occlusion = CLAMP(p_value, 0.0f, 1.0f);
+		_rebuild_if_live();
 	}
 
 	float FmodGeometryInstance3D::get_reverb_occlusion() const {
@@ -322,9 +555,7 @@ namespace godot {
 
 	void FmodGeometryInstance3D::set_double_sided(bool p_value) {
 		double_sided = p_value;
-		if (has_valid_geometry() && auto_rebuild) {
-			rebuild_geometry();
-		}
+		_rebuild_if_live();
 	}
 
 	bool FmodGeometryInstance3D::get_double_sided() const {
@@ -344,16 +575,44 @@ namespace godot {
 
 	void FmodGeometryInstance3D::set_auto_rebuild(bool p_value) {
 		auto_rebuild = p_value;
-		set_process(auto_rebuild);
 	}
 
 	bool FmodGeometryInstance3D::get_auto_rebuild() const {
 		return auto_rebuild;
 	}
 
+	void FmodGeometryInstance3D::set_sync_transform(bool p_value) {
+		sync_transform = p_value;
+		set_process(sync_transform);
+		if (sync_transform) {
+			sync_geometry_transform();
+		}
+	}
+
+	bool FmodGeometryInstance3D::get_sync_transform() const {
+		return sync_transform;
+	}
+
+	void FmodGeometryInstance3D::set_recursive_source_scan(bool p_value) {
+		recursive_source_scan = p_value;
+		_rebuild_if_live();
+	}
+
+	bool FmodGeometryInstance3D::get_recursive_source_scan() const {
+		return recursive_source_scan;
+	}
+
+	void FmodGeometryInstance3D::set_primitive_segments(int p_segments) {
+		primitive_segments = CLAMP(p_segments, 6, 64);
+		_rebuild_if_live();
+	}
+
+	int FmodGeometryInstance3D::get_primitive_segments() const {
+		return primitive_segments;
+	}
+
 	void FmodGeometryInstance3D::set_show_debug_gizmo(bool p_value) {
 		show_debug_gizmo = p_value;
-		// 通知编辑器更新 gizmo
 		#ifdef TOOLS_ENABLED
 		update_gizmos();
 		#endif
@@ -361,6 +620,14 @@ namespace godot {
 
 	bool FmodGeometryInstance3D::get_show_debug_gizmo() const {
 		return show_debug_gizmo;
+	}
+
+	int FmodGeometryInstance3D::get_polygon_count() const {
+		return polygon_count;
+	}
+
+	int FmodGeometryInstance3D::get_vertex_count() const {
+		return vertex_count;
 	}
 
 	Ref<FmodGeometry> FmodGeometryInstance3D::get_geometry() const {

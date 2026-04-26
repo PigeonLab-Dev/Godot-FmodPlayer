@@ -231,6 +231,8 @@ namespace godot {
 
 	void FmodServer::_bind_methods() {
 		ClassDB::bind_method(D_METHOD("_connect_update"), &FmodServer::_connect_update);
+		ClassDB::bind_method(D_METHOD("_update_fmod"), &FmodServer::_update_fmod);
+		ClassDB::bind_method(D_METHOD("_build_bus_layout"), &FmodServer::_build_bus_layout);
 		ClassDB::bind_static_method("FmodServer", D_METHOD("get_main_system"), &FmodServer::get_main_system);
 		ClassDB::bind_static_method("FmodServer", D_METHOD("get_master_channel_group"), &FmodServer::get_master_channel_group);
 		ClassDB::bind_static_method("FmodServer", D_METHOD("get_audio_bus_layout"), &FmodServer::get_audio_bus_layout);
@@ -302,6 +304,18 @@ namespace godot {
 	FmodServer::~FmodServer() {
 		ERR_FAIL_COND(singleton != this);
 
+		SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop());
+		Callable update_callable(this, "_update_fmod");
+		if (tree && tree->is_connected("process_frame", update_callable)) {
+			tree->disconnect("process_frame", update_callable);
+		}
+
+		AudioServer* audio_server = AudioServer::get_singleton();
+		Callable bus_layout_callable(this, "_build_bus_layout");
+		if (audio_server && audio_server->is_connected("bus_layout_changed", bus_layout_callable)) {
+			audio_server->disconnect("bus_layout_changed", bus_layout_callable);
+		}
+
 		singleton = nullptr;
 
 		// 释放 FMODSystem
@@ -372,8 +386,19 @@ namespace godot {
 		SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop());
 		if (tree) {
 			if (!update_connected) {
-				tree->connect("process_frame", callable_mp(this, &FmodServer::_update_fmod));
-				update_connected = true;
+				Callable update_callable(this, "_update_fmod");
+				if (update_callable.is_valid() && !tree->is_connected("process_frame", update_callable)) {
+					Error err = tree->connect("process_frame", update_callable);
+					update_connected = err == OK;
+					if (err != OK) {
+						WARN_PRINT("FmodServer: Failed to connect SceneTree::process_frame.");
+						retry_needed = true;
+					}
+				}
+				else {
+					update_connected = update_callable.is_valid();
+					retry_needed = !update_connected;
+				}
 			}
 		}
 		else {
@@ -383,9 +408,27 @@ namespace godot {
 		AudioServer* audio_server = AudioServer::get_singleton();
 		if (audio_server) {
 			if (!audio_server_connected) {
-				audio_server->connect("bus_layout_changed", callable_mp(this, &FmodServer::_build_bus_layout), CONNECT_DEFERRED);
-				audio_server_connected = true;
-				_build_bus_layout();
+				Callable bus_layout_callable(this, "_build_bus_layout");
+				if (bus_layout_callable.is_valid() && !audio_server->is_connected("bus_layout_changed", bus_layout_callable)) {
+					Error err = audio_server->connect("bus_layout_changed", bus_layout_callable, CONNECT_DEFERRED);
+					audio_server_connected = err == OK;
+					if (err == OK) {
+						_build_bus_layout();
+					}
+					else {
+						WARN_PRINT("FmodServer: Failed to connect AudioServer::bus_layout_changed.");
+						retry_needed = true;
+					}
+				}
+				else {
+					audio_server_connected = bus_layout_callable.is_valid();
+					if (audio_server_connected) {
+						_build_bus_layout();
+					}
+					else {
+						retry_needed = true;
+					}
+				}
 			}
 		}
 		else {

@@ -159,6 +159,7 @@
     <ClInclude Include="src\editor\fmod_audio_preview_inspector.h" />
     <ClInclude Include="src\editor\fmod_audio_preview_property.h" />
     <ClInclude Include="src\editor\fmod_audio_stream_player_3d_gizmo_plugin.h" />
+    <ClInclude Include="src\editor\fmod_reverb_zone_3d_gizmo_plugin.h" />
     <ClInclude Include="src\editor\modify_android_build_template_plugin.h" />
     <ClInclude Include="src\geometry\fmod_geometry.h" />
     <ClInclude Include="src\mixer\fmod_audio_bus.h" />
@@ -183,6 +184,7 @@
     <ClInclude Include="src\core\register_types.h" />
     <ClInclude Include="src\playback\fmod_sound_group.h" />
     <ClInclude Include="src\spatial\fmod_reverb_3d.h" />
+    <ClInclude Include="src\spatial\fmod_reverb_zone_3d.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\audio\fmod_audio_stream_flac.cpp" />
@@ -206,6 +208,7 @@
     <ClCompile Include="src\editor\fmod_audio_preview_inspector.cpp" />
     <ClCompile Include="src\editor\fmod_audio_preview_property.cpp" />
     <ClCompile Include="src\editor\fmod_audio_stream_player_3d_gizmo_plugin.cpp" />
+    <ClCompile Include="src\editor\fmod_reverb_zone_3d_gizmo_plugin.cpp" />
     <ClCompile Include="src\editor\modify_android_build_template_plugin.cpp" />
     <ClCompile Include="src\geometry\fmod_geometry.cpp" />
     <ClCompile Include="src\mixer\fmod_audio_bus.cpp" />
@@ -229,6 +232,7 @@
     <ClCompile Include="src\core\register_types.cpp" />
     <ClCompile Include="src\playback\fmod_sound_group.cpp" />
     <ClCompile Include="src\spatial\fmod_reverb_3d.cpp" />
+    <ClCompile Include="src\spatial\fmod_reverb_zone_3d.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

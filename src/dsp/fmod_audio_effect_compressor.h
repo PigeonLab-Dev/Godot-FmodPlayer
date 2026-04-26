@@ -16,6 +16,8 @@ namespace godot {
 		float mix;
 		StringName sidechain;
 
+		void _update_dsp_params();
+
 	protected:
 		static void _bind_methods();
 		void _validate_property(PropertyInfo& p_property) const;

@@ -23,10 +23,11 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_scale"), &FmodGeometry::get_scale);
 		ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "scale", PROPERTY_HINT_LINK, "", PROPERTY_USAGE_EDITOR), "set_scale", "get_scale");
 	
-		ClassDB::bind_method(D_METHOD("add_polygon", "direct_occlusion", "reverb_occlusion", "double_dided", "vertices"), &FmodGeometry::add_polygon);
+		ClassDB::bind_method(D_METHOD("set_transform", "transform"), &FmodGeometry::set_transform);
+		ClassDB::bind_method(D_METHOD("add_polygon", "direct_occlusion", "reverb_occlusion", "double_sided", "vertices"), &FmodGeometry::add_polygon);
 		
 		ClassDB::bind_method(D_METHOD("set_active", "active"), &FmodGeometry::set_active);
-		ClassDB::bind_method(D_METHOD("get_active"), &FmodGeometry::get_scale);
+		ClassDB::bind_method(D_METHOD("get_active"), &FmodGeometry::get_active);
 		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "active"), "set_active", "get_active");
 
 		ClassDB::bind_method(D_METHOD("get_max_polygons"), &FmodGeometry::get_max_polygons);
@@ -158,6 +159,26 @@ namespace godot {
 		return scale;
 	}
 
+	void FmodGeometry::set_transform(const Transform3D& transform) {
+		ERR_FAIL_COND(!geometry);
+
+		Vector3 position = transform.origin;
+		Vector3 scale = transform.basis.get_scale();
+		Basis basis = transform.basis.orthonormalized();
+
+		Vector3 forward = basis.get_column(2);
+		Vector3 up = basis.get_column(1);
+
+		FMOD_VECTOR fmod_pos = { position.x, position.y, position.z };
+		FMOD_VECTOR fmod_scale = { scale.x, scale.y, scale.z };
+		FMOD_VECTOR fmod_forward = { forward.x, forward.y, forward.z };
+		FMOD_VECTOR fmod_up = { up.x, up.y, up.z };
+
+		FMOD_ERR_CHECK(geometry->setPosition(&fmod_pos));
+		FMOD_ERR_CHECK(geometry->setRotation(&fmod_forward, &fmod_up));
+		FMOD_ERR_CHECK(geometry->setScale(&fmod_scale));
+	}
+
 	int FmodGeometry::add_polygon(
 		const float direct_occlusion,
 		const float reverb_occlusion,
@@ -201,10 +222,10 @@ namespace godot {
 
 	Dictionary FmodGeometry::get_max_polygons() const {
 		ERR_FAIL_COND_V(!geometry, Dictionary());
-		int maxpolyhons = 0, maxvertices = 0;
-		FMOD_ERR_CHECK_V(geometry->getMaxPolygons(&maxpolyhons, &maxvertices), Dictionary());
+		int maxpolygons = 0, maxvertices = 0;
+		FMOD_ERR_CHECK_V(geometry->getMaxPolygons(&maxpolygons, &maxvertices), Dictionary());
 		Dictionary result;
-		result["max_polyhons"] = maxpolyhons;
+		result["max_polygons"] = maxpolygons;
 		result["max_vertices"] = maxvertices;
 		return result;
 	}

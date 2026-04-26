@@ -1,8 +1,128 @@
 #include "fmod_audio_effect_capture.h"
 #include "core/fmod_server.h"
+#include "core/fmod_system.h"
+#include <fmod_errors.h>
 #include <string.h>
 
 namespace godot {
+	static constexpr uint32_t CAPTURE_DSP_USERDATA_MAGIC = 0x43415054;
+
+	struct CaptureDSPUserData : public CaptureDSPState {
+		uint32_t magic = CAPTURE_DSP_USERDATA_MAGIC;
+	};
+
+	static CaptureDSPUserData* _get_capture_userdata(FMOD_DSP_STATE* dsp_state) {
+		if (!dsp_state || !dsp_state->plugindata) {
+			return nullptr;
+		}
+
+		CaptureDSPUserData* userdata = static_cast<CaptureDSPUserData*>(dsp_state->plugindata);
+		return userdata->magic == CAPTURE_DSP_USERDATA_MAGIC ? userdata : nullptr;
+	}
+
+	static FMOD_RESULT F_CALL capture_dsp_create_callback(FMOD_DSP_STATE* dsp_state) {
+		if (!dsp_state) {
+			return FMOD_ERR_INVALID_PARAM;
+		}
+
+		void* userdata = nullptr;
+		if (dsp_state->functions && dsp_state->functions->getuserdata) {
+			dsp_state->functions->getuserdata(dsp_state, &userdata);
+		}
+
+		CaptureDSPUserData* capture_userdata = static_cast<CaptureDSPUserData*>(userdata);
+		if (!capture_userdata || capture_userdata->magic != CAPTURE_DSP_USERDATA_MAGIC) {
+			dsp_state->plugindata = nullptr;
+			dsp_state->instance = nullptr;
+			return FMOD_OK;
+		}
+
+		dsp_state->plugindata = capture_userdata;
+		dsp_state->instance = capture_userdata;
+		return FMOD_OK;
+	}
+
+	static FMOD_RESULT F_CALL capture_dsp_release_callback(FMOD_DSP_STATE* dsp_state) {
+		if (dsp_state) {
+			CaptureDSPUserData* userdata = static_cast<CaptureDSPUserData*>(dsp_state->plugindata);
+			if (userdata && userdata->magic == CAPTURE_DSP_USERDATA_MAGIC) {
+				userdata->magic = 0;
+				delete userdata;
+			}
+			dsp_state->plugindata = nullptr;
+			dsp_state->instance = nullptr;
+		}
+		return FMOD_OK;
+	}
+
+	static FMOD_RESULT F_CALL capture_dsp_process_callback(FMOD_DSP_STATE* dsp_state,
+		unsigned int length,
+		const FMOD_DSP_BUFFER_ARRAY* inbufferarray,
+		FMOD_DSP_BUFFER_ARRAY* outbufferarray,
+		FMOD_BOOL inputsidle,
+		FMOD_DSP_PROCESS_OPERATION op) {
+
+		(void)inputsidle;
+
+		if (!inbufferarray || !outbufferarray ||
+			inbufferarray->numbuffers <= 0 || outbufferarray->numbuffers <= 0 ||
+			!inbufferarray->buffernumchannels || !outbufferarray->buffernumchannels ||
+			!inbufferarray->bufferchannelmask || !outbufferarray->bufferchannelmask) {
+			return FMOD_ERR_INVALID_PARAM;
+		}
+
+		if (op == FMOD_DSP_PROCESS_QUERY) {
+			outbufferarray->buffernumchannels[0] = inbufferarray->buffernumchannels[0];
+			outbufferarray->bufferchannelmask[0] = inbufferarray->bufferchannelmask[0];
+			outbufferarray->speakermode = inbufferarray->speakermode;
+			return FMOD_OK;
+		}
+
+		if (op != FMOD_DSP_PROCESS_PERFORM) {
+			return FMOD_OK;
+		}
+
+		if (!inbufferarray->buffers || !outbufferarray->buffers) {
+			return FMOD_ERR_INVALID_PARAM;
+		}
+
+		const int channels = inbufferarray->buffernumchannels[0];
+		float* in = static_cast<float*>(inbufferarray->buffers[0]);
+		float* out = static_cast<float*>(outbufferarray->buffers[0]);
+		if (!in || !out || channels <= 0) {
+			return FMOD_ERR_INVALID_PARAM;
+		}
+
+		memcpy(out, in, static_cast<size_t>(length) * static_cast<size_t>(channels) * sizeof(float));
+
+		CaptureDSPUserData* state = _get_capture_userdata(dsp_state);
+		if (!state || !state->ring_buffer || !state->buffer_mutex || !state->pushed_frames || !state->discarded_frames) {
+			return FMOD_OK;
+		}
+
+		std::lock_guard<std::mutex> lock(*state->buffer_mutex);
+		size_t samples_to_write = static_cast<size_t>(length) * 2;
+		size_t written = 0;
+		for (unsigned int i = 0; i < length; i++) {
+			float stereo[2];
+			if (channels == 1) {
+				stereo[0] = in[i];
+				stereo[1] = in[i];
+			} else {
+				stereo[0] = in[i * channels];
+				stereo[1] = in[i * channels + 1];
+			}
+			written += state->ring_buffer->write(stereo, 2);
+		}
+
+		*state->pushed_frames += length;
+		if (written < samples_to_write) {
+			*state->discarded_frames += (samples_to_write - written) / 2;
+		}
+
+		return FMOD_OK;
+	}
+
 	void FmodAudioEffectCapture::_bind_methods() {
 		ClassDB::bind_method(D_METHOD("set_buffer_length", "buffer_length"), &FmodAudioEffectCapture::set_buffer_length);
 		ClassDB::bind_method(D_METHOD("get_buffer_length"), &FmodAudioEffectCapture::get_buffer_length);
@@ -148,23 +268,33 @@ namespace godot {
 			// 写入环形缓冲区
 			if (dsp_state->instance) {
 				CaptureDSPState* state = static_cast<CaptureDSPState*>(dsp_state->instance);
-				state->channels = ch;
+				state->channels = 2;
 				
 				// 安全地访问环形缓冲区
 				if (state->ring_buffer && state->buffer_mutex && state->pushed_frames && state->discarded_frames) {
 					std::lock_guard<std::mutex> lock(*state->buffer_mutex);
 					
 					// 写入数据（交错格式）
-					uint32_t samples_to_write = length * ch;
-					size_t written = state->ring_buffer->write(in, static_cast<size_t>(samples_to_write));
+					size_t samples_to_write = static_cast<size_t>(length) * 2;
+					size_t written = 0;
+					for (unsigned int i = 0; i < length; i++) {
+						float stereo[2];
+						if (ch == 1) {
+							stereo[0] = in[i];
+							stereo[1] = in[i];
+						} else {
+							stereo[0] = in[i * ch];
+							stereo[1] = in[i * ch + 1];
+						}
+						written += state->ring_buffer->write(stereo, 2);
+					}
 					
 					// 更新统计
 					*state->pushed_frames += length;
 					
 					// 计算丢弃的采样
 					if (written < samples_to_write) {
-						uint32_t dropped_samples = samples_to_write - written;
-						*state->discarded_frames += dropped_samples / ch;
+						*state->discarded_frames += (samples_to_write - written) / 2;
 					}
 				}
 			}
@@ -236,5 +366,56 @@ namespace godot {
 
 	double FmodAudioEffectCapture::get_buffer_length() const {
 		return buffer_length;
+	}
+
+	Ref<FmodDSP> FmodAudioEffectCapture::create_custom_dsp(Ref<FmodSystem> system) {
+		ERR_FAIL_COND_V(system.is_null(), Ref<FmodDSP>());
+
+		FMOD::System* fmod_system = system->get_system();
+		ERR_FAIL_COND_V(!fmod_system, Ref<FmodDSP>());
+
+		FMOD_DSP_DESCRIPTION desc;
+		memcpy(&desc, get_dsp_description(), sizeof(FMOD_DSP_DESCRIPTION));
+
+		CaptureDSPUserData* dsp_userdata = new CaptureDSPUserData();
+		dsp_userdata->ring_buffer = &ring_buffer;
+		dsp_userdata->buffer_mutex = &buffer_mutex;
+		dsp_userdata->pushed_frames = &pushed_frames;
+		dsp_userdata->discarded_frames = &discarded_frames;
+		dsp_userdata->channels = 2;
+		desc.userdata = dsp_userdata;
+
+		FMOD::DSP* dsp_ptr = nullptr;
+		FMOD_RESULT result = fmod_system->createDSP(&desc, &dsp_ptr);
+		if (result != FMOD_OK || !dsp_ptr) {
+			delete dsp_userdata;
+			ERR_PRINT(vformat("Failed to create capture DSP: %s", FMOD_ErrorString(result)));
+			return Ref<FmodDSP>();
+		}
+
+		Ref<FmodDSP> dsp;
+		dsp.instantiate();
+		dsp->setup(dsp_ptr);
+		return dsp;
+	}
+
+	FMOD_DSP_DESCRIPTION* FmodAudioEffectCapture::get_dsp_description() {
+		static FMOD_DSP_DESCRIPTION desc = {};
+		static bool initialized = false;
+
+		if (!initialized) {
+			memset(&desc, 0, sizeof(desc));
+			desc.pluginsdkversion = FMOD_PLUGIN_SDK_VERSION;
+			strncpy(desc.name, "GodotCaptureDSP", sizeof(desc.name) - 1);
+			desc.version = 1;
+			desc.numinputbuffers = 1;
+			desc.numoutputbuffers = 1;
+			desc.create = capture_dsp_create_callback;
+			desc.release = capture_dsp_release_callback;
+			desc.process = capture_dsp_process_callback;
+			initialized = true;
+		}
+
+		return &desc;
 	}
 }

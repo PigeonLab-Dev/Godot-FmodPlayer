@@ -117,8 +117,8 @@ namespace godot {
 				break;
 			case PRESET_10_BANDS:
 				// Godot AudioEffectEQ10 的频段: 31Hz, 62Hz, 125Hz, 250Hz, 500Hz, 1000Hz, 2000Hz, 4000Hz, 8000Hz, 16000Hz
-				r_frequencies.push_back(31.0f);
-				r_frequencies.push_back(62.0f);
+				r_frequencies.push_back(31.25f);
+				r_frequencies.push_back(62.5f);
 				r_frequencies.push_back(125.0f);
 				r_frequencies.push_back(250.0f);
 				r_frequencies.push_back(500.0f);

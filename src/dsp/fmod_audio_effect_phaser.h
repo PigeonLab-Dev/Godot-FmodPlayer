@@ -2,11 +2,11 @@
 #define FMOD_AUDIO_EFFECT_PHASER_H
 
 #include "dsp/fmod_audio_effect.h"
+#include <memory>
 
 namespace godot {
-	// 模拟 Godot 的 AudioEffectPhaser
-	// 使用 FMOD 的 FLANGE DSP 近似实现
-	// 注意：Phaser 和 Flanger 原理不同，这里用 Flanger 近似模拟 Phaser 效果
+	struct FmodAudioEffectPhaserSharedState;
+
 	class FmodAudioEffectPhaser : public FmodAudioEffect {
 		GDCLASS(FmodAudioEffectPhaser, FmodAudioEffect)
 
@@ -14,17 +14,22 @@ namespace godot {
 		static void _bind_methods();
 
 	private:
-		float depth = 1.0f;												// 滤波器频率扫描深度 (0.1 ~ 4.0)
-		float feedback = 0.7f;											// 反馈量 (0.1 ~ 0.9)
-		float range_max_hz = 1600.0f;									// LFO 最大频率 (10 ~ 10000)
-		float range_min_hz = 440.0f;									// LFO 最小频率 (10 ~ 10000)
-		float rate_hz = 0.5f;											// 扫描速率 Hz (0.5 ~ 20.0)
+		float depth = 1.0f;
+		float feedback = 0.7f;
+		float range_max_hz = 1600.0f;
+		float range_min_hz = 440.0f;
+		float rate_hz = 0.5f;
+		std::shared_ptr<FmodAudioEffectPhaserSharedState> phaser_state;
+
+		void _sync_shared_state();
 
 	public:
 		FmodAudioEffectPhaser();
 		virtual ~FmodAudioEffectPhaser();
 
 		virtual void apply_to(Ref<FmodChannelGroup> p_bus) override;
+		virtual Ref<FmodDSP> create_custom_dsp(Ref<FmodSystem> system) override;
+		virtual FMOD_DSP_DESCRIPTION* get_dsp_description() override;
 
 		void set_depth(float p_depth);
 		float get_depth() const;

@@ -1,12 +1,7 @@
-#ifndef FMOD_AUDIO_STREAM_FLAC_H
-#define FMOD_AUDIO_STREAM_FLAC_H
+#ifndef FMOD_AUDIO_STEAM_FLAC_COMPAT_H
+#define FMOD_AUDIO_STEAM_FLAC_COMPAT_H
 
-#include "audio/fmod_audio_stream.h"
+// Compatibility include for the historical misspelled filename.
+#include "audio/fmod_audio_stream_flac.h"
 
-namespace godot {
-	class FmodAudioStreamFLAC : public FmodAudioStream {
-		GDCLASS(FmodAudioStreamFLAC, FmodAudioStream)
-	};
-}
-
-#endif // !FMOD_AUDIO_STEAM_FLAC
+#endif // !FMOD_AUDIO_STEAM_FLAC_COMPAT_H

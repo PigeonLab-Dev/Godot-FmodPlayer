@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://71t6334q0t5f"
-path="res://.godot/imported/FmodAudioStream.svg-e0393b71e9c5f561c2707ffcc5670340.ctex"
+uid="uid://dkfpm5c1kfqm3"
+path="res://.godot/imported/FmodGeometryInstance3D.svg-265e47c5cd028cbdf03831362e19202a.ctex"
 metadata={
 "has_editor_variant": true,
 "vram_texture": false
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://addons/fmod_player/bin/icons/FmodAudioStream.svg"
-dest_files=["res://.godot/imported/FmodAudioStream.svg-e0393b71e9c5f561c2707ffcc5670340.ctex"]
+source_file="res://addons/fmod_player/bin/icons/FmodGeometryInstance3D.svg"
+dest_files=["res://.godot/imported/FmodGeometryInstance3D.svg-265e47c5cd028cbdf03831362e19202a.ctex"]
 
 [params]
 

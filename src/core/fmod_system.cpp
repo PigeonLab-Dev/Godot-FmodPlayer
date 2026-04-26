@@ -1068,7 +1068,7 @@ namespace godot {
 
 		Ref<FmodDSP> dsp;
 		dsp.instantiate();
-		dsp->setup(dsp_ptr, desc);  // 传递描述符以便管理生命周期
+		dsp->setup(dsp_ptr, desc);
 		return dsp;
 	}
 

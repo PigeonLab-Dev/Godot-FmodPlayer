@@ -1,6 +1,7 @@
 #include "register_types.h"
 
 #include "audio/fmod_audio_stream.h"
+#include "audio/fmod_audio_stream_advanced.h"
 #include "audio/fmod_audio_stream_flac.h"
 #include "audio/fmod_sound.h"
 #include "audio/fmod_sound_lock.h"
@@ -29,6 +30,8 @@
 #include "editor/fmod_audio_preview_inspector.h"
 #include "editor/fmod_audio_preview_property.h"
 #include "editor/fmod_audio_stream_player_3d_gizmo_plugin.h"
+#include "editor/fmod_geometry_mesh_tools_plugin.h"
+#include "editor/fmod_reverb_zone_3d_gizmo_plugin.h"
 #include "editor/modify_android_build_template_plugin.h"
 #include "geometry/fmod_geometry.h"
 #include "mixer/fmod_audio_bus.h"
@@ -42,6 +45,7 @@
 #include "playback/fmod_channel_group.h"
 #include "playback/fmod_sound_group.h"
 #include "spatial/fmod_reverb_3d.h"
+#include "spatial/fmod_reverb_zone_3d.h"
 
 #include <gdextension_interface.h>
 #include <godot_cpp/classes/engine.hpp>
@@ -137,6 +141,8 @@ void initialize_fmod_player_module(ModuleInitializationLevel p_level) {
 		GDREGISTER_CLASS(FmodAudioPreviewInspector);
 		GDREGISTER_CLASS(FmodAudioPreviewProperty);
 		GDREGISTER_CLASS(FmodAudioStreamPlayer3DGizmoPlugin);
+		GDREGISTER_CLASS(FmodGeometryMeshToolsPlugin);
+		GDREGISTER_CLASS(FmodReverbZone3DGizmoPlugin);
 		GDREGISTER_CLASS(ModifyAndroidBuildTemplatePlugin);
 		return;
 	}
@@ -180,9 +186,11 @@ void initialize_fmod_player_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(FmodAudioBusLayout);
 
 	GDREGISTER_CLASS(FmodAudioStream);
+	GDREGISTER_CLASS(FmodAudioStreamAdvanced);
 	GDREGISTER_CLASS(FmodAudioStreamFLAC);
 
 	GDREGISTER_CLASS(FmodReverb3D);
+	GDREGISTER_CLASS(FmodReverbZone3D);
 
 	GDREGISTER_CLASS(FmodGeometry);
 
