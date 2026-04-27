@@ -110,7 +110,7 @@ namespace godot {
 
 			#ifdef TOOLS_ENABLED
 			case NOTIFICATION_EDITOR_PRE_SAVE: {
-				if (auto_rebuild && !has_valid_geometry()) {
+				if (auto_rebuild && is_inside_tree() && !has_valid_geometry()) {
 					rebuild_geometry();
 				}
 			} break;
@@ -119,6 +119,10 @@ namespace godot {
 	}
 
 	void FmodGeometryInstance3D::rebuild_geometry() {
+		if (!is_inside_tree()) {
+			return;
+		}
+
 		clear_geometry();
 
 		std::vector<PackedVector3Array> polygons;
@@ -209,7 +213,7 @@ namespace godot {
 	}
 
 	void FmodGeometryInstance3D::sync_geometry_transform() {
-		if (!has_valid_geometry()) {
+		if (!is_inside_tree() || !has_valid_geometry()) {
 			return;
 		}
 		geometry->set_transform(get_global_transform());
@@ -306,6 +310,9 @@ namespace godot {
 		if (!p_collision_shape) {
 			return false;
 		}
+		if (!is_inside_tree() || !p_collision_shape->is_inside_tree()) {
+			return false;
+		}
 
 		Ref<Shape3D> shape = p_collision_shape->get_shape();
 		if (!shape.is_valid()) {
@@ -319,6 +326,9 @@ namespace godot {
 
 	bool FmodGeometryInstance3D::_build_from_mesh_instance(MeshInstance3D *p_mesh_instance, std::vector<PackedVector3Array> &r_polygons) const {
 		if (!p_mesh_instance) {
+			return false;
+		}
+		if (!is_inside_tree() || !p_mesh_instance->is_inside_tree()) {
 			return false;
 		}
 
@@ -584,7 +594,7 @@ namespace godot {
 	void FmodGeometryInstance3D::set_sync_transform(bool p_value) {
 		sync_transform = p_value;
 		set_process(sync_transform);
-		if (sync_transform) {
+		if (sync_transform && is_inside_tree()) {
 			sync_geometry_transform();
 		}
 	}
