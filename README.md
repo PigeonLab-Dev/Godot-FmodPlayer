@@ -105,17 +105,6 @@ Godot-FmodPlayer includes FMOD-backed effects designed to feel familiar to Godot
 - `FmodReverbZone3D` for localized environmental reverb.
 - Editor gizmos for spatial audio debugging.
 
-## What's New?
-
-- Real-time recording waveform snapshot API.
-- Audio visualizer HUD examples for 3D scenes.
-- More accurate Godot-like mappings for chorus, delay, reverb, record, and spectrum analyzer effects.
-- Advanced audio stream resource for special FMOD loading options.
-- Higher-level FMOD geometry and reverb zone wrappers.
-- Mesh tools for creating FMOD geometry from Godot meshes.
-- Android export template setup helper.
-- Improved editor audio preview experience.
-
 ## Quick Start
 
 ### 1. Install The Plugin
