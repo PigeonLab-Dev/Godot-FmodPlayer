@@ -161,7 +161,7 @@ scons platform=android target=template_debug arch=arm64
 Open your Godot project and enable:
 
 ```text
-Project > Project Settings > Plugins > fmod_player
+Project > Project Settings > Plugins > FMOD Player
 ```
 
 ### 5. Play Audio
