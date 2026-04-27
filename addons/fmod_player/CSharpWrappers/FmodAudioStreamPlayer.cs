@@ -11,6 +11,12 @@ namespace FmodPlayer;
 [Tool]
 public partial class FmodAudioStreamPlayer : Node
 {
+	public enum MixTargetEnum
+	{
+		Stereo = 0,
+		Surround = 1,
+		Center = 2,
+	}
 
 	private new static readonly StringName NativeName = new StringName("FmodAudioStreamPlayer");
 
@@ -95,8 +101,10 @@ public partial class FmodAudioStreamPlayer : Node
 		public new static readonly StringName Playing = "playing";
 		public new static readonly StringName StreamPaused = "stream_paused";
 		public new static readonly StringName VolumeDb = "volume_db";
-		public new static readonly StringName Pitch = "pitch";
+		public new static readonly StringName PitchScale = "pitch_scale";
+		public new static readonly StringName MixTarget = "mix_target";
 		public new static readonly StringName AutoPlay = "auto_play";
+		public new static readonly StringName PreloadOnSetStream = "preload_on_set_stream";
 		public new static readonly StringName Bus = "bus";
 	}
 
@@ -124,16 +132,28 @@ public partial class FmodAudioStreamPlayer : Node
 		set => Set(GDExtensionPropertyName.VolumeDb, value);
 	}
 
-	public new double Pitch
+	public new double PitchScale
 	{
-		get => Get(GDExtensionPropertyName.Pitch).As<double>();
-		set => Set(GDExtensionPropertyName.Pitch, value);
+		get => Get(GDExtensionPropertyName.PitchScale).As<double>();
+		set => Set(GDExtensionPropertyName.PitchScale, value);
+	}
+
+	public new MixTargetEnum MixTarget
+	{
+		get => Get(GDExtensionPropertyName.MixTarget).As<MixTargetEnum>();
+		set => Set(GDExtensionPropertyName.MixTarget, Variant.From(value));
 	}
 
 	public new bool AutoPlay
 	{
 		get => Get(GDExtensionPropertyName.AutoPlay).As<bool>();
 		set => Set(GDExtensionPropertyName.AutoPlay, value);
+	}
+
+	public new bool PreloadOnSetStream
+	{
+		get => Get(GDExtensionPropertyName.PreloadOnSetStream).As<bool>();
+		set => Set(GDExtensionPropertyName.PreloadOnSetStream, value);
 	}
 
 	public new StringName/* "Empty Enum Constant String" */ Bus

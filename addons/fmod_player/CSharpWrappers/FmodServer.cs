@@ -62,14 +62,10 @@ public partial class FmodServer : GodotObject
 
 	public new static class GDExtensionMethodName
 	{
-		public new static readonly StringName GetSingleton = "get_singleton";
 		public new static readonly StringName GetMainSystem = "get_main_system";
 		public new static readonly StringName GetMasterChannelGroup = "get_master_channel_group";
 		public new static readonly StringName GetAudioBusLayout = "get_audio_bus_layout";
 	}
-
-	public new static FmodServer GetSingleton() => 
-		FmodServer.Bind(ClassDB.ClassCallStatic(NativeName, GDExtensionMethodName.GetSingleton, []).As<GodotObject>());
 
 	public new static FmodSystem GetMainSystem() => 
 		FmodSystem.Bind(ClassDB.ClassCallStatic(NativeName, GDExtensionMethodName.GetMainSystem, []).As<GodotObject>());

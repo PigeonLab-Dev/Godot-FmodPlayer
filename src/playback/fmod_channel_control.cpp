@@ -10,7 +10,7 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_paused", "paused"), &FmodChannelControl::set_paused);
 		ClassDB::bind_method(D_METHOD("get_paused"), &FmodChannelControl::get_paused);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "pasued"), "set_paused", "get_paused");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "paused"), "set_paused", "get_paused");
 
 		ClassDB::bind_method(D_METHOD("set_mode", "mode"), &FmodChannelControl::set_mode);
 		ClassDB::bind_method(D_METHOD("get_mode"), &FmodChannelControl::get_mode);
@@ -63,7 +63,7 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_3d_max_distance"), &FmodChannelControl::get_3d_max_distance);
 		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_max_distance", PROPERTY_HINT_RANGE, "1,100000,1"), "set_3d_max_distance", "get_3d_max_distance");
 		
-		ClassDB::bind_method(D_METHOD("set_3d_occlusion", "min_distance", "max_distance"), &FmodChannelControl::set_3d_occlusion);
+		ClassDB::bind_method(D_METHOD("set_3d_occlusion", "direct_occlusion", "reverb_occlusion"), &FmodChannelControl::set_3d_occlusion);
 		ClassDB::bind_method(D_METHOD("get_3d_occlusion"), &FmodChannelControl::get_3d_occlusion);
 
 		ClassDB::bind_method(D_METHOD("set_3d_spread", "angle"), &FmodChannelControl::set_3d_spread);
@@ -109,12 +109,18 @@ namespace godot {
 
 	FmodChannelControl::~FmodChannelControl() {
 		if (channel_control) {
+			channel_control->setCallback(nullptr);
 			channel_control->setUserData(nullptr);
 			channel_control = nullptr;
 		}
 	}
 
 	void FmodChannelControl::_setup_control(FMOD::ChannelControl* control) {
+		if (channel_control && channel_control != control) {
+			channel_control->setCallback(nullptr);
+			channel_control->setUserData(nullptr);
+		}
+
 		channel_control = control;
 		if (channel_control) {
 			channel_control->setUserData(this);
@@ -233,7 +239,7 @@ namespace godot {
 	) {
 		ERR_FAIL_COND(!channel_control);
 		FMOD_VECTOR fmod_pos = { pos.x, pos.y, pos.z };
-		FMOD_VECTOR fmod_vel = { pos.x, pos.y, pos.z };
+		FMOD_VECTOR fmod_vel = { vel.x, vel.y, vel.z };
 		FMOD_ERR_CHECK(channel_control->set3DAttributes(&fmod_pos, &fmod_vel));
 	}
 
@@ -285,6 +291,7 @@ namespace godot {
 		ERR_FAIL_COND(!channel_control);
 
 		const int num_points = points.size();
+		custom_rolloff_points.clear();
 		if (num_points == 0) {
 			// 传入空数组表示清除自定义 rolloff
 			FMOD_ERR_CHECK(channel_control->set3DCustomRolloff(nullptr, 0));
@@ -292,16 +299,15 @@ namespace godot {
 		}
 
 		// 使用 std::vector 管理内存，自动释放
-		std::vector<FMOD_VECTOR> fmod_points;
-		fmod_points.reserve(num_points);
+		custom_rolloff_points.reserve(num_points);
 
 		for (int i = 0; i < num_points; i++) {
 			const Vector3& p = points[i];
-			fmod_points.push_back({ p.x, p.y, p.z });
+			custom_rolloff_points.push_back({ p.x, p.y, p.z });
 		}
 
 		// 传递数组首地址（连续内存）
-		FMOD_ERR_CHECK(channel_control->set3DCustomRolloff(fmod_points.data(), num_points));
+		FMOD_ERR_CHECK(channel_control->set3DCustomRolloff(custom_rolloff_points.data(), num_points));
 	}
 
 	PackedVector3Array FmodChannelControl::get_3d_custom_rolloff() const {
@@ -395,11 +401,11 @@ namespace godot {
 
 	Dictionary FmodChannelControl::get_3d_occlusion() const {
 		if (!channel_control) return Dictionary();
-		float min_distance = 0.0f, max_distance = 0.0f;
-		FMOD_ERR_CHECK_V(channel_control->get3DOcclusion(&min_distance, &max_distance), Dictionary());
+		float direct_occlusion = 0.0f, reverb_occlusion = 0.0f;
+		FMOD_ERR_CHECK_V(channel_control->get3DOcclusion(&direct_occlusion, &reverb_occlusion), Dictionary());
 		Dictionary result;
-		result["min_distance"] = min_distance;
-		result["max_distance"] = max_distance;
+		result["direct_occlusion"] = direct_occlusion;
+		result["reverb_occlusion"] = reverb_occlusion;
 		return result;
 	}
 
@@ -422,6 +428,7 @@ namespace godot {
 
 	void FmodChannelControl::set_mix_levels_input(const PackedFloat32Array& levels) {
 		ERR_FAIL_COND(!channel_control);
+		ERR_FAIL_COND_MSG(levels.is_empty(), "Input levels cannot be empty.");
 
 		const int num_levels = levels.size();
 		std::vector<float> fmod_levels;
@@ -546,7 +553,7 @@ namespace godot {
 		ERR_FAIL_COND_MSG(!dsp->dsp, "DSP internal pointer is null");
 		FMOD_RESULT result = channel_control->addDSP(index, dsp->dsp);
 		if (result != FMOD_OK) {
-			ERR_PRINT(vformat("Failed to add DSP: ", FMOD_ErrorString(result)));
+			ERR_PRINT(vformat("Failed to add DSP: %s", FMOD_ErrorString(result)));
 		}
 	}
 
@@ -566,6 +573,7 @@ namespace godot {
 
 	Ref<FmodDSP> FmodChannelControl::get_dsp(const int index) const {
 		ERR_FAIL_COND_V(!channel_control, Ref<FmodDSP>());
+		ERR_FAIL_COND_V_MSG(index < 0, Ref<FmodDSP>(), "DSP index must be >= 0.");
 
 		FMOD::DSP* dsp_ptr = nullptr;
 		FMOD_ERR_CHECK_V(channel_control->getDSP(index, &dsp_ptr), Ref<FmodDSP>());
@@ -584,19 +592,20 @@ namespace godot {
 		// 如果没有，创建新对象并设置 userdata
 		Ref<FmodDSP> dsp;
 		dsp.instantiate();
-		dsp->dsp = dsp_ptr;
-		dsp_ptr->setUserData(dsp.ptr());			// 设置 userdata
+		dsp->setup(dsp_ptr);
 
 		return dsp;
 	}
 
 	void FmodChannelControl::set_dsp_index(Ref<FmodDSP> dsp, const int index) {
 		ERR_FAIL_COND(!channel_control);
+		ERR_FAIL_COND_MSG(dsp.is_null() || !dsp->dsp, "DSP is invalid.");
 		FMOD_ERR_CHECK(channel_control->setDSPIndex(dsp->dsp, index));
 	}
 
 	int FmodChannelControl::get_dsp_index(Ref<FmodDSP> dsp) const {
 		ERR_FAIL_COND_V(!channel_control, -1);
+		ERR_FAIL_COND_V_MSG(dsp.is_null() || !dsp->dsp, -1, "DSP is invalid.");
 		int index = -1;
 		FMOD_ERR_CHECK(channel_control->getDSPIndex(dsp->dsp, &index));
 		return index;
@@ -651,13 +660,31 @@ namespace godot {
 	Dictionary FmodChannelControl::get_fade_points() const {
 		ERR_FAIL_COND_V(!channel_control, Dictionary());
 		unsigned int numpoints = 0;
-		unsigned long long point_dspclock = 0;
-		float point_volume = 0.0f;
-		FMOD_ERR_CHECK_V(channel_control->getFadePoints(&numpoints, &point_dspclock, &point_volume), Dictionary());
+		FMOD_ERR_CHECK_V(channel_control->getFadePoints(&numpoints, nullptr, nullptr), Dictionary());
+
+		PackedInt64Array point_dspclocks;
+		PackedFloat32Array point_volumes;
+		point_dspclocks.resize(numpoints);
+		point_volumes.resize(numpoints);
+
+		if (numpoints > 0) {
+			std::vector<unsigned long long> dspclocks;
+			std::vector<float> volumes;
+			dspclocks.resize(numpoints);
+			volumes.resize(numpoints);
+			FMOD_ERR_CHECK_V(channel_control->getFadePoints(&numpoints, dspclocks.data(), volumes.data()), Dictionary());
+			point_dspclocks.resize(numpoints);
+			point_volumes.resize(numpoints);
+			for (unsigned int i = 0; i < numpoints; i++) {
+				point_dspclocks.set(i, static_cast<int64_t>(dspclocks[i]));
+				point_volumes.set(i, volumes[i]);
+			}
+		}
+
 		Dictionary result;
 		result["num_points"] = (uint32_t)numpoints;
-		result["point_dspclock"] = (uint64_t)point_dspclock;
-		result["point_volume"] = point_volume;
+		result["point_dspclocks"] = point_dspclocks;
+		result["point_volumes"] = point_volumes;
 		return result;
 	}
 
@@ -680,7 +707,7 @@ namespace godot {
 		void* commanddata1,
 		void* commanddata2
 	) {
-		emit_signal("callback_received", (int)callbacktype);
+		call_deferred("emit_signal", StringName("callback_received"), (int)callbacktype);
 	}
 }
 

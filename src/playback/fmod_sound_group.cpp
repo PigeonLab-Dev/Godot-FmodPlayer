@@ -36,6 +36,16 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("release"), &FmodSoundGroup::release);
 	}
 
+	FmodSoundGroup::FmodSoundGroup() {
+	}
+
+	FmodSoundGroup::~FmodSoundGroup() {
+		if (sound_group) {
+			sound_group->setUserData(nullptr);
+			sound_group = nullptr;
+		}
+	}
+
 	bool FmodSoundGroup::sound_group_is_valid() const {
 		return sound_group != nullptr;
 	}
@@ -57,6 +67,7 @@ namespace godot {
 
 	void FmodSoundGroup::set_max_audible(const int max_audible) {
 		ERR_FAIL_COND(!sound_group);
+		ERR_FAIL_COND_MSG(max_audible < 0, "max_audible must be >= 0.");
 		FMOD_ERR_CHECK(sound_group->setMaxAudible(max_audible));
 	}
 
@@ -69,6 +80,7 @@ namespace godot {
 
 	void FmodSoundGroup::set_max_audible_behavior(const Behavior behavior) {
 		ERR_FAIL_COND(!sound_group);
+		ERR_FAIL_COND_MSG(behavior < BEHAVIOR_FAIL || behavior >= BEHAVIOR_MAX, "Invalid SoundGroup behavior.");
 		FMOD_ERR_CHECK(sound_group->setMaxAudibleBehavior(static_cast<FMOD_SOUNDGROUP_BEHAVIOR>(behavior)));
 	}
 
@@ -81,6 +93,7 @@ namespace godot {
 
 	void FmodSoundGroup::set_mute_fade_speed(const float speed) {
 		ERR_FAIL_COND(!sound_group);
+		ERR_FAIL_COND_MSG(speed < 0.0f, "Mute fade speed must be >= 0.");
 		FMOD_ERR_CHECK(sound_group->setMuteFadeSpeed(speed));
 	}
 
@@ -112,11 +125,19 @@ namespace godot {
 
 	Ref<FmodSound> FmodSoundGroup::get_sound(const int index) const {
 		ERR_FAIL_COND_V(!sound_group, Ref<FmodSound>());
+		ERR_FAIL_COND_V_MSG(index < 0, Ref<FmodSound>(), "Sound index must be >= 0.");
 		FMOD::Sound* sound_ptr = nullptr;
 		FMOD_ERR_CHECK_V(sound_group->getSound(index, &sound_ptr), Ref<FmodSound>());
+		ERR_FAIL_NULL_V(sound_ptr, Ref<FmodSound>());
+		void* userdata = nullptr;
+		sound_ptr->getUserData(&userdata);
+		if (userdata) {
+			return Ref<FmodSound>(static_cast<FmodSound*>(userdata));
+		}
+
 		Ref<FmodSound> sound;
 		sound.instantiate();
-		sound->sound = sound_ptr;
+		sound->setup(sound_ptr);
 		return sound;
 	}
 
@@ -141,6 +162,7 @@ namespace godot {
 
 	void FmodSoundGroup::release() {
 		ERR_FAIL_COND(!sound_group);
+		sound_group->setUserData(nullptr);
 		FMOD_RESULT result = sound_group->release();
 		if (result != FMOD_OK) {
 			ERR_PRINT(vformat("Failed to release FMOD SoundGroup: %s", FMOD_ErrorString(result)));

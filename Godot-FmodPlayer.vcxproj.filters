@@ -185,6 +185,9 @@
     <ClInclude Include="src\nodes\fmod_geometry_instance_3d.h">
       <Filter>Header Files\nodes</Filter>
     </ClInclude>
+    <ClInclude Include="src\nodes\fmod_reverb_zone_3d.h">
+      <Filter>Header Files\nodes</Filter>
+    </ClInclude>
     <ClInclude Include="src\nodes\fmod_audio_stream_player_3d.h">
       <Filter>Header Files\nodes</Filter>
     </ClInclude>
@@ -314,6 +317,9 @@
       <Filter>Source Files\spatial</Filter>
     </ClCompile>
     <ClCompile Include="src\nodes\fmod_geometry_instance_3d.cpp">
+      <Filter>Source Files\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nodes\fmod_reverb_zone_3d.cpp">
       <Filter>Source Files\nodes</Filter>
     </ClCompile>
     <ClCompile Include="src\nodes\fmod_audio_stream_player_3d.cpp">

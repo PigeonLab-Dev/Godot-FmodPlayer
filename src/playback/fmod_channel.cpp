@@ -51,6 +51,7 @@ namespace godot {
 	}
 
 	void FmodChannel::setup(FMOD::Channel* p_channel) {
+		ERR_FAIL_NULL(p_channel);
 		channel = p_channel;
 		_setup_control(p_channel);
 		set_callback();
@@ -66,6 +67,7 @@ namespace godot {
 
 	void FmodChannel::set_frequency(const double frequency) {
 		ERR_FAIL_COND(!channel);
+		ERR_FAIL_COND_MSG(frequency <= 0.0, "frequency must be greater than 0.");
 		FMOD_ERR_CHECK(channel->setFrequency((float)frequency));
 	}
 
@@ -90,6 +92,7 @@ namespace godot {
 
 	void FmodChannel::set_position(int position, FmodSystem::FmodTimeUnit timeunit) {
 		ERR_FAIL_COND(!channel);
+		ERR_FAIL_COND_MSG(position < 0, "position must be >= 0.");
 		FMOD_ERR_CHECK(channel->setPosition(position, timeunit));
 	}
 
@@ -102,6 +105,7 @@ namespace godot {
 
 	void FmodChannel::set_channel_group(Ref<FmodChannelGroup> p_channel_group) {
 		ERR_FAIL_COND(!channel);
+		ERR_FAIL_COND_MSG(p_channel_group.is_null() || !p_channel_group->channel_group, "ChannelGroup is invalid.");
 		internal_channel_group = p_channel_group;
 		FMOD_ERR_CHECK(channel->setChannelGroup(internal_channel_group->channel_group));
 	}
@@ -125,6 +129,7 @@ namespace godot {
 
 	void FmodChannel::set_loop_points(const unsigned int start, const unsigned int end, FmodSystem::FmodTimeUnit timeunit) {
 		ERR_FAIL_COND(!channel);
+		ERR_FAIL_COND_MSG(end < start, "Loop end must be greater than or equal to start.");
 		FMOD_TIMEUNIT fmod_timeunit = static_cast<FMOD_TIMEUNIT>((int)timeunit);
 		FMOD_ERR_CHECK(channel->setLoopPoints((unsigned int)start, fmod_timeunit, (unsigned int)end, fmod_timeunit));
 	}
@@ -151,6 +156,7 @@ namespace godot {
 		if (!channel) return nullptr;
 		FMOD::Sound* sound_ptr = nullptr;
 		FMOD_ERR_CHECK_V(channel->getCurrentSound(&sound_ptr), Ref<FmodSound>());
+		ERR_FAIL_NULL_V(sound_ptr, Ref<FmodSound>());
 
 		// 尝试从 userdata 获取已有对象
 		void* userdata = nullptr;
@@ -161,8 +167,7 @@ namespace godot {
 
 		Ref<FmodSound> sound;
 		sound.instantiate();
-		sound->sound = sound_ptr;
-		sound_ptr->setUserData(sound.ptr());
+		sound->setup(sound_ptr);
 		return sound;
 	}
 
@@ -180,22 +185,24 @@ namespace godot {
 		void* commanddata2) {
 		switch (callbacktype) {
 		case FMOD_CHANNELCONTROL_CALLBACK_END:
-			emit_signal("ended");
+			call_deferred("emit_signal", StringName("ended"));
 			break;
 
 		case FMOD_CHANNELCONTROL_CALLBACK_VIRTUALVOICE: {
+			ERR_FAIL_NULL(commanddata1);
 			int virtual_state = *reinterpret_cast<int*>(commanddata1);
-			emit_signal("virtualvoice", virtual_state == 1);
+			call_deferred("emit_signal", StringName("virtualvoice"), virtual_state == 1);
 			break;
 		}
 
 		case FMOD_CHANNELCONTROL_CALLBACK_SYNCPOINT: {
-			int sync_point = *reinterpret_cast<int*>(commanddata1);
-			emit_signal("syncpoint", sync_point);
+			ERR_FAIL_NULL(commanddata1);
+			call_deferred("emit_signal", StringName("syncpoint"), static_cast<int64_t>(reinterpret_cast<uintptr_t>(commanddata1)));
 			break;
 		}
 
 		case FMOD_CHANNELCONTROL_CALLBACK_OCCLUSION: {
+			ERR_FAIL_COND(!commanddata1 || !commanddata2);
 			float* direct_ptr = reinterpret_cast<float*>(commanddata1);
 			float* reverb_ptr = reinterpret_cast<float*>(commanddata2);
 
@@ -217,7 +224,7 @@ namespace godot {
 				*reverb_ptr = modified_reverb;
 			}
 
-			emit_signal("occlusion", *direct_ptr, *reverb_ptr);
+			call_deferred("emit_signal", StringName("occlusion"), *direct_ptr, *reverb_ptr);
 			break;
 		}
 		}

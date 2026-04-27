@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="FmodAudioStreamAdvanced" inherits="FmodAudioStream" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Advanced FMOD audio stream resource with extra sound creation options.
+	</brief_description>
+	<description>
+		FmodAudioStreamAdvanced extends [FmodAudioStream] and exposes additional FMOD_CREATESOUNDEXINFO fields for special audio files. Use it when a stream needs a file offset, explicit length, subsound selection, raw PCM format information, encryption key, DLS bank, initial seek position, or other low-level FMOD creation settings.
+		Most ordinary MP3, WAV, OGG Vorbis, and FLAC files should use [FmodAudioStream]. This class is intended for files that need format hints or advanced FMOD loading control.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="load_from_file" qualifiers="static">
+			<return type="FmodAudioStreamAdvanced" />
+			<param index="0" name="path" type="String" />
+			<param index="1" name="flags" type="int" default="1" />
+			<description>
+				Loads an external file into a new [FmodAudioStreamAdvanced] resource and applies the supplied FMOD mode flags.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="decode_buffer_size" type="int" setter="set_decode_buffer_size" getter="get_decode_buffer_size" default="0">
+			Optional decode buffer size in PCM samples. Leave at [code]0[/code] to let FMOD choose the default.
+		</member>
+		<member name="default_frequency" type="int" setter="set_default_frequency" getter="get_default_frequency" default="0">
+			Default sample rate for raw PCM data. Leave at [code]0[/code] unless the file format requires it.
+		</member>
+		<member name="dls_name" type="String" setter="set_dls_name" getter="get_dls_name" default="&quot;&quot;">
+			Optional DLS bank path used by MIDI playback.
+		</member>
+		<member name="encryption_key" type="String" setter="set_encryption_key" getter="get_encryption_key" default="&quot;&quot;">
+			Optional FMOD encryption key for encrypted sound data.
+		</member>
+		<member name="file_offset" type="int" setter="set_file_offset" getter="get_file_offset" default="0">
+			Byte offset where the audio data starts inside the supplied buffer.
+		</member>
+		<member name="format" type="int" setter="set_format" getter="get_format" enum="FmodSound.FmodSoundFormat" default="0">
+			Raw PCM sample format hint. Leave as [constant FmodSound.FMOD_SOUND_FORMAT_NONE] for normal encoded files.
+		</member>
+		<member name="ignore_set_file_system" type="bool" setter="set_ignore_set_file_system" getter="is_ignore_set_file_system" default="false">
+			If enabled, FMOD ignores the custom file system callbacks for this stream creation request.
+		</member>
+		<member name="inclusion_list" type="PackedInt32Array" setter="set_inclusion_list" getter="get_inclusion_list">
+			Optional list of subsounds to include when loading container formats.
+		</member>
+		<member name="initial_seek_position" type="int" setter="set_initial_seek_position" getter="get_initial_seek_position" default="0">
+			Optional initial seek position applied when the sound is created.
+		</member>
+		<member name="initial_seek_postype" type="int" setter="set_initial_seek_postype" getter="get_initial_seek_postype" enum="FmodSystem.FmodTimeUnit" default="1">
+			Time unit used by [member initial_seek_position].
+		</member>
+		<member name="initial_subsound" type="int" setter="set_initial_subsound" getter="get_initial_subsound" default="-1">
+			Initial subsound index to load or play. Use [code]-1[/code] for FMOD's default behavior.
+		</member>
+		<member name="length_override" type="int" setter="set_length_override" getter="get_length_override" default="0">
+			Optional byte length override for the audio data. Leave at [code]0[/code] to use the full buffer size.
+		</member>
+		<member name="max_polyphony" type="int" setter="set_max_polyphony" getter="get_max_polyphony" default="0">
+			Optional maximum polyphony for the created sound. Leave at [code]0[/code] for FMOD's default.
+		</member>
+		<member name="num_channels" type="int" setter="set_num_channels" getter="get_num_channels" default="0">
+			Channel count hint for raw PCM data.
+		</member>
+		<member name="num_subsounds" type="int" setter="set_num_subsounds" getter="get_num_subsounds" default="0">
+			Number of subsounds to load from a container format. Leave at [code]0[/code] for FMOD's default.
+		</member>
+		<member name="suggested_sound_type" type="int" setter="set_suggested_sound_type" getter="get_suggested_sound_type" enum="FmodSound.FmodSoundType" default="0">
+			Optional sound type hint used when FMOD cannot infer the file type reliably.
+		</member>
+	</members>
+</class>

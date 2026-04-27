@@ -23,14 +23,17 @@ namespace godot {
 	
 	FmodChannelGroup::~FmodChannelGroup() {
 		if (channel_group) {
+			channel_group->setCallback(nullptr);
+			channel_group->setUserData(nullptr);
 			channel_group = nullptr;
+			channel_control = nullptr;
 		}
 	}
 
 	void FmodChannelGroup::setup(FMOD::ChannelGroup* p_channel_group) {
+		ERR_FAIL_NULL(p_channel_group);
 		_setup_control(p_channel_group);  // 调用基类方法设置 channel_control
 		channel_group = p_channel_group;  // 存储派生类特有的指针
-		//set_callback(); 暂时没用
 	}
 
 	bool FmodChannelGroup::channel_group_is_valid() const {
@@ -50,8 +53,10 @@ namespace godot {
 
 	Ref<FmodChannel> FmodChannelGroup::get_channel(const int index) const {
 		ERR_FAIL_COND_V(!channel_group, Ref<FmodChannel>());
+		ERR_FAIL_COND_V_MSG(index < 0, Ref<FmodChannel>(), "Channel index must be >= 0.");
 		FMOD::Channel* p_channel = nullptr;
-		FMOD_ERR_CHECK(channel_group->getChannel(index, &p_channel));
+		FMOD_ERR_CHECK_V(channel_group->getChannel(index, &p_channel), Ref<FmodChannel>());
+		ERR_FAIL_NULL_V(p_channel, Ref<FmodChannel>());
 
 		// 尝试从 userdata 获取已有对象
 		void* userdata = nullptr;
@@ -86,8 +91,10 @@ namespace godot {
 
 	Ref<FmodChannelGroup> FmodChannelGroup::get_group(const int index) const {
 		ERR_FAIL_COND_V(!channel_group, Ref<FmodChannelGroup>());
+		ERR_FAIL_COND_V_MSG(index < 0, Ref<FmodChannelGroup>(), "Group index must be >= 0.");
 		FMOD::ChannelGroup* channel_group_ptr = nullptr;
 		FMOD_ERR_CHECK_V(channel_group->getGroup(index, &channel_group_ptr), Ref<FmodChannelGroup>());
+		ERR_FAIL_NULL_V(channel_group_ptr, Ref<FmodChannelGroup>());
 		Ref<FmodChannelGroup> channel_group;
 		channel_group.instantiate();
 		channel_group->setup(channel_group_ptr);
@@ -114,6 +121,8 @@ namespace godot {
 
 	void FmodChannelGroup::release() {
 		ERR_FAIL_COND_MSG(!channel_group, "ChannelGroup is null");
+		channel_group->setCallback(nullptr);
+		channel_group->setUserData(nullptr);
 		FMOD_ERR_CHECK(channel_group->release());
 		channel_group = nullptr;
 		channel_control = nullptr;

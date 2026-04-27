@@ -1,6 +1,27 @@
 #include "geometry/fmod_geometry.h"
 
+#include <cmath>
+
 namespace godot {
+	namespace {
+		bool _is_finite(float p_value) {
+			return std::isfinite(p_value);
+		}
+
+		bool _is_finite_vector(const Vector3& p_vector) {
+			return _is_finite(static_cast<float>(p_vector.x)) &&
+					_is_finite(static_cast<float>(p_vector.y)) &&
+					_is_finite(static_cast<float>(p_vector.z));
+		}
+
+		bool _is_finite_transform(const Transform3D& p_transform) {
+			return _is_finite_vector(p_transform.origin) &&
+					_is_finite_vector(p_transform.basis.get_column(0)) &&
+					_is_finite_vector(p_transform.basis.get_column(1)) &&
+					_is_finite_vector(p_transform.basis.get_column(2));
+		}
+	}
+
 	void FmodGeometry::_bind_methods() {
 		ClassDB::bind_method(D_METHOD("geometry_is_valid"), &FmodGeometry::geometry_is_valid);
 		ClassDB::bind_method(D_METHOD("geometry_is_null"), &FmodGeometry::geometry_is_null);
@@ -41,9 +62,29 @@ namespace godot {
 	}
 
 	FmodGeometry::~FmodGeometry() {
-		if (geometry) {
-			geometry->setUserData(nullptr);
+		_release_internal(false);
+	}
+
+	bool FmodGeometry::_release_internal(bool p_restore_userdata_on_failure) {
+		if (!geometry) {
+			return true;
 		}
+
+		FMOD::Geometry* geometry_to_release = geometry;
+		geometry_to_release->setUserData(nullptr);
+		const FMOD_RESULT result = geometry_to_release->release();
+		if (result != FMOD_OK) {
+			if (p_restore_userdata_on_failure) {
+				geometry_to_release->setUserData(this);
+			} else {
+				geometry = nullptr;
+			}
+			ERR_PRINT(vformat("Failed to release Geometry: %s", FMOD_ErrorString(result)));
+			return false;
+		}
+
+		geometry = nullptr;
+		return true;
 	}
 
 	bool FmodGeometry::geometry_is_valid() const {
@@ -58,7 +99,7 @@ namespace godot {
 		ERR_FAIL_COND_MSG(!p_geometry, "Geometry pointer is null");
 
 		if (geometry) {
-			geometry->setUserData(nullptr);
+			ERR_FAIL_COND_MSG(!_release_internal(true), "Failed to release previous Geometry before setup.");
 		}
 
 		geometry = p_geometry;
@@ -72,11 +113,15 @@ namespace godot {
 		const bool double_sided
 	) {
 		ERR_FAIL_COND(!geometry);
-		FMOD_ERR_CHECK(geometry->setPolygonAttributes(index, direct_occlusion, reverb_occlusion, double_sided));
+		ERR_FAIL_COND_MSG(index < 0, "Polygon index must be >= 0.");
+		ERR_FAIL_COND_MSG(!_is_finite(direct_occlusion), "direct_occlusion must be finite.");
+		ERR_FAIL_COND_MSG(!_is_finite(reverb_occlusion), "reverb_occlusion must be finite.");
+		FMOD_ERR_CHECK(geometry->setPolygonAttributes(index, CLAMP(direct_occlusion, 0.0f, 1.0f), CLAMP(reverb_occlusion, 0.0f, 1.0f), double_sided));
 	}
 
 	Dictionary FmodGeometry::get_polygon_attributes(const int index) const {
 		ERR_FAIL_COND_V(!geometry, Dictionary());
+		ERR_FAIL_COND_V_MSG(index < 0, Dictionary(), "Polygon index must be >= 0.");
 		float directocclusion = 0.0f, reverbocclusion = 0.0f;
 		bool doublesided = false;
 		FMOD_ERR_CHECK_V(geometry->getPolygonAttributes(index, &directocclusion, &reverbocclusion, &doublesided), Dictionary());
@@ -89,6 +134,7 @@ namespace godot {
 
 	int FmodGeometry::get_polygon_num_vertices(const int index) const {
 		ERR_FAIL_COND_V(!geometry, 0);
+		ERR_FAIL_COND_V_MSG(index < 0, 0, "Polygon index must be >= 0.");
 		int numvertices = 0;
 		FMOD_ERR_CHECK_V(geometry->getPolygonNumVertices(index, &numvertices), 0);
 		return numvertices;
@@ -96,12 +142,17 @@ namespace godot {
 
 	void FmodGeometry::set_polygon_vertex(const int index, const int vertex_index, const Vector3 vertex) {
 		ERR_FAIL_COND(!geometry);
-		FMOD_VECTOR fmod_vector = { vertex.x, vertex.y, vertex.z };
+		ERR_FAIL_COND_MSG(index < 0, "Polygon index must be >= 0.");
+		ERR_FAIL_COND_MSG(vertex_index < 0, "Vertex index must be >= 0.");
+		ERR_FAIL_COND_MSG(!_is_finite_vector(vertex), "Vertex must be finite.");
+		FMOD_VECTOR fmod_vector = { static_cast<float>(vertex.x), static_cast<float>(vertex.y), static_cast<float>(vertex.z) };
 		FMOD_ERR_CHECK(geometry->setPolygonVertex(index, vertex_index, &fmod_vector));
 	}
 
 	Vector3 FmodGeometry::get_polygon_vertex(const int index, const int vertex_index) const {
 		ERR_FAIL_COND_V(!geometry, Vector3());
+		ERR_FAIL_COND_V_MSG(index < 0, Vector3(), "Polygon index must be >= 0.");
+		ERR_FAIL_COND_V_MSG(vertex_index < 0, Vector3(), "Vertex index must be >= 0.");
 		FMOD_VECTOR fmod_vector = {};
 		FMOD_ERR_CHECK_V(geometry->getPolygonVertex(index, vertex_index, &fmod_vector), Vector3());
 		Vector3 vertex;
@@ -113,7 +164,8 @@ namespace godot {
 
 	void FmodGeometry::set_position(const Vector3 position) {
 		ERR_FAIL_COND(!geometry);
-		FMOD_VECTOR fmod_pos = { position.x, position.y, position.z };
+		ERR_FAIL_COND_MSG(!_is_finite_vector(position), "Position must be finite.");
+		FMOD_VECTOR fmod_pos = { static_cast<float>(position.x), static_cast<float>(position.y), static_cast<float>(position.z) };
 		FMOD_ERR_CHECK(geometry->setPosition(&fmod_pos));
 	}
 
@@ -130,6 +182,7 @@ namespace godot {
 
 	void FmodGeometry::set_rotation(const Vector3 rotation) {
 		ERR_FAIL_COND(!geometry);
+		ERR_FAIL_COND_MSG(!_is_finite_vector(rotation), "Rotation must be finite.");
 		FMOD_VECTOR forward = {}, up = {};
 		FmodUtils::godot_euler_to_fmod_vectors(rotation, &forward, &up);
 		FMOD_ERR_CHECK(geometry->setRotation(&forward, &up));
@@ -144,7 +197,8 @@ namespace godot {
 
 	void FmodGeometry::set_scale(const Vector3 scale) {
 		ERR_FAIL_COND(!geometry);
-		FMOD_VECTOR fmod_scale = { scale.x, scale.y, scale.z };
+		ERR_FAIL_COND_MSG(!_is_finite_vector(scale), "Scale must be finite.");
+		FMOD_VECTOR fmod_scale = { static_cast<float>(scale.x), static_cast<float>(scale.y), static_cast<float>(scale.z) };
 		FMOD_ERR_CHECK(geometry->setScale(&fmod_scale));
 	}
 	
@@ -161,6 +215,7 @@ namespace godot {
 
 	void FmodGeometry::set_transform(const Transform3D& transform) {
 		ERR_FAIL_COND(!geometry);
+		ERR_FAIL_COND_MSG(!_is_finite_transform(transform), "Transform must be finite.");
 
 		Vector3 position = transform.origin;
 		Vector3 scale = transform.basis.get_scale();
@@ -168,11 +223,12 @@ namespace godot {
 
 		Vector3 forward = basis.get_column(2);
 		Vector3 up = basis.get_column(1);
+		ERR_FAIL_COND_MSG(!_is_finite_vector(forward) || !_is_finite_vector(up), "Transform basis must contain a valid rotation.");
 
-		FMOD_VECTOR fmod_pos = { position.x, position.y, position.z };
-		FMOD_VECTOR fmod_scale = { scale.x, scale.y, scale.z };
-		FMOD_VECTOR fmod_forward = { forward.x, forward.y, forward.z };
-		FMOD_VECTOR fmod_up = { up.x, up.y, up.z };
+		FMOD_VECTOR fmod_pos = { static_cast<float>(position.x), static_cast<float>(position.y), static_cast<float>(position.z) };
+		FMOD_VECTOR fmod_scale = { static_cast<float>(scale.x), static_cast<float>(scale.y), static_cast<float>(scale.z) };
+		FMOD_VECTOR fmod_forward = { static_cast<float>(forward.x), static_cast<float>(forward.y), static_cast<float>(forward.z) };
+		FMOD_VECTOR fmod_up = { static_cast<float>(up.x), static_cast<float>(up.y), static_cast<float>(up.z) };
 
 		FMOD_ERR_CHECK(geometry->setPosition(&fmod_pos));
 		FMOD_ERR_CHECK(geometry->setRotation(&fmod_forward, &fmod_up));
@@ -187,19 +243,22 @@ namespace godot {
 	) const {
 		ERR_FAIL_COND_V(!geometry, -1);
 		ERR_FAIL_COND_V(vertices.size() < 3, -1);
+		ERR_FAIL_COND_V_MSG(!_is_finite(direct_occlusion), -1, "direct_occlusion must be finite.");
+		ERR_FAIL_COND_V_MSG(!_is_finite(reverb_occlusion), -1, "reverb_occlusion must be finite.");
 		
 		// 转换 Godot 顶点数组为 FMOD 顶点数组
 		LocalVector<FMOD_VECTOR> fmod_vertices;
 		fmod_vertices.resize(vertices.size());
 		
 		for (int i = 0; i < vertices.size(); i++) {
-			fmod_vertices[i] = { vertices[i].x, vertices[i].y, vertices[i].z };
+			ERR_FAIL_COND_V_MSG(!_is_finite_vector(vertices[i]), -1, "Polygon vertices must be finite.");
+			fmod_vertices[i] = { static_cast<float>(vertices[i].x), static_cast<float>(vertices[i].y), static_cast<float>(vertices[i].z) };
 		}
 		
 		int polygonindex = -1;
 		FMOD_ERR_CHECK_V(geometry->addPolygon(
-			direct_occlusion,
-			reverb_occlusion,
+			CLAMP(direct_occlusion, 0.0f, 1.0f),
+			CLAMP(reverb_occlusion, 0.0f, 1.0f),
 			double_dided,
 			vertices.size(),
 			fmod_vertices.ptr(),
@@ -243,6 +302,7 @@ namespace godot {
 		// 获取所需大小
 		int size = 0;
 		FMOD_ERR_CHECK_V(geometry->save(nullptr, &size), PackedByteArray());
+		ERR_FAIL_COND_V_MSG(size <= 0, PackedByteArray(), "Geometry save size must be greater than 0.");
 
 		// 分配缓冲区并保存
 		PackedByteArray data;
@@ -261,12 +321,6 @@ namespace godot {
 
 	void FmodGeometry::release() {
 		ERR_FAIL_COND(!geometry);
-		geometry->setUserData(nullptr);
-		FMOD_RESULT result = geometry->release();
-		if (result != FMOD_OK) {
-			ERR_PRINT("Failed to release Geometry");
-			return;
-		}
-		geometry = nullptr;
+		_release_internal(true);
 	}
 }

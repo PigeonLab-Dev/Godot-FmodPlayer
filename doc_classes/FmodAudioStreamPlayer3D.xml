@@ -53,7 +53,7 @@
 			<return type="StringName" />
 			<description>
 				Returns the name of the audio bus this player outputs to.
-				The default value is [code]&"Master"[/code].
+				The default value is [code]&amp;"Master"[/code].
 			</description>
 		</method>
 		<method name="get_doppler_tracking" qualifiers="const">
@@ -340,7 +340,7 @@
 		<member name="auto_play" type="bool" setter="set_auto_play" getter="is_autoplay_enabled" default="false">
 			If [code]true[/code], audio plays automatically when the node enters the scene tree.
 		</member>
-		<member name="bus" type="StringName" setter="set_bus" getter="get_bus" default="&amp;"Master"">
+		<member name="bus" type="StringName" setter="set_bus" getter="get_bus" default="&amp;&quot;Master&quot;">
 			The name of the audio bus to route output to.
 		</member>
 		<member name="doppler_tracking" type="int" setter="set_doppler_tracking" getter="get_doppler_tracking" default="0">

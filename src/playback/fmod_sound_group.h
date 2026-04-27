@@ -11,6 +11,9 @@ namespace godot {
 		GDCLASS(FmodSoundGroup, RefCounted)
 
 	public:
+		FmodSoundGroup();
+		~FmodSoundGroup();
+
 		enum Behavior {
 			BEHAVIOR_FAIL,											// 调用 FmodSystem::play_sound 时，过剩的声音会失败
 			BEHAVIOR_MUTE,											// 多余的声音会从静音开始，当足够多的声音停止时才会变得可听见

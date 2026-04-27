@@ -1,6 +1,36 @@
 #include "fmod_reverb_3d.h"
+#include <godot_cpp/core/math.hpp>
 
 namespace godot {
+	static float _clamp_finite_or(float p_value, float p_fallback, float p_min, float p_max) {
+		if (!Math::is_finite(p_value)) {
+			return p_fallback;
+		}
+		return CLAMP(p_value, p_min, p_max);
+	}
+
+	static bool _dictionary_get_float(const Dictionary& p_dictionary, const StringName& p_key, float p_min, float p_max, float& r_value) {
+		if (!p_dictionary.has(p_key)) {
+			return false;
+		}
+
+		const Variant value = p_dictionary[p_key];
+		const Variant::Type value_type = value.get_type();
+		if (value_type != Variant::INT && value_type != Variant::FLOAT) {
+			ERR_PRINT(vformat("FmodReverb3D property '%s' expects a numeric value.", String(p_key)));
+			return false;
+		}
+
+		const float float_value = static_cast<float>(value);
+		if (!Math::is_finite(float_value)) {
+			ERR_PRINT(vformat("FmodReverb3D property '%s' must be finite.", String(p_key)));
+			return false;
+		}
+
+		r_value = CLAMP(float_value, p_min, p_max);
+		return true;
+	}
+
 	void FmodReverb3D::_bind_methods() {
 		ClassDB::bind_method(D_METHOD("reverb_3d_is_valid"), &FmodReverb3D::reverb_3d_is_valid);
 		ClassDB::bind_method(D_METHOD("reverb_3d_is_null"), &FmodReverb3D::reverb_3d_is_null);
@@ -76,7 +106,11 @@ namespace godot {
 
 	void FmodReverb3D::_apply_3d_attributes() {
 		if (!reverb_3d) return;
-		FMOD_VECTOR fmod_position = { position.x, position.y, position.z };
+		FMOD_VECTOR fmod_position = {
+			static_cast<float>(position.x),
+			static_cast<float>(position.y),
+			static_cast<float>(position.z)
+		};
 		FMOD_ERR_CHECK(reverb_3d->set3DAttributes(&fmod_position, min_distance, max_distance));
 	}
 
@@ -98,10 +132,18 @@ namespace godot {
 	}
 
 	void FmodReverb3D::setup(FMOD::Reverb3D* p_reverb_3d) {
-		ERR_FAIL_COND_MSG(!p_reverb_3d, "DSP pointer is null");
+		ERR_FAIL_COND_MSG(!p_reverb_3d, "Reverb3D pointer is null");
+
+		if (reverb_3d == p_reverb_3d) {
+			_apply_properties();
+			_apply_3d_attributes();
+			_apply_active();
+			return;
+		}
 
 		if (reverb_3d) {
-			reverb_3d->setUserData(nullptr);
+			release();
+			ERR_FAIL_COND_MSG(reverb_3d != nullptr, "Failed to release previous Reverb3D before setup.");
 		}
 
 		reverb_3d = p_reverb_3d;
@@ -112,18 +154,19 @@ namespace godot {
 	}
 
 	void FmodReverb3D::set_properties(const Dictionary& p_properties) {
-		if (p_properties.has("decay_time")) properties.DecayTime = CLAMP((float)p_properties["decay_time"], 100.0f, 20000.0f);
-		if (p_properties.has("early_delay")) properties.EarlyDelay = CLAMP((float)p_properties["early_delay"], 0.0f, 300.0f);
-		if (p_properties.has("late_delay")) properties.LateDelay = CLAMP((float)p_properties["late_delay"], 0.0f, 100.0f);
-		if (p_properties.has("hf_reference")) properties.HFReference = CLAMP((float)p_properties["hf_reference"], 20.0f, 20000.0f);
-		if (p_properties.has("hf_decay_ratio")) properties.HFDecayRatio = CLAMP((float)p_properties["hf_decay_ratio"], 10.0f, 200.0f);
-		if (p_properties.has("diffusion")) properties.Diffusion = CLAMP((float)p_properties["diffusion"], 0.0f, 100.0f);
-		if (p_properties.has("density")) properties.Density = CLAMP((float)p_properties["density"], 0.0f, 100.0f);
-		if (p_properties.has("low_shelf_frequency")) properties.LowShelfFrequency = CLAMP((float)p_properties["low_shelf_frequency"], 20.0f, 1000.0f);
-		if (p_properties.has("low_shelf_gain")) properties.LowShelfGain = CLAMP((float)p_properties["low_shelf_gain"], -36.0f, 12.0f);
-		if (p_properties.has("high_cut")) properties.HighCut = CLAMP((float)p_properties["high_cut"], 20.0f, 20000.0f);
-		if (p_properties.has("early_late_mix")) properties.EarlyLateMix = CLAMP((float)p_properties["early_late_mix"], 0.0f, 100.0f);
-		if (p_properties.has("wet_level")) properties.WetLevel = CLAMP((float)p_properties["wet_level"], -80.0f, 20.0f);
+		float value = 0.0f;
+		if (_dictionary_get_float(p_properties, "decay_time", 100.0f, 20000.0f, value)) properties.DecayTime = value;
+		if (_dictionary_get_float(p_properties, "early_delay", 0.0f, 300.0f, value)) properties.EarlyDelay = value;
+		if (_dictionary_get_float(p_properties, "late_delay", 0.0f, 100.0f, value)) properties.LateDelay = value;
+		if (_dictionary_get_float(p_properties, "hf_reference", 20.0f, 20000.0f, value)) properties.HFReference = value;
+		if (_dictionary_get_float(p_properties, "hf_decay_ratio", 10.0f, 200.0f, value)) properties.HFDecayRatio = value;
+		if (_dictionary_get_float(p_properties, "diffusion", 0.0f, 100.0f, value)) properties.Diffusion = value;
+		if (_dictionary_get_float(p_properties, "density", 0.0f, 100.0f, value)) properties.Density = value;
+		if (_dictionary_get_float(p_properties, "low_shelf_frequency", 20.0f, 1000.0f, value)) properties.LowShelfFrequency = value;
+		if (_dictionary_get_float(p_properties, "low_shelf_gain", -36.0f, 12.0f, value)) properties.LowShelfGain = value;
+		if (_dictionary_get_float(p_properties, "high_cut", 20.0f, 20000.0f, value)) properties.HighCut = value;
+		if (_dictionary_get_float(p_properties, "early_late_mix", 0.0f, 100.0f, value)) properties.EarlyLateMix = value;
+		if (_dictionary_get_float(p_properties, "wet_level", -80.0f, 20.0f, value)) properties.WetLevel = value;
 		_apply_properties();
 	}
 
@@ -145,9 +188,15 @@ namespace godot {
 	}
 
 	void FmodReverb3D::set_3d_attributes(const Vector3 position, const float min_distance, const float max_distance) {
-		this->position = position;
-		this->min_distance = MAX(min_distance, 0.0f);
-		this->max_distance = MAX(max_distance, this->min_distance + 0.001f);
+		if (position.is_finite()) {
+			this->position = position;
+		}
+		else {
+			ERR_PRINT("FmodReverb3D position must be finite.");
+		}
+
+		this->min_distance = MAX(_clamp_finite_or(min_distance, this->min_distance, 0.0f, FLT_MAX), 0.0f);
+		this->max_distance = MAX(_clamp_finite_or(max_distance, this->max_distance, 0.0f, FLT_MAX), this->min_distance + 0.001f);
 		_apply_3d_attributes();
 	}
 
@@ -173,6 +222,7 @@ namespace godot {
 		reverb_3d->setUserData(nullptr);
 		FMOD_RESULT result = reverb_3d->release();
 		if (result != FMOD_OK) {
+			reverb_3d->setUserData(this);
 			ERR_PRINT("Failed to release Reverb3D");
 			return;
 		}
@@ -180,7 +230,7 @@ namespace godot {
 	}
 
 	void FmodReverb3D::set_decay_time(const float decay_time) {
-		properties.DecayTime = CLAMP(decay_time, 100.0f, 20000.0f);
+		properties.DecayTime = _clamp_finite_or(decay_time, properties.DecayTime, 100.0f, 20000.0f);
 		_apply_properties();
 	}
 
@@ -189,7 +239,7 @@ namespace godot {
 	}
 
 	void FmodReverb3D::set_early_delay(const float early_delay) {
-		properties.EarlyDelay = CLAMP(early_delay, 0.0f, 300.0f);
+		properties.EarlyDelay = _clamp_finite_or(early_delay, properties.EarlyDelay, 0.0f, 300.0f);
 		_apply_properties();
 	}
 
@@ -198,7 +248,7 @@ namespace godot {
 	}
 
 	void FmodReverb3D::set_late_delay(const float late_delay) {
-		properties.LateDelay = CLAMP(late_delay, 0.0f, 100.0f);
+		properties.LateDelay = _clamp_finite_or(late_delay, properties.LateDelay, 0.0f, 100.0f);
 		_apply_properties();
 	}
 
@@ -207,7 +257,7 @@ namespace godot {
 	}
 
 	void FmodReverb3D::set_hf_reference(const float hf_reference) {
-		properties.HFReference = CLAMP(hf_reference, 20.0f, 20000.0f);
+		properties.HFReference = _clamp_finite_or(hf_reference, properties.HFReference, 20.0f, 20000.0f);
 		_apply_properties();
 	}
 
@@ -216,7 +266,7 @@ namespace godot {
 	}
 
 	void FmodReverb3D::set_hf_decay_ratio(const float hf_decay_ratio) {
-		properties.HFDecayRatio = CLAMP(hf_decay_ratio, 10.0f, 200.0f);
+		properties.HFDecayRatio = _clamp_finite_or(hf_decay_ratio, properties.HFDecayRatio, 10.0f, 200.0f);
 		_apply_properties();
 	}
 
@@ -225,7 +275,7 @@ namespace godot {
 	}
 
 	void FmodReverb3D::set_diffusion(const float diffusion) {
-		properties.Diffusion = CLAMP(diffusion, 0.0f, 100.0f);
+		properties.Diffusion = _clamp_finite_or(diffusion, properties.Diffusion, 0.0f, 100.0f);
 		_apply_properties();
 	}
 
@@ -234,7 +284,7 @@ namespace godot {
 	}
 
 	void FmodReverb3D::set_density(const float density) {
-		properties.Density = CLAMP(density, 0.0f, 100.0f);
+		properties.Density = _clamp_finite_or(density, properties.Density, 0.0f, 100.0f);
 		_apply_properties();
 	}
 
@@ -243,7 +293,7 @@ namespace godot {
 	}
 
 	void FmodReverb3D::set_low_shelf_frequency(const float low_shelf_frequency) {
-		properties.LowShelfFrequency = CLAMP(low_shelf_frequency, 20.0f, 1000.0f);
+		properties.LowShelfFrequency = _clamp_finite_or(low_shelf_frequency, properties.LowShelfFrequency, 20.0f, 1000.0f);
 		_apply_properties();
 	}
 
@@ -252,7 +302,7 @@ namespace godot {
 	}
 
 	void FmodReverb3D::set_low_shelf_gain(const float low_shelf_gain) {
-		properties.LowShelfGain = CLAMP(low_shelf_gain, -36.0f, 12.0f);
+		properties.LowShelfGain = _clamp_finite_or(low_shelf_gain, properties.LowShelfGain, -36.0f, 12.0f);
 		_apply_properties();
 	}
 
@@ -261,7 +311,7 @@ namespace godot {
 	}
 
 	void FmodReverb3D::set_high_cut(const float high_cut) {
-		properties.HighCut = CLAMP(high_cut, 20.0f, 20000.0f);
+		properties.HighCut = _clamp_finite_or(high_cut, properties.HighCut, 20.0f, 20000.0f);
 		_apply_properties();
 	}
 
@@ -270,7 +320,7 @@ namespace godot {
 	}
 
 	void FmodReverb3D::set_early_late_mix(const float early_late_mix) {
-		properties.EarlyLateMix = CLAMP(early_late_mix, 0.0f, 100.0f);
+		properties.EarlyLateMix = _clamp_finite_or(early_late_mix, properties.EarlyLateMix, 0.0f, 100.0f);
 		_apply_properties();
 	}
 
@@ -279,7 +329,7 @@ namespace godot {
 	}
 
 	void FmodReverb3D::set_wet_level(const float wet_level) {
-		properties.WetLevel = CLAMP(wet_level, -80.0f, 20.0f);
+		properties.WetLevel = _clamp_finite_or(wet_level, properties.WetLevel, -80.0f, 20.0f);
 		_apply_properties();
 	}
 

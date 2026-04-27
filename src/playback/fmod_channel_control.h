@@ -10,11 +10,12 @@ namespace godot {
     class FmodChannelControl : public RefCounted {
         GDCLASS(FmodChannelControl, RefCounted)
 
-    protected:
-        FMOD::ChannelControl* channel_control = nullptr;
+	protected:
+		FMOD::ChannelControl* channel_control = nullptr;
+		std::vector<FMOD_VECTOR> custom_rolloff_points;
 
-        static void _bind_methods();
-        void _setup_control(FMOD::ChannelControl* control);
+		static void _bind_methods();
+		void _setup_control(FMOD::ChannelControl* control);
 
     public:
         FmodChannelControl();

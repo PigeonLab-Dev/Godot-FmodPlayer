@@ -1,4 +1,4 @@
-#include "spatial/fmod_reverb_zone_3d.h"
+#include "nodes/fmod_reverb_zone_3d.h"
 
 #include "core/fmod_server.h"
 #include "core/fmod_system.h"

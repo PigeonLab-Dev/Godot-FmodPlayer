@@ -40,12 +40,12 @@
 #include "nodes/fmod_audio_stream_player_2d.h"
 #include "nodes/fmod_audio_stream_player_3d.h"
 #include "nodes/fmod_geometry_instance_3d.h"
+#include "nodes/fmod_reverb_zone_3d.h"
 #include "playback/fmod_channel.h"
 #include "playback/fmod_channel_control.h"
 #include "playback/fmod_channel_group.h"
 #include "playback/fmod_sound_group.h"
 #include "spatial/fmod_reverb_3d.h"
-#include "spatial/fmod_reverb_zone_3d.h"
 
 #include <gdextension_interface.h>
 #include <godot_cpp/classes/engine.hpp>

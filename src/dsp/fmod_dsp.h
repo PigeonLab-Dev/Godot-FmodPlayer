@@ -14,6 +14,8 @@ namespace godot {
 	private:
 		bool callbacks_set = false;                                                     // 记录是否设置了回调
 
+		PackedByteArray getparam_data_storage;
+
 		Callable _create_callback;
 		Callable _release_callback;
 		Callable _reset_callback;

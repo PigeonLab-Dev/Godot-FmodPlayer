@@ -1,7 +1,7 @@
 #include "editor/fmod_reverb_zone_3d_gizmo_plugin.h"
 
 #include "core/fmod_utils.hpp"
-#include "spatial/fmod_reverb_zone_3d.h"
+#include "nodes/fmod_reverb_zone_3d.h"
 
 #include <godot_cpp/classes/editor_interface.hpp>
 #include <godot_cpp/classes/editor_node3d_gizmo.hpp>

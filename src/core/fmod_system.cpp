@@ -10,6 +10,8 @@
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/classes/project_settings.hpp>
 
+#include <limits>
+
 namespace godot {
 	void FmodSystem::_bind_methods() {
 		BIND_ENUM_CONSTANT(FMOD_INIT_FLAG_NORMAL);
@@ -142,7 +144,7 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("system_is_null"), &FmodSystem::system_is_null);
 
 		ClassDB::bind_static_method("FmodSystem", D_METHOD("create_system"), &FmodSystem::create_system);
-		ClassDB::bind_method(D_METHOD("init", "max_channels", "flags"), &FmodSystem::init, DEFVAL(FMOD_INIT_FLAG_NORMAL), DEFVAL(32));
+		ClassDB::bind_method(D_METHOD("init", "max_channels", "flags"), &FmodSystem::init, DEFVAL(32), DEFVAL(FMOD_INIT_FLAG_NORMAL));
 		ClassDB::bind_method(D_METHOD("close"), &FmodSystem::close);
 		ClassDB::bind_method(D_METHOD("release"), &FmodSystem::release);
 		ClassDB::bind_method(D_METHOD("update"), &FmodSystem::update);
@@ -164,7 +166,7 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_software_format"), &FmodSystem::get_software_format);
 		ClassDB::bind_method(D_METHOD("set_dsp_buffer_size", "buffer_length", "num_buffers"), &FmodSystem::set_dsp_buffer_size);
 		ClassDB::bind_method(D_METHOD("get_dsp_buffer_size"), &FmodSystem::get_dsp_buffer_size);
-		ClassDB::bind_method(D_METHOD("set_stream_buffer_size", "file_buffer_size", "file_buffer_size_type"), &FmodSystem::set_stream_buffer_size, DEFVAL(FMOD_TIME_UNIT_RAWBYTES), DEFVAL(16384));
+		ClassDB::bind_method(D_METHOD("set_stream_buffer_size", "file_buffer_size", "file_buffer_size_type"), &FmodSystem::set_stream_buffer_size, DEFVAL(16384), DEFVAL(FMOD_TIME_UNIT_RAWBYTES));
 		ClassDB::bind_method(D_METHOD("get_stream_buffer_size"), &FmodSystem::get_stream_buffer_size);
 		ClassDB::bind_method(D_METHOD("set_speaker_position", "speaker", "x", "y", "active"), &FmodSystem::set_speaker_position);
 		ClassDB::bind_method(D_METHOD("get_speaker_position", "speaker"), &FmodSystem::get_speaker_position);
@@ -311,7 +313,7 @@ namespace godot {
 			"wet_level"
 		), &FmodSystem::set_reverb_properties);
 		ClassDB::bind_method(D_METHOD("get_reverb_properties", "instance"), &FmodSystem::get_reverb_properties);
-		ClassDB::bind_method(D_METHOD("attach_channel_group_to_port", "channel_group", "prot_type", "port_index", "pass_thru"), &FmodSystem::attach_channel_group_to_port, DEFVAL(false), DEFVAL(-1));
+		ClassDB::bind_method(D_METHOD("attach_channel_group_to_port", "channel_group", "prot_type", "port_index", "pass_thru"), &FmodSystem::attach_channel_group_to_port, DEFVAL(FMOD_PORT_INDEX_NONE), DEFVAL(false));
 		ClassDB::bind_method(D_METHOD("detach_channel_group_from_port", "channel_group"), &FmodSystem::detach_channel_group_from_port);
 
 		ClassDB::bind_method(D_METHOD("get_record_num_drivers"), &FmodSystem::get_record_num_drivers);
@@ -340,6 +342,10 @@ namespace godot {
 
 	FmodSystem::~FmodSystem() {
 		if (system) {
+			if (current_callback_system == this) {
+				current_callback_system = nullptr;
+				system->set3DRolloffCallback(nullptr);
+			}
 			system->setUserData(nullptr);
 		}
 	}
@@ -371,6 +377,10 @@ namespace godot {
 		ERR_FAIL_COND_MSG(!p_system, "System pointer is null");
 
 		if (system) {
+			if (current_callback_system == this) {
+				current_callback_system = nullptr;
+				system->set3DRolloffCallback(nullptr);
+			}
 			system->setUserData(nullptr);
 		}
 
@@ -389,30 +399,42 @@ namespace godot {
 
 	void FmodSystem::init(const int max_channels, FmodInitFlags flags) {
 		ERR_FAIL_COND(!system);
+		ERR_FAIL_COND_MSG(max_channels <= 0, "max_channels must be greater than 0.");
 		auto initflags = static_cast<FMOD_INITFLAGS>(flags);
 		FMOD_ERR_CHECK(system->init(max_channels, initflags, nullptr));
 	}
 
 	void FmodSystem::close() {
 		ERR_FAIL_COND(!system);
+		if (current_callback_system == this) {
+			current_callback_system = nullptr;
+			_3d_rolloff_callback = Callable();
+			FMOD_ERR_CHECK(system->set3DRolloffCallback(nullptr));
+		}
 		FMOD_ERR_CHECK(system->close());
 	}
 
 	void FmodSystem::release() {
 		ERR_FAIL_COND(!system);
+		if (current_callback_system == this) {
+			current_callback_system = nullptr;
+			_3d_rolloff_callback = Callable();
+			FMOD_ERR_CHECK(system->set3DRolloffCallback(nullptr));
+		}
 		system->setUserData(nullptr);
 		FMOD_RESULT result = system->release();
 		if (result != FMOD_OK) {
-			ERR_PRINT(vformat("Failed to release FMOD System: ", FMOD_ErrorString(result)));
+			ERR_PRINT(vformat("Failed to release FMOD System: %s", FMOD_ErrorString(result)));
 			return;
 		}
 		system = nullptr;
 	}
 
 	void FmodSystem::update() {
+		ERR_FAIL_COND(!system);
 		FMOD_RESULT result = system->update();
 		if (result != FMOD_OK)
-			ERR_PRINT(vformat("FMOD Sytem update failed: ", FMOD_ErrorString(result)));
+			ERR_PRINT(vformat("FMOD System update failed: %s", FMOD_ErrorString(result)));
 	}
 
 	void FmodSystem::mixer_suspend() {
@@ -448,6 +470,7 @@ namespace godot {
 
 	Dictionary FmodSystem::get_driver_info(const int id) const {
 		ERR_FAIL_COND_V(!system, Dictionary());
+		ERR_FAIL_COND_V_MSG(id < 0, Dictionary(), "Driver id must be >= 0.");
 		char name[256] = { 0 };
 		FMOD_GUID guid;
 		int system_rate = 0;
@@ -468,6 +491,7 @@ namespace godot {
 
 	void FmodSystem::set_driver(const int driver) {
 		ERR_FAIL_COND(!system);
+		ERR_FAIL_COND_MSG(driver < 0, "Driver id must be >= 0.");
 		FMOD_ERR_CHECK(system->setDriver(driver));
 	}
 
@@ -480,6 +504,7 @@ namespace godot {
 
 	void FmodSystem::set_software_channels(const int num_software_channels) {
 		ERR_FAIL_COND(!system);
+		ERR_FAIL_COND_MSG(num_software_channels <= 0, "num_software_channels must be greater than 0.");
 		FMOD_ERR_CHECK(system->setSoftwareChannels(num_software_channels));
 	}
 
@@ -496,6 +521,8 @@ namespace godot {
 		const int num_raw_speakers
 	) {
 		ERR_FAIL_COND(!system);
+		ERR_FAIL_COND_MSG(sample_rate <= 0, "sample_rate must be greater than 0.");
+		ERR_FAIL_COND_MSG(speaker_mode == FMOD_SPEAKER_MODE_RAW && num_raw_speakers <= 0, "num_raw_speakers must be greater than 0 when speaker_mode is RAW.");
 		FMOD_SPEAKERMODE fmod_speaker_mode = static_cast<FMOD_SPEAKERMODE>(speaker_mode);
 		FMOD_ERR_CHECK(system->setSoftwareFormat(sample_rate, fmod_speaker_mode, num_raw_speakers));
 	}
@@ -514,6 +541,8 @@ namespace godot {
 
 	void FmodSystem::set_dsp_buffer_size(const unsigned int buffer_length, const int num_buffers) {
 		ERR_FAIL_COND(!system);
+		ERR_FAIL_COND_MSG(buffer_length == 0, "buffer_length must be greater than 0.");
+		ERR_FAIL_COND_MSG(num_buffers <= 0, "num_buffers must be greater than 0.");
 		FMOD_ERR_CHECK(system->setDSPBufferSize(buffer_length, num_buffers));
 	}
 
@@ -529,12 +558,14 @@ namespace godot {
 	}
 
 	void FmodSystem::set_stream_buffer_size(const unsigned int file_buffer_size, FmodTimeUnit file_buffer_size_type) {
+		ERR_FAIL_COND(!system);
+		ERR_FAIL_COND_MSG(file_buffer_size == 0, "file_buffer_size must be greater than 0.");
 		const bool valid_time_unit =
 			file_buffer_size_type == FMOD_TIME_UNIT_MS ||
 			file_buffer_size_type == FMOD_TIME_UNIT_PCM ||
 			file_buffer_size_type == FMOD_TIME_UNIT_PCMBYTES ||
 			file_buffer_size_type == FMOD_TIME_UNIT_RAWBYTES;
-		ERR_FAIL_COND_MSG(!system || !valid_time_unit, "system is null or file_buffer_size_type is invalid");
+		ERR_FAIL_COND_MSG(!valid_time_unit, "file_buffer_size_type is invalid.");
 		FMOD_TIMEUNIT fmod_file_buffer_size_type = static_cast<FMOD_TIMEUNIT>(file_buffer_size_type);
 		FMOD_ERR_CHECK(system->setStreamBufferSize(file_buffer_size, fmod_file_buffer_size_type));
 	}
@@ -603,6 +634,7 @@ namespace godot {
 
 	void FmodSystem::set_3d_num_listeners(const int num_listeners) {
 		ERR_FAIL_COND(!system);
+		ERR_FAIL_COND_MSG(num_listeners < 1 || num_listeners > 8, "FMOD supports 1 to 8 listeners.");
 		FMOD_ERR_CHECK(system->set3DNumListeners(num_listeners));
 	}
 
@@ -786,8 +818,8 @@ namespace godot {
 
 	void FmodSystem::set_network_proxy(const String& p_proxy) {
 		ERR_FAIL_COND(!system);
-		const char* data = p_proxy.utf8().get_data();
-		FMOD_ERR_CHECK(system->setNetworkProxy(data));
+		CharString proxy_utf8 = p_proxy.utf8();
+		FMOD_ERR_CHECK(system->setNetworkProxy(proxy_utf8.get_data()));
 	}
 
 	String FmodSystem::get_network_proxy() const {
@@ -799,6 +831,7 @@ namespace godot {
 
 	void FmodSystem::set_network_timeout(const int timeout) {
 		ERR_FAIL_COND(!system);
+		ERR_FAIL_COND_MSG(timeout < 0, "timeout must be >= 0.");
 		FMOD_ERR_CHECK(system->setNetworkTimeout(timeout));
 	}
 
@@ -881,57 +914,56 @@ namespace godot {
 
 		FMOD_SPEAKERMODE fmod_source = static_cast<FMOD_SPEAKERMODE>(source_speaker_mode);
 		FMOD_SPEAKERMODE fmod_target = static_cast<FMOD_SPEAKERMODE>(target_speaker_mode);
-		int source_channels = 0, arr_len = array_length;
+		ERR_FAIL_COND_V_MSG(fmod_source == FMOD_SPEAKERMODE_RAW || fmod_target == FMOD_SPEAKERMODE_RAW, PackedFloat32Array(), "RAW speaker mode is not supported by getDefaultMixMatrix.");
 
-		// 获取实际需要的大小
+		int source_channels = 0;
 		int target_channels = 0;
 		FMOD_ERR_CHECK_V(system->getSpeakerModeChannels(fmod_source, &source_channels), PackedFloat32Array());
 		FMOD_ERR_CHECK_V(system->getSpeakerModeChannels(fmod_target, &target_channels), PackedFloat32Array());
-		int needed_size = source_channels * target_channels;
+		ERR_FAIL_COND_V_MSG(source_channels <= 0 || target_channels <= 0, PackedFloat32Array(), "Invalid source or target speaker channel count.");
 
-		// 若用户指定 array_length，使用需要的尺寸
-		if (arr_len <= 0) {
-			arr_len = needed_size;
-		}
+		const int matrix_hop = hop <= 0 ? source_channels : hop;
+		ERR_FAIL_COND_V_MSG(matrix_hop < source_channels, PackedFloat32Array(), "hop must be 0 or greater than or equal to the source channel count.");
+		ERR_FAIL_COND_V_MSG(matrix_hop > FMOD_MAX_CHANNEL_WIDTH, PackedFloat32Array(), "hop cannot exceed FMOD_MAX_CHANNEL_WIDTH.");
 
-		// 分配内存
-		float* matrix = (float*)memalloc(arr_len * sizeof(float));
+		const int compact_size = source_channels * target_channels;
+		const int required_size = target_channels * matrix_hop;
+		ERR_FAIL_COND_V_MSG(array_length > 0 && array_length < required_size, PackedFloat32Array(), "array_length is too small for the requested mix matrix.");
 
-		ERR_FAIL_COND_V(!matrix, PackedFloat32Array());
-		for (int i = 0; i < arr_len; i++) {
+		PackedFloat32Array matrix_storage;
+		matrix_storage.resize(array_length > 0 ? array_length : required_size);
+		float* matrix = matrix_storage.ptrw();
+		for (int i = 0; i < matrix_storage.size(); i++) {
 			matrix[i] = 0.0f;
 		}
 
-		// 获取默认混音矩阵
 		FMOD_RESULT result = system->getDefaultMixMatrix(
 			fmod_source,
 			fmod_target,
 			matrix,
-			hop
+			matrix_hop
 		);
 
 		if (result != FMOD_OK) {
-			memfree(matrix);
 			FMOD_ERR_CHECK_V(result, PackedFloat32Array());
 			return PackedFloat32Array();
 		}
 
-		// 转换为 PackedFloat32Array
 		PackedFloat32Array mix_matrix;
+		mix_matrix.resize(compact_size);
+		float* compact_matrix = mix_matrix.ptrw();
 
-		// 只复制实际需要的数据
-		mix_matrix.resize(needed_size);
-
-		// 应用矩阵
-		for (int i = 0; i < needed_size; i++) {
-			mix_matrix[i] = matrix[i * hop];
+		for (int target = 0; target < target_channels; target++) {
+			for (int source = 0; source < source_channels; source++) {
+				compact_matrix[target * source_channels + source] = matrix[target * matrix_hop + source];
+			}
 		}
 
-		memfree(matrix);
 		return mix_matrix;
 	}
 
 	int FmodSystem::get_speaker_mode_channels(FmodSpeakerMode mode) const {
+		ERR_FAIL_COND_V(!system, -1);
 		FMOD_SPEAKERMODE fmod_speaker_mode = static_cast<FMOD_SPEAKERMODE>(mode);
 		int channels = 0;
 		FMOD_ERR_CHECK_V(system->getSpeakerModeChannels(fmod_speaker_mode, &channels), -1);
@@ -939,7 +971,8 @@ namespace godot {
 	}
 
 	Ref<FmodSound> FmodSystem::create_sound_from_file(const String p_path, unsigned int mode) const {
-		ERR_FAIL_COND_V(!system, nullptr);
+		ERR_FAIL_COND_V(!system, Ref<FmodSound>());
+		ERR_FAIL_COND_V_MSG(p_path.is_empty(), Ref<FmodSound>(), "Sound path cannot be empty.");
 
 		// 检查是否为资源文件路径，如果是则使用资源文件加载 FmodSound
 		if (p_path.begins_with("res://")) {
@@ -947,7 +980,9 @@ namespace godot {
 		}
 
 		// 转换字符串为对象，防止野指针
-		CharString path_utf8 = ProjectSettings::get_singleton()->globalize_path(p_path).utf8();
+		ProjectSettings* project_settings = ProjectSettings::get_singleton();
+		ERR_FAIL_NULL_V(project_settings, Ref<FmodSound>());
+		CharString path_utf8 = project_settings->globalize_path(p_path).utf8();
 		const char* path_cstr = path_utf8.get_data();
 		FMOD::Sound* sound_ptr = nullptr;
 
@@ -960,12 +995,14 @@ namespace godot {
 
 		Ref<FmodSound> fmod_sound;
 		fmod_sound.instantiate();
+		ERR_FAIL_NULL_V(sound_ptr, Ref<FmodSound>());
 		fmod_sound->setup(sound_ptr);
 		return fmod_sound;
 	}
 
 	Ref<FmodSound> FmodSystem::create_sound_from_memory(const PackedByteArray& data, unsigned int mode) const {
 		ERR_FAIL_COND_V(!system || data.is_empty(), Ref<FmodSound>());
+		ERR_FAIL_COND_V_MSG(data.size() > static_cast<int64_t>(std::numeric_limits<unsigned int>::max()), Ref<FmodSound>(), "Sound data is too large for FMOD OPENMEMORY.");
 
 		FMOD::Sound* sound_ptr = nullptr;
 		Ref<FmodSound> sound;
@@ -973,7 +1010,7 @@ namespace godot {
 		sound->data = data;
 		FMOD_CREATESOUNDEXINFO exinfo = {};
 		exinfo.cbsize = sizeof(exinfo);
-		exinfo.length = sound->data.size();
+		exinfo.length = static_cast<unsigned int>(sound->data.size());
 
 		if (!(mode & FMOD_MODE_OPENMEMORY)) {
 			mode |= FMOD_MODE_OPENMEMORY;
@@ -986,20 +1023,23 @@ namespace godot {
 			&sound_ptr
 		), Ref<FmodSound>());
 
+		ERR_FAIL_NULL_V(sound_ptr, Ref<FmodSound>());
 		sound->setup(sound_ptr);
 		return sound;
 	}
 
 	Ref<FmodSound> FmodSystem::create_sound_from_res(const String p_path, unsigned int mode) const {
 		ERR_FAIL_COND_V(!system, Ref<FmodSound>());
+		ERR_FAIL_COND_V_MSG(p_path.is_empty(), Ref<FmodSound>(), "Resource sound path cannot be empty.");
 
 		// 从文件加载
 		Ref<FileAccess> file = FileAccess::open(p_path, FileAccess::READ);
 		ERR_FAIL_COND_V(file.is_null(), Ref<FmodSound>());
+		ERR_FAIL_COND_V_MSG(file->get_length() > static_cast<uint64_t>(std::numeric_limits<unsigned int>::max()), Ref<FmodSound>(), "Resource sound is too large for FMOD OPENMEMORY.");
 
 		// 读取文件数据到内存
 		PackedByteArray data = file->get_buffer(file->get_length());
-		ERR_FAIL_COND_V(data.is_empty(), nullptr);
+		ERR_FAIL_COND_V(data.is_empty(), Ref<FmodSound>());
 
 		// 以内存模式创建 FMOD Sound（添加 OPENMEMORY 标志）
 		return create_sound_from_memory(data, mode);
@@ -1007,22 +1047,63 @@ namespace godot {
 
 	Ref<FmodSound> FmodSystem::create_stream_from_file(const String p_path, unsigned int mode) const {
 		ERR_FAIL_COND_V(!system, Ref<FmodSound>());
+		ERR_FAIL_COND_V_MSG(p_path.is_empty(), Ref<FmodSound>(), "Stream path cannot be empty.");
+
+		unsigned int stream_mode = mode | FMOD_MODE_CREATESTREAM;
+		stream_mode &= ~FMOD_MODE_CREATESAMPLE;
+		stream_mode &= ~FMOD_MODE_CREATECOMPRESSEDSAMPLE;
+
+		if (p_path.begins_with("res://")) {
+			Ref<FileAccess> file = FileAccess::open(p_path, FileAccess::READ);
+			ERR_FAIL_COND_V(file.is_null(), Ref<FmodSound>());
+			ERR_FAIL_COND_V_MSG(file->get_length() > static_cast<uint64_t>(std::numeric_limits<unsigned int>::max()), Ref<FmodSound>(), "Resource stream is too large for FMOD OPENMEMORY.");
+
+			PackedByteArray data = file->get_buffer(file->get_length());
+			ERR_FAIL_COND_V(data.is_empty(), Ref<FmodSound>());
+
+			stream_mode |= FMOD_MODE_OPENMEMORY;
+
+			Ref<FmodSound> sound;
+			sound.instantiate();
+			sound->data = data;
+			sound->file_path = p_path;
+
+			FMOD_CREATESOUNDEXINFO exinfo = {};
+			exinfo.cbsize = sizeof(exinfo);
+			exinfo.length = static_cast<unsigned int>(sound->data.size());
+
+			FMOD::Sound* sound_ptr = nullptr;
+			FMOD_ERR_CHECK_V(system->createStream(
+				(const char*)sound->data.ptr(),
+				stream_mode,
+				&exinfo,
+				&sound_ptr
+			), Ref<FmodSound>());
+
+			ERR_FAIL_NULL_V(sound_ptr, Ref<FmodSound>());
+			sound->setup(sound_ptr);
+			return sound;
+		}
 
 		// 转换字符串为对象，防止野指针
-		CharString path_utf8 = ProjectSettings::get_singleton()->globalize_path(p_path).utf8();
+		ProjectSettings* project_settings = ProjectSettings::get_singleton();
+		ERR_FAIL_NULL_V(project_settings, Ref<FmodSound>());
+		CharString path_utf8 = project_settings->globalize_path(p_path).utf8();
 		const char* path_cstr = path_utf8.get_data();
 
 		FMOD::Sound* sound_ptr = nullptr;
 		FMOD_ERR_CHECK_V(system->createStream(
 			path_cstr,
-			mode,
+			stream_mode,
 			nullptr,
 			&sound_ptr
 		), Ref<FmodSound>());
 
 		Ref<FmodSound> sound;
 		sound.instantiate();
-		sound->sound = sound_ptr;
+		ERR_FAIL_NULL_V(sound_ptr, Ref<FmodSound>());
+		sound->setup(sound_ptr);
+		sound->file_path = p_path;
 		return sound;
 	}
 
@@ -1065,6 +1146,10 @@ namespace godot {
 			FMOD_ERR_CHECK(result);
 			return Ref<FmodDSP>();
 		}
+		if (!dsp_ptr) {
+			memdelete(desc);
+			ERR_FAIL_V_MSG(Ref<FmodDSP>(), "FMOD returned a null DSP pointer.");
+		}
 
 		Ref<FmodDSP> dsp;
 		dsp.instantiate();
@@ -1073,10 +1158,13 @@ namespace godot {
 	}
 
 	Ref<FmodDSP> FmodSystem::create_dsp_by_type(unsigned int type) const {
+		ERR_FAIL_COND_V(!system, Ref<FmodDSP>());
+		ERR_FAIL_COND_V_MSG(type >= FMOD_DSP_TYPE_MAX, Ref<FmodDSP>(), "Invalid built-in DSP type.");
 		FMOD::DSP* dsp_ptr = nullptr;
 		FMOD_ERR_CHECK_V(system->createDSPByType((FMOD_DSP_TYPE)type, &dsp_ptr), Ref<FmodDSP>());
 		Ref<FmodDSP> dsp;
 		dsp.instantiate();
+		ERR_FAIL_NULL_V(dsp_ptr, Ref<FmodDSP>());
 		dsp->setup(dsp_ptr);
 		return dsp;
 	}
@@ -1090,6 +1178,7 @@ namespace godot {
 		);
 		Ref<FmodChannelGroup> channel_group;
 		channel_group.instantiate();
+		ERR_FAIL_NULL_V(channel_group_ptr, Ref<FmodChannelGroup>());
 		channel_group->setup(channel_group_ptr);
 		return channel_group;
 	}
@@ -1103,6 +1192,7 @@ namespace godot {
 		);
 		Ref<FmodSoundGroup> sound_group;
 		sound_group.instantiate();
+		ERR_FAIL_NULL_V(sound_group_ptr, Ref<FmodSoundGroup>());
 		sound_group->setup(sound_group_ptr);
 		return sound_group;
 	}
@@ -1113,6 +1203,7 @@ namespace godot {
 		FMOD_ERR_CHECK_V(system->createReverb3D(&reverb_ptr), Ref<FmodReverb3D>());
 		Ref<FmodReverb3D> reverb;
 		reverb.instantiate();
+		ERR_FAIL_NULL_V(reverb_ptr, Ref<FmodReverb3D>());
 		reverb->setup(reverb_ptr);
 		return reverb;
 	}
@@ -1169,8 +1260,10 @@ namespace godot {
 
 	Ref<FmodChannel> FmodSystem::get_channel(const int id) const {
 		ERR_FAIL_COND_V(!system, Ref<FmodChannel>());
+		ERR_FAIL_COND_V_MSG(id < 0, Ref<FmodChannel>(), "Channel id must be >= 0.");
 		FMOD::Channel* fmod_channel = nullptr;
 		FMOD_ERR_CHECK_V(system->getChannel(id, &fmod_channel), Ref<FmodChannel>());
+		ERR_FAIL_NULL_V(fmod_channel, Ref<FmodChannel>());
 		Ref<FmodChannel> channel;
 		channel.instantiate();
 		channel->setup(fmod_channel);
@@ -1179,10 +1272,12 @@ namespace godot {
 
 	Dictionary FmodSystem::get_dsp_info_by_type(unsigned int type) const {
 		ERR_FAIL_COND_V(!system, Dictionary());
+		ERR_FAIL_COND_V_MSG(type >= FMOD_DSP_TYPE_MAX, Dictionary(), "Invalid built-in DSP type.");
 
 		FMOD_DSP_TYPE fmod_type = static_cast<FMOD_DSP_TYPE>(type);
 		const FMOD_DSP_DESCRIPTION* desc = nullptr;
 		FMOD_ERR_CHECK_V(system->getDSPInfoByType(fmod_type, &desc), Dictionary());
+		ERR_FAIL_NULL_V(desc, Dictionary());
 
 		Dictionary info;
 		info["name"] = String::utf8(desc->name);
@@ -1204,6 +1299,7 @@ namespace godot {
 		ERR_FAIL_COND_V(!system, Ref<FmodChannelGroup>());
 		FMOD::ChannelGroup* channel_group_ptr = nullptr;
 		FMOD_ERR_CHECK_V(system->getMasterChannelGroup(&channel_group_ptr), Ref<FmodChannelGroup>());
+		ERR_FAIL_NULL_V(channel_group_ptr, Ref<FmodChannelGroup>());
 		Ref<FmodChannelGroup> channel_group;
 		channel_group.instantiate();
 		channel_group->setup(channel_group_ptr);
@@ -1214,6 +1310,7 @@ namespace godot {
 		ERR_FAIL_COND_V(!system, Ref<FmodSoundGroup>());
 		FMOD::SoundGroup* sound_group_ptr = nullptr;
 		FMOD_ERR_CHECK_V(system->getMasterSoundGroup(&sound_group_ptr), Ref<FmodSoundGroup>());
+		ERR_FAIL_NULL_V(sound_group_ptr, Ref<FmodSoundGroup>());
 		Ref<FmodSoundGroup> sound_group;
 		sound_group.instantiate();
 		sound_group->setup(sound_group_ptr);
@@ -1329,6 +1426,7 @@ namespace godot {
 
 	Dictionary FmodSystem::get_record_driver_info(const int id) const {
 		ERR_FAIL_COND_V(!system, Dictionary());
+		ERR_FAIL_COND_V_MSG(id < 0, Dictionary(), "Record driver id must be >= 0.");
 
 		char name[512] = { 0 };
 		FMOD_GUID guid;
@@ -1359,6 +1457,7 @@ namespace godot {
 
 	int FmodSystem::get_record_position(const int id) const {
 		ERR_FAIL_COND_V(!system, 0);
+		ERR_FAIL_COND_V_MSG(id < 0, 0, "Record driver id must be >= 0.");
 		unsigned int position = 0;
 		FMOD_ERR_CHECK_V(system->getRecordPosition(id, &position), 0);
 		return position;
@@ -1366,16 +1465,19 @@ namespace godot {
 
 	void FmodSystem::record_start(const int id, Ref<FmodSound> sound, const bool loop) {
 		ERR_FAIL_COND(!system || sound.is_null() || !sound->sound);
+		ERR_FAIL_COND_MSG(id < 0, "Record driver id must be >= 0.");
 		FMOD_ERR_CHECK(system->recordStart(id, sound->sound, loop));
 	}
 
 	void FmodSystem::record_stop(const int id) {
 		ERR_FAIL_COND(!system);
+		ERR_FAIL_COND_MSG(id < 0, "Record driver id must be >= 0.");
 		FMOD_ERR_CHECK(system->recordStop(id));
 	}
 
 	bool FmodSystem::is_recording(const int id) const {
 		ERR_FAIL_COND_V(!system, false);
+		ERR_FAIL_COND_V_MSG(id < 0, false, "Record driver id must be >= 0.");
 		bool recording = false;
 		FMOD_ERR_CHECK_V(system->isRecording(id, &recording), false);
 		return recording;
@@ -1383,8 +1485,11 @@ namespace godot {
 
 	Ref<FmodGeometry> FmodSystem::create_geometry(const int max_polygons, const int max_vertices) const {
 		ERR_FAIL_COND_V(!system, Ref<FmodGeometry>());
+		ERR_FAIL_COND_V_MSG(max_polygons <= 0, Ref<FmodGeometry>(), "max_polygons must be greater than 0.");
+		ERR_FAIL_COND_V_MSG(max_vertices <= 0, Ref<FmodGeometry>(), "max_vertices must be greater than 0.");
 		FMOD::Geometry* geometry_ptr = nullptr;
 		FMOD_ERR_CHECK_V(system->createGeometry(max_polygons, max_vertices, &geometry_ptr), Ref<FmodGeometry>());
+		ERR_FAIL_NULL_V(geometry_ptr, Ref<FmodGeometry>());
 		Ref<FmodGeometry> geometry;
 		geometry.instantiate();
 		geometry->setup(geometry_ptr);
@@ -1393,6 +1498,7 @@ namespace godot {
 
 	void FmodSystem::set_3d_max_world_size(const float max_world_size) {
 		ERR_FAIL_COND(!system);
+		ERR_FAIL_COND_MSG(max_world_size <= 0.0f, "max_world_size must be greater than 0.");
 		FMOD_ERR_CHECK(system->setGeometrySettings(max_world_size));
 	}
 
@@ -1405,8 +1511,11 @@ namespace godot {
 
 	Ref<FmodGeometry> FmodSystem::load_geometry(const PackedByteArray& data) const {
 		ERR_FAIL_COND_V(!system, Ref<FmodGeometry>());
+		ERR_FAIL_COND_V_MSG(data.is_empty(), Ref<FmodGeometry>(), "Geometry data cannot be empty.");
+		ERR_FAIL_COND_V_MSG(data.size() > static_cast<int64_t>(std::numeric_limits<int>::max()), Ref<FmodGeometry>(), "Geometry data is too large for FMOD loadGeometry.");
 		FMOD::Geometry* geometry_ptr = nullptr;
-		FMOD_ERR_CHECK_V(system->loadGeometry(data.ptr(), data.size(), &geometry_ptr), Ref<FmodGeometry>());
+		FMOD_ERR_CHECK_V(system->loadGeometry(data.ptr(), static_cast<int>(data.size()), &geometry_ptr), Ref<FmodGeometry>());
+		ERR_FAIL_NULL_V(geometry_ptr, Ref<FmodGeometry>());
 		Ref<FmodGeometry> geometry;
 		geometry.instantiate();
 		geometry->setup(geometry_ptr);

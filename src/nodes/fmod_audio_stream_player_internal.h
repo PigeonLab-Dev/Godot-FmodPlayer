@@ -9,6 +9,13 @@
 
 namespace godot {
 	class FmodAudioStreamPlayerInternal {
+	public:
+		enum MixTarget {
+			MIX_TARGET_STEREO,
+			MIX_TARGET_SURROUND,
+			MIX_TARGET_CENTER,
+		};
+
 	private:
 		Ref<FmodAudioStream> stream;
 		Ref<FmodChannel> channel;
@@ -23,9 +30,11 @@ namespace godot {
 		bool last_channel_created = false;
 		float volume_db = 0.0f;
 		float pitch_scale = 1.0f;
+		MixTarget mix_target = MIX_TARGET_STEREO;
 		StringName bus;
 
 		void _apply_stream_mode();
+		void _apply_mix_target();
 		Ref<FmodChannelGroup> _get_bus_channel_group() const;
 		void _connect_channel();
 		void _disconnect_channel();
@@ -61,6 +70,9 @@ namespace godot {
 
 		void set_pitch_scale(float p_pitch_scale);
 		float get_pitch_scale() const;
+
+		void set_mix_target(MixTarget p_mix_target);
+		MixTarget get_mix_target() const;
 
 		void set_autoplay(bool p_enable);
 		bool is_autoplay_enabled() const;

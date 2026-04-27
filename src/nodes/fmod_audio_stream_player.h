@@ -9,6 +9,13 @@ namespace godot {
 	class FmodAudioStreamPlayer : public Node {
 		GDCLASS(FmodAudioStreamPlayer, Node)
 
+	public:
+		enum MixTarget {
+			MIX_TARGET_STEREO,
+			MIX_TARGET_SURROUND,
+			MIX_TARGET_CENTER,
+		};
+
 	private:
 		FmodAudioStreamPlayerInternal* internal_player = nullptr;
 		void _on_internal_player_finished();
@@ -45,6 +52,9 @@ namespace godot {
 		void set_pitch_scale(const float new_pitch);
 		float get_pitch_scale() const;
 
+		void set_mix_target(MixTarget p_mix_target);
+		MixTarget get_mix_target() const;
+
 		void set_auto_play(const bool enable);
 		bool is_autoplay_enabled() const;
 
@@ -55,5 +65,7 @@ namespace godot {
 		StringName get_bus() const;
 	};
 }
+
+VARIANT_ENUM_CAST(FmodAudioStreamPlayer::MixTarget);
 
 #endif // !FMOD_AUDIO_STREAM_PLAYER_H

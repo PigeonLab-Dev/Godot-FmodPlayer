@@ -163,7 +163,6 @@ namespace godot {
 
 	void FmodAudioBus::set_mute(bool p_mute) {
 		user_mute = p_mute;
-		// 不直接操作 FMOD，由 AudioBusLayout 统一调用 apply_mute
 	}
 
 	bool FmodAudioBus::is_mute() const {

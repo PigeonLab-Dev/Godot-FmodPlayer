@@ -2,6 +2,7 @@
 
 #include "core/fmod_server.h"
 #include "mixer/fmod_audio_bus_layout.h"
+#include <godot_cpp/classes/audio_server.hpp>
 
 namespace godot {
 	FmodAudioStreamPlayerInternal::FmodAudioStreamPlayerInternal() {
@@ -35,6 +36,31 @@ namespace godot {
 
 		if (new_flags != flags) {
 			stream->set_mode_flags(new_flags);
+		}
+	}
+
+	void FmodAudioStreamPlayerInternal::_apply_mix_target() {
+		if (channel.is_null() || !channel->channel_control_is_valid()) {
+			return;
+		}
+
+		AudioServer* audio_server = AudioServer::get_singleton();
+		if (audio_server && audio_server->get_speaker_mode() == AudioServer::SPEAKER_MODE_STEREO) {
+			channel->set_mix_levels_output(1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+			return;
+		}
+
+		switch (mix_target) {
+			case MIX_TARGET_SURROUND:
+				channel->set_mix_levels_output(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+				break;
+			case MIX_TARGET_CENTER:
+				channel->set_mix_levels_output(0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+				break;
+			case MIX_TARGET_STEREO:
+			default:
+				channel->set_mix_levels_output(1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+				break;
 		}
 	}
 
@@ -173,6 +199,7 @@ namespace godot {
 
 		channel->set_volume_db(volume_db);
 		channel->set_pitch(pitch_scale);
+		_apply_mix_target();
 		if (p_from_position > 0.0f) {
 			channel->set_position(int(p_from_position * 1000.0f));
 		}
@@ -257,6 +284,16 @@ namespace godot {
 
 	float FmodAudioStreamPlayerInternal::get_pitch_scale() const {
 		return pitch_scale;
+	}
+
+	void FmodAudioStreamPlayerInternal::set_mix_target(MixTarget p_mix_target) {
+		ERR_FAIL_COND(p_mix_target < MIX_TARGET_STEREO || p_mix_target > MIX_TARGET_CENTER);
+		mix_target = p_mix_target;
+		_apply_mix_target();
+	}
+
+	FmodAudioStreamPlayerInternal::MixTarget FmodAudioStreamPlayerInternal::get_mix_target() const {
+		return mix_target;
 	}
 
 	void FmodAudioStreamPlayerInternal::set_autoplay(bool p_enable) {

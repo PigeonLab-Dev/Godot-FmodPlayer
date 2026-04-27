@@ -6,6 +6,12 @@ env = SConscript("godot-cpp/SConstruct")
 
 env.Append(CPPPATH=["src/", "src/thirdparty/fmod/inc"])
 
+# godot-cpp only defines TOOLS_ENABLED for target=editor. This extension's
+# .gdextension file uses the template_debug binary inside the Godot editor, so
+# keep editor-only integration code enabled for template_debug builds as well.
+if env["target"] == "template_debug":
+    env.Append(CPPDEFINES=["TOOLS_ENABLED"])
+
 env.Tool("compilation_db")
 env.CompilationDatabase()
 sources = (Glob("src/core/*.cpp") + Glob("src/audio/*.cpp") + Glob("src/playback/*.cpp") + 

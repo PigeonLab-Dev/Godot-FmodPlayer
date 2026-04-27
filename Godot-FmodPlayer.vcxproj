@@ -184,7 +184,7 @@
     <ClInclude Include="src\core\register_types.h" />
     <ClInclude Include="src\playback\fmod_sound_group.h" />
     <ClInclude Include="src\spatial\fmod_reverb_3d.h" />
-    <ClInclude Include="src\spatial\fmod_reverb_zone_3d.h" />
+    <ClInclude Include="src\nodes\fmod_reverb_zone_3d.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\audio\fmod_audio_stream_flac.cpp" />
@@ -232,7 +232,7 @@
     <ClCompile Include="src\core\register_types.cpp" />
     <ClCompile Include="src\playback\fmod_sound_group.cpp" />
     <ClCompile Include="src\spatial\fmod_reverb_3d.cpp" />
-    <ClCompile Include="src\spatial\fmod_reverb_zone_3d.cpp" />
+    <ClCompile Include="src\nodes\fmod_reverb_zone_3d.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

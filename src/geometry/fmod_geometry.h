@@ -15,6 +15,8 @@ namespace godot {
 	private:
 		FMOD::Geometry* geometry = nullptr;
 
+		bool _release_internal(bool p_restore_userdata_on_failure);
+
 	protected:
 		static void _bind_methods();
 

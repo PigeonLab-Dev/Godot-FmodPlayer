@@ -17,7 +17,7 @@
 		- [code]FmodFileUsage/SampleBytesRead[/code]: Sample bytes read from disk
 		- [code]FmodFileUsage/StreamBytesRead[/code]: Stream bytes read from disk
 		- [code]FmodFileUsage/OtherBytesRead[/code]: Other bytes read from disk
-		[b]Note:[/b] This class is a singleton. Use [method get_singleton] to access the instance, or use the static methods directly.
+		[b]Note:[/b] This class is a singleton. Use the static methods directly to access FMOD systems and shared resources.
 	</description>
 	<tutorials>
 	</tutorials>
@@ -38,12 +38,6 @@
 			<return type="FmodChannelGroup" />
 			<description>
 				Returns the master channel group that all sounds route through by default. This is the root of the channel group hierarchy and can be used to control global volume, pitch, and effects for all playing sounds.
-			</description>
-		</method>
-		<method name="get_singleton" qualifiers="static">
-			<return type="FmodServer" />
-			<description>
-				Returns the FmodServer singleton instance. This is the global instance that manages the FMOD system. Returns [code]null[/code] if the server has not been initialized.
 			</description>
 		</method>
 	</methods>

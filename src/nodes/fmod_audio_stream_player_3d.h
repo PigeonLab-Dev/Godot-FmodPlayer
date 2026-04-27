@@ -130,4 +130,4 @@ namespace godot {
 VARIANT_ENUM_CAST(FmodAudioStreamPlayer3D::AttenuationModel)
 VARIANT_ENUM_CAST(FmodAudioStreamPlayer3D::DopplerTracking)
 
-#endif
+#endif // !FMOD_AUDIO_STREAM_PLAYER_3D_H

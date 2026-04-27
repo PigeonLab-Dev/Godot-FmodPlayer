@@ -28,7 +28,9 @@ namespace godot {
 	}
 
 	FmodDSPConnection::~FmodDSPConnection() {
-		dsp_connection->setUserData(nullptr);
+		if (dsp_connection) {
+			dsp_connection->setUserData(nullptr);
+		}
 		dsp_connection = nullptr;
 	}
 

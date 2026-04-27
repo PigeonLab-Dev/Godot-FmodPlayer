@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="FmodReverbZone3DGizmoPlugin" inherits="EditorNode3DGizmoPlugin" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Editor gizmo plugin for [FmodReverbZone3D].
+	</brief_description>
+	<description>
+		FmodReverbZone3DGizmoPlugin draws the editor visualization for [FmodReverbZone3D] nodes, including the spherical minimum and maximum distance ranges used by FMOD 3D reverb.
+		This class is registered for editor integration and is normally managed by the plugin automatically.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>

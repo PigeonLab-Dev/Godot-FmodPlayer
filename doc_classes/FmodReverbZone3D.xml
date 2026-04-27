@@ -70,25 +70,65 @@
 		</member>
 	</members>
 	<constants>
-		<constant name="PRESET_CUSTOM" value="0" enum="Preset" />
-		<constant name="PRESET_OFF" value="1" enum="Preset" />
-		<constant name="PRESET_GENERIC" value="2" enum="Preset" />
-		<constant name="PRESET_PADDED_CELL" value="3" enum="Preset" />
-		<constant name="PRESET_ROOM" value="4" enum="Preset" />
-		<constant name="PRESET_BATHROOM" value="5" enum="Preset" />
-		<constant name="PRESET_LIVING_ROOM" value="6" enum="Preset" />
-		<constant name="PRESET_STONE_ROOM" value="7" enum="Preset" />
-		<constant name="PRESET_AUDITORIUM" value="8" enum="Preset" />
-		<constant name="PRESET_CONCERT_HALL" value="9" enum="Preset" />
-		<constant name="PRESET_CAVE" value="10" enum="Preset" />
-		<constant name="PRESET_ARENA" value="11" enum="Preset" />
-		<constant name="PRESET_HANGAR" value="12" enum="Preset" />
-		<constant name="PRESET_HALLWAY" value="13" enum="Preset" />
-		<constant name="PRESET_STONE_CORRIDOR" value="14" enum="Preset" />
-		<constant name="PRESET_ALLEY" value="15" enum="Preset" />
-		<constant name="PRESET_FOREST" value="16" enum="Preset" />
-		<constant name="PRESET_CITY" value="17" enum="Preset" />
-		<constant name="PRESET_MOUNTAINS" value="18" enum="Preset" />
-		<constant name="PRESET_UNDERWATER" value="19" enum="Preset" />
+		<constant name="PRESET_CUSTOM" value="0" enum="Preset">
+			Custom user-edited reverb properties.
+		</constant>
+		<constant name="PRESET_OFF" value="1" enum="Preset">
+			Disables the reverb effect.
+		</constant>
+		<constant name="PRESET_GENERIC" value="2" enum="Preset">
+			General purpose room reverb.
+		</constant>
+		<constant name="PRESET_PADDED_CELL" value="3" enum="Preset">
+			Very small, heavily damped room.
+		</constant>
+		<constant name="PRESET_ROOM" value="4" enum="Preset">
+			Small room preset.
+		</constant>
+		<constant name="PRESET_BATHROOM" value="5" enum="Preset">
+			Bright reflective bathroom preset.
+		</constant>
+		<constant name="PRESET_LIVING_ROOM" value="6" enum="Preset">
+			Soft furnished room preset.
+		</constant>
+		<constant name="PRESET_STONE_ROOM" value="7" enum="Preset">
+			Reflective stone room preset.
+		</constant>
+		<constant name="PRESET_AUDITORIUM" value="8" enum="Preset">
+			Large auditorium preset.
+		</constant>
+		<constant name="PRESET_CONCERT_HALL" value="9" enum="Preset">
+			Concert hall preset with a long spacious tail.
+		</constant>
+		<constant name="PRESET_CAVE" value="10" enum="Preset">
+			Cave-like reverb with strong late reflections.
+		</constant>
+		<constant name="PRESET_ARENA" value="11" enum="Preset">
+			Very large arena preset.
+		</constant>
+		<constant name="PRESET_HANGAR" value="12" enum="Preset">
+			Huge metallic hangar preset.
+		</constant>
+		<constant name="PRESET_HALLWAY" value="13" enum="Preset">
+			Narrow hallway preset.
+		</constant>
+		<constant name="PRESET_STONE_CORRIDOR" value="14" enum="Preset">
+			Reflective stone corridor preset.
+		</constant>
+		<constant name="PRESET_ALLEY" value="15" enum="Preset">
+			Outdoor alley preset.
+		</constant>
+		<constant name="PRESET_FOREST" value="16" enum="Preset">
+			Outdoor forest ambience preset.
+		</constant>
+		<constant name="PRESET_CITY" value="17" enum="Preset">
+			Outdoor city ambience preset.
+		</constant>
+		<constant name="PRESET_MOUNTAINS" value="18" enum="Preset">
+			Open mountain ambience preset.
+		</constant>
+		<constant name="PRESET_UNDERWATER" value="19" enum="Preset">
+			Underwater muffled reverb preset.
+		</constant>
 	</constants>
 </class>

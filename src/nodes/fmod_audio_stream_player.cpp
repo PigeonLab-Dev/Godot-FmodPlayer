@@ -5,6 +5,10 @@
 
 namespace godot {
 	void FmodAudioStreamPlayer::_bind_methods() {
+		BIND_ENUM_CONSTANT(MIX_TARGET_STEREO);
+		BIND_ENUM_CONSTANT(MIX_TARGET_SURROUND);
+		BIND_ENUM_CONSTANT(MIX_TARGET_CENTER);
+
 		ClassDB::bind_method(D_METHOD("set_stream", "stream"), &FmodAudioStreamPlayer::set_stream);
 		ClassDB::bind_method(D_METHOD("get_stream"), &FmodAudioStreamPlayer::get_stream);
 		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "stream", PROPERTY_HINT_RESOURCE_TYPE, "FmodAudioStream"), "set_stream", "get_stream");
@@ -31,6 +35,10 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("set_pitch_scale", "pitch_scale"), &FmodAudioStreamPlayer::set_pitch_scale);
 		ClassDB::bind_method(D_METHOD("get_pitch_scale"), &FmodAudioStreamPlayer::get_pitch_scale);
 		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pitch_scale", PROPERTY_HINT_RANGE, "0.01,4,0.01,or_greater"), "set_pitch_scale", "get_pitch_scale");
+
+		ClassDB::bind_method(D_METHOD("set_mix_target", "mix_target"), &FmodAudioStreamPlayer::set_mix_target);
+		ClassDB::bind_method(D_METHOD("get_mix_target"), &FmodAudioStreamPlayer::get_mix_target);
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "mix_target", PROPERTY_HINT_ENUM, "Stereo,Surround,Center"), "set_mix_target", "get_mix_target");
 
 		ClassDB::bind_method(D_METHOD("set_auto_play", "enable"), &FmodAudioStreamPlayer::set_auto_play);
 		ClassDB::bind_method(D_METHOD("is_autoplay_enabled"), &FmodAudioStreamPlayer::is_autoplay_enabled);
@@ -155,6 +163,15 @@ namespace godot {
 
 	float FmodAudioStreamPlayer::get_pitch_scale() const {
 		return internal_player->get_pitch_scale();
+	}
+
+	void FmodAudioStreamPlayer::set_mix_target(MixTarget p_mix_target) {
+		ERR_FAIL_COND(p_mix_target < MIX_TARGET_STEREO || p_mix_target > MIX_TARGET_CENTER);
+		internal_player->set_mix_target(static_cast<FmodAudioStreamPlayerInternal::MixTarget>(p_mix_target));
+	}
+
+	FmodAudioStreamPlayer::MixTarget FmodAudioStreamPlayer::get_mix_target() const {
+		return static_cast<MixTarget>(internal_player->get_mix_target());
 	}
 
 	void FmodAudioStreamPlayer::set_auto_play(const bool enable) {
