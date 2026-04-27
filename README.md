@@ -5,7 +5,7 @@
 <h1 align="center">Godot-FmodPlayer</h1>
 
 <p align="center">
-  <b>Godot 4 GDExtension for advanced audio playback via FMOD Core API</b>
+  <b>FMOD Core API audio playback, mixing, DSP, and 3D spatial tools for Godot 4.</b>
 </p>
 
 <p align="center">
@@ -21,92 +21,190 @@
   <a href="https://godotengine.org">
     <img src="https://img.shields.io/badge/Godot-4.1%2B-478CBF?style=flat-square&logo=godot-engine" alt="Godot Version" />
   </a>
+  <a href="https://godot-fmodplayerdocs.readthedocs.io/en/latest/">
+    <img src="https://img.shields.io/badge/docs-online-2ea44f?style=flat-square" alt="Documentation" />
+  </a>
 </p>
 
 <p align="center">
-  A audio player plugin supporting multiple formats, flexible loading modes,<br>
-  professional DSP effects, and real-time mixing capabilities.
+  A Godot 4 GDExtension plugin for developers who want low-level FMOD playback<br>
+  without giving up Godot-style nodes, resources, buses, inspectors, and editor workflows.
 </p>
 
-## Features
+---
 
-### Multi-Format Audio Support
-Play all major audio formats supported by FMOD:
-- MP3, WAV, OGG Vorbis, FLAC
-- MOD, XM, S3M, IT (tracker formats)
-- MIDI, AIFF, and more
+## Why This Plugin?
 
-### Flexible Loading Modes
-Load audio from virtually any source:
-- **File System** - Direct file path loading (`res://`, `user://`, absolute paths)
-- **Memory Buffer** - Load from raw byte arrays for procedural/generated audio
-- **Godot PCK** - Seamless integration with Godot's resource pack system
-- **Streaming** - Memory-efficient playback for large music files
+Godot-FmodPlayer is built around the **FMOD Core API**, not FMOD Studio. It is aimed at projects that need direct control over sounds, channels, channel groups, DSP graphs, streamed audio, 3D spatial playback, and runtime mixing.
 
-### Professional DSP Effects
-Built-in 16+ audio effects for real-time processing:
-| Effect | Description |
-|--------|-------------|
-| **Amplify** | Volume gain control |
-| **EQ** | 6/10/21-band equalizer |
-| **Filter** | Low-pass, high-pass, band-pass |
-| **Chorus** | Stereo chorus effect |
-| **Delay** | Echo and delay lines |
-| **Distortion** | Overdrive and fuzz |
-| **Phaser** | Phase shifting effect |
-| **Pitch Shift** | Real-time pitch manipulation |
-| **Reverb** | Room simulation |
-| **Compressor** | Dynamic range compression |
-| **Hard Limiter** | Peak limiting |
-| **Stereo Enhance** | Stereo width control |
-| **Spectrum Analyzer** | Real-time frequency analysis |
-| **Capture** | Audio capture functionality |
-| **Record** | Audio recording functionality |
-| **Panner** | Stereo positioning |
+Use it when you want:
 
-### Dynamic Mixing & Bus System
-Professional-grade audio mixing:
-- **Audio Buses** - Organize sounds into mix buses with independent controls
-- **Bus Layout** - Synchronized with Godot's AudioServer
-- **Channel Groups** - Group channels for collective mixing
-- **Real-time Parameters** - Adjust volume, pitch, pan on the fly
-- **3D Audio** - 3D positioning with various rolloff modes
+- FMOD's mature decoder, mixer, and DSP runtime inside Godot.
+- Godot-friendly nodes such as `FmodAudioStreamPlayer`, `FmodAudioStreamPlayer2D`, and `FmodAudioStreamPlayer3D`.
+- Editor tools for importing, previewing, inspecting, and testing FMOD audio resources.
+- A bus layout that follows Godot's `AudioServer` while routing playback through FMOD.
+- Advanced 3D audio features such as geometry occlusion and spatial reverb zones.
 
-### Performance Monitoring
-Built-in integration with Godot's Performance Monitor:
-- **CPU Usage** - Track FMOD mixer CPU consumption (DSP, Stream, Geometry, Update, Convolution)
-- **File Usage** - Track streaming and sample bytes read
+> Looking for FMOD Studio event/bank workflows? This project intentionally focuses on **FMOD Core API**. For Studio API integration, see [fmod-gdextension](https://github.com/utopia-rise/fmod-gdextension).
 
-### Editor Integration
-First-class Godot Editor support:
-- **Audio Importer** - Import and configure audio assets directly in the editor
-- **Audio Preview** - Preview audio files in the inspector
-- **Custom Icons** - Visual distinction for all FMOD-related nodes and resources
+## Highlights
+
+### Godot-Native Workflow
+
+- Import audio as FMOD stream resources directly in the editor.
+- Preview FMOD audio resources from the inspector.
+- Use custom icons, 3D gizmos, and editor tools for FMOD nodes.
+- Configure FMOD system options from `Project Settings`.
+- Use a helper tool to prepare Android export templates for FMOD runtime files.
+
+### Playback And Loading
+
+- Play common FMOD-supported formats: MP3, WAV, OGG Vorbis, FLAC, AIFF, MIDI, MOD, XM, S3M, IT, and more.
+- Load from `res://`, `user://`, absolute file paths, memory buffers, and Godot PCK resources.
+- Choose streaming or sample loading modes depending on memory and latency needs.
+- Use advanced stream settings for special formats, subsounds, tracks, and FMOD create flags.
+
+### Mixing And Routing
+
+- Synchronize FMOD buses with Godot's audio bus layout.
+- Route players to named buses.
+- Use channel groups and sound groups for grouped playback control.
+- Adjust volume, pitch, pan, mute, solo, bypass, and DSP parameters at runtime.
+- Monitor FMOD CPU and file usage in Godot's Performance panel.
+
+### DSP Effects
+
+Godot-FmodPlayer includes FMOD-backed effects designed to feel familiar to Godot users:
+
+| Effect | Use Case |
+|--------|----------|
+| Amplify | Gain and volume adjustment |
+| Filter | Low-pass, high-pass, band-pass filtering |
+| EQ / EQ6 / EQ10 / EQ21 | Graphic and multi-band equalization |
+| Chorus | Modulated stereo thickening |
+| Delay | Echo, taps, and feedback delay |
+| Distortion | Drive, clipping, and saturation |
+| Phaser | Sweeping phase modulation |
+| Pitch Shift | Real-time pitch manipulation |
+| Reverb | Godot-like room reverb mapping |
+| Compressor | Dynamic range compression |
+| Hard Limiter | Peak control |
+| Stereo Enhance | Stereo width shaping |
+| Panner | Stereo positioning |
+| Spectrum Analyzer | Real-time frequency visualization |
+| Capture | Runtime sample capture |
+| Record | Bus recording and waveform snapshots |
+
+### 3D Audio
+
+- `FmodAudioStreamPlayer3D` for spatial playback.
+- Listener updates from the active Godot camera.
+- Distance attenuation and rolloff controls.
+- `FmodGeometryInstance3D` for FMOD geometry occlusion.
+- MeshInstance3D editor tools for quickly creating FMOD geometry.
+- `FmodReverbZone3D` for localized environmental reverb.
+- Editor gizmos for spatial audio debugging.
+
+## What's New?
+
+- Real-time recording waveform snapshot API.
+- Audio visualizer HUD examples for 3D scenes.
+- More accurate Godot-like mappings for chorus, delay, reverb, record, and spectrum analyzer effects.
+- Advanced audio stream resource for special FMOD loading options.
+- Higher-level FMOD geometry and reverb zone wrappers.
+- Mesh tools for creating FMOD geometry from Godot meshes.
+- Android export template setup helper.
+- Improved editor audio preview experience.
+
+## Quick Start
+
+### 1. Install The Plugin
+
+Recommended: install Godot-FmodPlayer from the Godot Asset Library:
+
+**[Godot Asset Library - Godot-FmodPlayer](https://godotengine.org/asset-library/asset/4905)**
+
+You can also download a release from GitHub or build the GDExtension from source if you need the latest development version.
+
+### 2. Install FMOD Core API
+
+Download the FMOD Core API SDK from [fmod.com](https://www.fmod.com) and place the required headers and libraries under:
+
+```text
+src/thirdparty/fmod/
+```
+
+FMOD runtime libraries are not distributed by this repository. You must provide them according to the FMOD license.
+
+### 3. Build The GDExtension
+
+Windows debug build:
+
+```bash
+scons platform=windows target=template_debug arch=x86_64
+```
+
+Windows release build:
+
+```bash
+scons platform=windows target=template_release arch=x86_64
+```
+
+Android arm64 debug build:
+
+```bash
+scons platform=android target=template_debug arch=arm64
+```
+
+### 4. Enable The Plugin
+
+Open your Godot project and enable:
+
+```text
+Project > Project Settings > Plugins > fmod_player
+```
+
+### 5. Play Audio
+
+Add one of the player nodes:
+
+- `FmodAudioStreamPlayer`
+- `FmodAudioStreamPlayer2D`
+- `FmodAudioStreamPlayer3D`
+
+Assign an FMOD audio stream resource, choose a bus, and press play.
+
+## Platform Support
+
+| Platform | Status | Notes |
+|----------|--------|-------|
+| Windows x86_64 | Supported | Main development target |
+| Android arm64 / arm32 / x86 / x86_64 | Supported | Requires FMOD Android runtime setup |
+| macOS | Experimental | Build script support exists, FMOD linking may need local adjustment |
+| iOS | Experimental | Static library workflow may need project-specific setup |
 
 ## Requirements
 
 - **Godot:** 4.1 or later
-- **Platforms:** Windows, Android
-- **Compiler:** C++17 (MSVC v145+ on Windows, NDK for Android)
-- **FMOD:** Core API libraries (included in `src/thirdparty/fmod/`)
-
-> **Note:** This plugin uses the **FMOD Core API** (low-level), not FMOD Studio API. For Studio API support, use [fmod-gdextension](https://github.com/utopia-rise/fmod-gdextension).
-
-> **License Notice:** FMOD is a proprietary audio engine. You must obtain your own license from [fmod.com](https://www.fmod.com) for commercial use.
-
-#### Available Options
-- **Platforms:** `windows`, `android`
-- **Targets:** `template_debug`, `template_release`
-- **Architectures:** `x86_64`, `arm64`
-
-#### Enable the Plugin
-After building, go to `Project > Project Settings > Plugins` in Godot Editor, find **fmod_player** and enable it.
+- **Language:** C++17 or newer
+- **Windows compiler:** Visual Studio 2022 / MSVC v145+
+- **Android compiler:** Android NDK
+- **Build system:** SCons
+- **Audio runtime:** FMOD Core API SDK
 
 ## Documentation
 
-**Full documentation available at:** [Documentation](https://godot-fmodplayerdocs.readthedocs.io/en/latest/)
+Full documentation is available here:
 
-The documentation includes detailed usage guides, API reference, code examples, and platform-specific instructions.
+**[godot-fmodplayerdocs.readthedocs.io](https://godot-fmodplayerdocs.readthedocs.io/en/latest/)**
+
+The documentation includes setup guides, API references, usage examples, and platform-specific export notes.
+
+## License
+
+This repository is licensed under the MIT License. See [LICENSE.txt](LICENSE.txt).
+
+FMOD is proprietary software by Firelight Technologies Pty Ltd. You must obtain the appropriate FMOD license for your project from [fmod.com](https://www.fmod.com).
 
 ## Acknowledgments
 
