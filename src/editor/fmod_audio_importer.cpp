@@ -27,17 +27,45 @@ namespace godot {
 
 	PackedStringArray AudioImporterFmod::_get_recognized_extensions() const {
 		PackedStringArray extensions;
-		extensions.append("flac");
-		extensions.append("wav");
-		extensions.append("mp3");
-		extensions.append("ogg");
-		extensions.append("aiff");
-		extensions.append("wma");
-		extensions.append("asf");
-		extensions.append("xm");
-		extensions.append("mod");
-		extensions.append("s3m");
-		extensions.append("it");
+
+		// Keep this list aligned with FMOD_SOUND_TYPE formats that can be
+		// reasonably detected from normal files or memory-backed imports.
+		static const char* recognized_extensions[] = {
+			"aac",
+			"adts",
+			"aif",
+			"aifc",
+			"aiff",
+			"asf",
+			"at9",
+			"caf",
+			"flac",
+			"fsb",
+			"it",
+			"m4a",
+			"mid",
+			"midi",
+			"mod",
+			"mp2",
+			"mp3",
+			"mp4",
+			"oga",
+			"ogg",
+			"opus",
+			"rmi",
+			"s3m",
+			"wav",
+			"wma",
+			"wmv",
+			"xma",
+			"xm",
+			"3gp",
+		};
+
+		for (const char* extension : recognized_extensions) {
+			extensions.append(extension);
+		}
+
 		return extensions;
 	}
 

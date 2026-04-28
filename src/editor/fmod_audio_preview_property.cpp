@@ -185,6 +185,7 @@ namespace godot {
 			}
 		}
 
+		set_visible(stream.is_valid());
 		_update_time_labels();
 		_queue_preview_redraw();
 	}
