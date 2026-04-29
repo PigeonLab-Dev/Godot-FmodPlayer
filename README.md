@@ -115,37 +115,7 @@ Recommended: install Godot-FmodPlayer from the Godot Asset Library:
 
 You can also download a release from GitHub or build the GDExtension from source if you need the latest development version.
 
-### 2. Install FMOD Core API
-
-Download the FMOD Core API SDK from [fmod.com](https://www.fmod.com) and place the required headers and libraries under:
-
-```text
-src/thirdparty/fmod/
-```
-
-FMOD runtime libraries are not distributed by this repository. You must provide them according to the FMOD license.
-
-### 3. Build The GDExtension
-
-Windows debug build:
-
-```bash
-scons platform=windows target=template_debug arch=x86_64
-```
-
-Windows release build:
-
-```bash
-scons platform=windows target=template_release arch=x86_64
-```
-
-Android arm64 debug build:
-
-```bash
-scons platform=android target=template_debug arch=arm64
-```
-
-### 4. Enable The Plugin
+### 2. Enable The Plugin
 
 Open your Godot project and enable:
 
@@ -153,7 +123,7 @@ Open your Godot project and enable:
 Project > Project Settings > Plugins > FMOD Player
 ```
 
-### 5. Play Audio
+### 3. Play Audio
 
 Add one of the player nodes:
 
