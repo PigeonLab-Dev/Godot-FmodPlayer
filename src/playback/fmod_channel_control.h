@@ -7,8 +7,8 @@
 #include <vector>
 
 namespace godot {
-    class FmodChannelControl : public RefCounted {
-        GDCLASS(FmodChannelControl, RefCounted)
+	class FmodChannelControl : public RefCounted {
+		GDCLASS(FmodChannelControl, RefCounted)
 
 	protected:
 		FMOD::ChannelControl* channel_control = nullptr;
@@ -17,16 +17,16 @@ namespace godot {
 		static void _bind_methods();
 		void _setup_control(FMOD::ChannelControl* control);
 
-    public:
-        FmodChannelControl();
-        virtual ~FmodChannelControl();
+	public:
+		FmodChannelControl();
+		virtual ~FmodChannelControl();
 
 		// 有效性检查
 		bool channel_control_is_valid() const;						// 检查底层 FMOD::ChannelControl 对象是否有效
 		bool channel_control_is_null() const;						// 检查底层 FMOD::ChannelControl 对象是否无效
 
-        // 播放控制
-        bool is_playing() const;									// 检查播放状态
+		// 播放控制
+		bool is_playing() const;									// 检查播放状态
 		void stop();												// 停止该频道 (或嵌套 ChannelGroups 中的所有频道) 的播放
 
 		void set_paused(const bool paused);							// 设置暂停状态
@@ -131,7 +131,7 @@ namespace godot {
 		Ref<FmodDSP> get_dsp(const int index) const;				// 在 DSP 链中指定的索引处获取 DSP 单元
 		void set_dsp_index(Ref<FmodDSP> dsp, const int index);		// 在指定 DSP 的 DSP 链中设置索引
 		int get_dsp_index(Ref<FmodDSP> dsp) const;					// 获取 Channel 或 ChannelGroup 的 DSP 链中的 DSP 索引
-    
+	
 		// 样本精准排程
 		Dictionary get_dsp_clock() const;							// 获取当前 DSP 时钟值
 		void set_delay(

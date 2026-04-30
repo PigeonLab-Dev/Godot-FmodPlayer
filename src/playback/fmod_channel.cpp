@@ -1,4 +1,4 @@
-﻿#include "fmod_channel.h"
+#include "fmod_channel.h"
 
 namespace godot {
 	void FmodChannel::_bind_methods() {
