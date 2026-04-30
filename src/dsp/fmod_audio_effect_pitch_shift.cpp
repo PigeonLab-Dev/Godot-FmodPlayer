@@ -5,7 +5,6 @@
 #include <godot_cpp/core/class_db.hpp>
 
 namespace godot {
-
 	static float _fft_size_to_value(FmodAudioEffectPitchShift::FFTSize size) {
 		switch (size) {
 			case FmodAudioEffectPitchShift::FFT_SIZE_256: return 256.0f;
@@ -104,5 +103,4 @@ namespace godot {
 	int FmodAudioEffectPitchShift::get_oversampling() const {
 		return oversampling;
 	}
-
 }

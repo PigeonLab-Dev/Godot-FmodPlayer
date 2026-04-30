@@ -174,10 +174,6 @@ VARIANT_ENUM_CAST(FmodSound::FmodTagDataType);
 VARIANT_ENUM_CAST(FmodSound::FmodOpenState);
 
 extern "C" {
-	/*
-	* Godot FMOD Sound 回调函数
-	* 注意: 这些名字加了 gd 前缀以避免与 FMOD 头文件中的 typedef 冲突
-	*/
 	FMOD_RESULT F_CALL GD_FMOD_SOUND_PCMREAD_CALLBACK(
 		FMOD_SOUND* sound,
 		void* data,

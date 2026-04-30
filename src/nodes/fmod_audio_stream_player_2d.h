@@ -8,13 +8,7 @@
 #include <godot_cpp/classes/camera2d.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/node2d.hpp>
-#include <godot_cpp/classes/physics_direct_space_state2d.hpp>
-#include <godot_cpp/classes/physics_point_query_parameters2d.hpp>
-#include <godot_cpp/classes/physics_server2d.hpp>
 #include <godot_cpp/classes/viewport.hpp>
-#include <godot_cpp/classes/window.hpp>
-#include <godot_cpp/classes/world2d.hpp>
-#include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
 namespace godot {

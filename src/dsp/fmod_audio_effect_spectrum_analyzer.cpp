@@ -7,7 +7,6 @@
 #include <cmath>
 
 namespace godot {
-
 	static int _fft_size_to_value(FmodAudioEffectSpectrumAnalyzer::FFTSize size) {
 		switch (size) {
 			case FmodAudioEffectSpectrumAnalyzer::FFT_SIZE_256: return 256;
@@ -245,5 +244,4 @@ namespace godot {
 	void FmodAudioEffectSpectrumAnalyzer::_update_centroid(float centroid) {
 		current_centroid = centroid;
 	}
-
 }

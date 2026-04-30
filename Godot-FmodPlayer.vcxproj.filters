@@ -200,6 +200,12 @@
     <ClInclude Include="src\editor\modify_android_build_template_plugin.h">
       <Filter>Header Files\editor</Filter>
     </ClInclude>
+    <ClInclude Include="src\nodes\fmod_audio_stream_player_internal.h">
+      <Filter>Header Files\editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\editor\fmod_reverb_zone_3d_gizmo_plugin.h">
+      <Filter>Header Files\editor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\fmod_server.cpp">
@@ -332,6 +338,12 @@
       <Filter>Source Files\nodes</Filter>
     </ClCompile>
     <ClCompile Include="src\editor\modify_android_build_template_plugin.cpp">
+      <Filter>Source Files\editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editor\fmod_reverb_zone_3d_gizmo_plugin.cpp">
+      <Filter>Source Files\editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nodes\fmod_audio_stream_player_internal.cpp">
       <Filter>Source Files\editor</Filter>
     </ClCompile>
   </ItemGroup>

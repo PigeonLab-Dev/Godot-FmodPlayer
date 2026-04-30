@@ -1,7 +1,6 @@
 #include "register_types.h"
 
 #include "audio/fmod_audio_stream.h"
-#include "audio/fmod_audio_stream_advanced.h"
 #include "audio/fmod_audio_stream_flac.h"
 #include "audio/fmod_sound.h"
 #include "audio/fmod_sound_lock.h"
@@ -186,7 +185,6 @@ void initialize_fmod_player_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(FmodAudioBusLayout);
 
 	GDREGISTER_CLASS(FmodAudioStream);
-	GDREGISTER_CLASS(FmodAudioStreamAdvanced);
 	GDREGISTER_CLASS(FmodAudioStreamFLAC);
 
 	GDREGISTER_CLASS(FmodReverb3D);
