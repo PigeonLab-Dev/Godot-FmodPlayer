@@ -1,52 +1,61 @@
-source,zh_Hans,zh_CN,zh
-Fmod,FMOD,FMOD,FMOD
-3d,3D,3D,3D
-3D,3D,3D,3D
-Init Flags,初始化标志,初始化标志,初始化标志
-Show Startup Banner,显示启动横幅,显示启动横幅,显示启动横幅
-Max Channels,最大通道数,最大通道数,最大通道数
-Software Channels,软件通道数,软件通道数,软件通道数
-Output Type,输出类型,输出类型,输出类型
-Software Sample Rate,软件采样率,软件采样率,软件采样率
-Speaker Mode,扬声器模式,扬声器模式,扬声器模式
-Num Raw Speakers,原始扬声器数量,原始扬声器数量,原始扬声器数量
-Dsp Buffer Size,DSP 缓冲区大小,DSP 缓冲区大小,DSP 缓冲区大小
-Dsp Buffer Count,DSP 缓冲区数量,DSP 缓冲区数量,DSP 缓冲区数量
-Stream Buffer Size,流缓冲区大小,流缓冲区大小,流缓冲区大小
-Stream From Update,在更新线程中流式读取,在更新线程中流式读取,在更新线程中流式读取
-Mix From Update,在更新线程中混音,在更新线程中混音,在更新线程中混音
-3d Right Handed,3D 右手坐标系,3D 右手坐标系,3D 右手坐标系
-3D Right Handed,3D 右手坐标系,3D 右手坐标系,3D 右手坐标系
-Clip Output,裁剪输出,裁剪输出,裁剪输出
-Channel Lowpass,通道低通,通道低通,通道低通
-Channel Distance Filter,通道距离滤波,通道距离滤波,通道距离滤波
-Vol0 Becomes Virtual,音量为零时虚拟化,音量为零时虚拟化,音量为零时虚拟化
-Geometry Use Closest,几何体使用最近面,几何体使用最近面,几何体使用最近面
-Prefer Dolby Downmix,优先 Dolby 下混,优先 Dolby 下混,优先 Dolby 下混
-Thread Unsafe,非线程安全,非线程安全,非线程安全
-Profile Meter All,统计全部 Profile 指标,统计全部 Profile 指标,统计全部 Profile 指标
-Memory Tracking,内存跟踪,内存跟踪,内存跟踪
-Enable Profile,启用 Profile,启用 Profile,启用 Profile
-Profile Port,Profile 端口,Profile 端口,Profile 端口
-Network Proxy,网络代理,网络代理,网络代理
-Network Timeout,网络超时,网络超时,网络超时
-Doppler Scale,多普勒缩放,多普勒缩放,多普勒缩放
-Distance Factor,距离系数,距离系数,距离系数
-Rolloff Scale,衰减缩放,衰减缩放,衰减缩放
-Num Listeners,监听器数量,监听器数量,监听器数量
-Geometry Max Fade Time,几何遮挡最大淡化时间,几何遮挡最大淡化时间,几何遮挡最大淡化时间
-Distance Filter Center Freq,距离滤波中心频率,距离滤波中心频率,距离滤波中心频率
-Default Decode Buffer Size,默认解码缓冲区大小,默认解码缓冲区大小,默认解码缓冲区大小
-Dsp Buffer Pool Size,DSP 缓冲池大小,DSP 缓冲池大小,DSP 缓冲池大小
-Resampler Method,重采样方法,重采样方法,重采样方法
-Random Seed,随机种子,随机种子,随机种子
-Max Convolution Threads,最大卷积线程数,最大卷积线程数,最大卷积线程数
-Max Spatial Objects,最大空间对象数,最大空间对象数,最大空间对象数
-Vol0 Virtual Vol,音量为零时虚拟音量,音量为零时虚拟音量,音量为零时虚拟音量
-Max Mpeg Codecs,最大 MPEG 解码器数,最大 MPEG 解码器数,最大 MPEG 解码器数
-Max Adpcm Codecs,最大 ADPCM 解码器数,最大 ADPCM 解码器数,最大 ADPCM 解码器数
-Max Xma Codecs,最大 XMA 解码器数,最大 XMA 解码器数,最大 XMA 解码器数
-Max Vorbis Codecs,最大 Vorbis 解码器数,最大 Vorbis 解码器数,最大 Vorbis 解码器数
-Max At9 Codecs,最大 AT9 解码器数,最大 AT9 解码器数,最大 AT9 解码器数
-Max Fadpcm Codecs,最大 FADPCM 解码器数,最大 FADPCM 解码器数,最大 FADPCM 解码器数
-Max Opus Codecs,最大 Opus 解码器数,最大 Opus 解码器数,最大 Opus 解码器数
+source,zh_Hans,zh_Hant,ja,ru
+Fmod,FMOD,FMOD,FMOD,FMOD
+3d,3D,3D,3D,3D
+Init Flags,初始化标志,初始化標誌,初期化フラグ,Флаги инициализации
+Show Startup Banner,显示启动横幅,顯示啟動橫幅,スタートアップバナーを表示,Показать стартовый баннер
+Max Channels,最大通道数,最大通道數,最大チャンネル数,Макс. каналов
+Software Channels,软件通道数,軟體通道數,ソフトウェアチャンネル数,Программные каналы
+Output Type,输出类型,輸出類型,出力タイプ,Тип выхода
+Software Sample Rate,软件采样率,軟體取樣率,ソフトウェアサンプリングレート,Программная частота дискретизации
+Speaker Mode,扬声器模式,揚聲器模式,スピーカーモード,Режим динамиков
+Num Raw Speakers,原始扬声器数量,原始揚聲器數量,生スピーカー数,Количество исходных динамиков
+Dsp Buffer Size,DSP 缓冲区大小,DSP 緩衝區大小,DSP バッファサイズ,Размер DSP-буфера
+Dsp Buffer Count,DSP 缓冲区数量,DSP 緩衝區數量,DSP バッファ数,Количество DSP-буферов
+Stream Buffer Size,流缓冲区大小,流緩衝區大小,ストリームバッファサイズ,Размер потокового буфера
+Stream From Update,在更新线程中流式读取,在更新線程中流式讀取,アップデートからストリーム,Поток из обновления
+Mix From Update,在更新线程中混音,在更新線程中混音,アップデートからミックス,Микширование из обновления
+3d Right Handed,3D 右手坐标系,3D 右手坐標系,3D 右手座標系,3D правая система координат
+Clip Output,裁剪输出,裁剪輸出,クリップ出力,Обрезка выхода
+Channel Low-pass,通道低通,通道低通,チャンネルローパス,Низкочастотный фильтр канала
+Channel Distance Filter,通道距离滤波,通道距離濾波,チャンネル距離フィルタ,Фильтр дистанции канала
+Vol 0 Becomes Virtual,音量为零时虚拟化,音量為零時虛擬化,音量0で仮想化,Громкость 0 становится виртуальной
+Geometry Use Closest,几何体使用最近面,幾何體使用最近面,ジオメトリ最近面使用,Геометрия: ближайшая поверхность
+Prefer Dolby Downmix,优先 Dolby 下混,優先 Dolby 下混,Dolby ダウンミックス優先,Предпочтительный Dolby Downmix
+Thread Unsafe,非线程安全,非執行緒安全,スレッド非安全,Непотокобезопасно
+Profile Meter All,统计全部 Profile 指标,統計全部 Profile 指標,全プロファイルメーター,Измерить все профили
+Memory Tracking,内存跟踪,記憶體追蹤,メモリトラッキング,Отслеживание памяти
+Enable Profile,启用 Profile,啟用 Profile,プロファイルを有効化,Включить профилирование
+Profile Port,Profile 端口,Profile 端口,プロファイルポート,Порт профилирования
+Network Proxy,网络代理,網絡代理,ネットワークプロキシ,Сетевой прокси
+Network Timeout,网络超时,網絡超時,ネットワークタイムアウト,Сетевой таймаут
+Doppler Scale,多普勒缩放,多普勒縮放,ドップラースケール,Масштаб Доплера
+Distance Factor,距离系数,距離係數,距離係数,Фактор расстояния
+Rolloff Scale,衰减缩放,衰減縮放,ロールオフスケール,Масштаб затухания
+Num Listeners,监听器数量,監聽器數量,リスナー数,Количество слушателей
+Geometry Max Fade Time,几何遮挡最大淡化时间,幾何遮擋最大淡化時間,ジオメトリ最大フェード時間,Макс. время затухания геометрии
+Distance Filter Center Freq,距离滤波中心频率,距離濾波中心頻率,距離フィルタ中心周波数,Центральная частота фильтра дистанции
+Default Decode Buffer Size,默认解码缓冲区大小,默認解碼緩衝區大小,デフォルトデコードバッファサイズ,Размер буфера декодирования по умолчанию
+Dsp Buffer Pool Size,DSP 缓冲池大小,DSP 緩衝池大小,DSP バッファプールサイズ,Размер пула DSP-буферов
+Resampler Method,重采样方法,重採樣方法,リサンプリング方式,Метод ресемплинга
+Random Seed,随机种子,隨機種子,ランダムシード,Случайное зерно
+Max Convolution Threads,最大卷积线程数,最大卷積線程數,最大畳み込みスレッド数,Макс. потоков свёртки
+Max Spatial Objects,最大空间对象数,最大空間對象數,最大空間オブジェクト数,Макс. пространственных объектов
+Vol 0 Virtual Vol,音量为零时虚拟音量,音量為零時虛擬音量,音量0仮想音量,Виртуальная громкость при громкости 0
+Max Mpeg Codecs,最大 MPEG 解码器数,最大 MPEG 解碼器數,最大 MPEG コーデック数,Макс. MPEG-кодеков
+Max Adpcm Codecs,最大 ADPCM 解码器数,最大 ADPCM 解碼器數,最大 ADPCM コーデック数,Макс. ADPCM-кодеков
+Max Xma Codecs,最大 XMA 解码器数,最大 XMA 解碼器數,最大 XMA コーデック数,Макс. XMA-кодеков
+Max Vorbis Codecs,最大 Vorbis 解码器数,最大 Vorbis 解碼器數,最大 Vorbis コーデック数,Макс. Vorbis-кодеков
+Max At 9 Codecs,最大 AT9 解码器数,最大 AT9 解碼器數,最大 AT9 コーデック数,Макс. AT9-кодеков
+Max Fadpcm Codecs,最大 FADPCM 解码器数,最大 FADPCM 解碼器數,最大 FADPCM コーデック数,Макс. FADPCM-кодеков
+Max Opus Codecs,最大 Opus 解码器数,最大 Opus 解碼器數,最大 Opus コーデック数,Макс. Opus-кодеков
+Suggested Sound Type,建议的声音类型,建議的聲音類型,推奨サウンドタイプ,Рекомендуемый тип звука
+Length Override,长度覆盖,長度覆蓋,長さオーバーライド,Переопределение длины
+File Offset,文件偏移,檔案偏移,ファイルオフセット,Смещение файла
+Decode Buffer Size,解码缓冲区大小,解碼緩衝區大小,デコードバッファサイズ,Размер буфера декодирования
+Initial Subsound,初始子声音,初始子聲音,初期サブサウンド,Начальный подзвук
+Num Subsounds,子声音数量,子聲音數量,サブサウンド数,Количество подзвуков
+Inclusion List,包含列表,包含列表,インクルージョンリスト,Список включений
+Dls Name,DLS 名称,DLS 名稱,DLS 名,Имя DLS
+Encryption Key,加密密钥,加密密鑰,暗号化キー,Ключ шифрования
+Initial Seek Position,初始寻道,初始尋道,初期シーク位置,Начальная позиция поиска
+Ignore Set File System,忽略设置文件系统,忽略設定檔案系統,ファイルシステム設定を無視,Игнорировать установленную файловую систему

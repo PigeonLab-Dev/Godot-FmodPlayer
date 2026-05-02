@@ -1,0 +1,220 @@
+[gd_scene format=3 uid="uid://dccdv74ostt1m"]
+
+[ext_resource type="Script" uid="uid://d0kuv1nbjadnf" path="res://addons/fmod_player/tools/generate_property_translations_scene.gd" id="1_generator"]
+
+[sub_resource type="SystemFont" id="SystemFont_yrcs3"]
+font_names = PackedStringArray("Arial")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gnlfp"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.039215688)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.646029, 0.646029, 0.646029, 1)
+border_blend = true
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_36xym"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.11764706)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 1)
+border_blend = true
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o8edu"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.11764706)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 1)
+border_blend = true
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fbc3x"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.11764706)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 1)
+border_blend = true
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x8suf"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.078431375)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_blend = true
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2skom"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.078431375)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_blend = true
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w6a20"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yrcs3"]
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 1)
+
+[sub_resource type="SystemFont" id="SystemFont_w6a20"]
+font_names = PackedStringArray("Arial")
+
+[sub_resource type="SystemFont" id="SystemFont_36xym"]
+font_names = PackedStringArray("Arial")
+font_weight = 600
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g2l13"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0, 0, 0, 0.49019608)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_detail = 5
+
+[sub_resource type="Theme" id="Theme_x8suf"]
+Button/fonts/font = SubResource("SystemFont_yrcs3")
+Button/styles/disabled = SubResource("StyleBoxFlat_gnlfp")
+Button/styles/focus = SubResource("StyleBoxFlat_36xym")
+Button/styles/hover = SubResource("StyleBoxFlat_o8edu")
+Button/styles/hover_pressed = SubResource("StyleBoxFlat_fbc3x")
+Button/styles/normal = SubResource("StyleBoxFlat_x8suf")
+Button/styles/pressed = SubResource("StyleBoxFlat_2skom")
+Label/fonts/font = SubResource("SystemFont_yrcs3")
+LineEdit/fonts/font = SubResource("SystemFont_yrcs3")
+LineEdit/styles/normal = SubResource("StyleBoxFlat_w6a20")
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_yrcs3")
+Tree/fonts/font = SubResource("SystemFont_w6a20")
+Tree/fonts/title_button_font = SubResource("SystemFont_36xym")
+Tree/styles/title_button_hover = SubResource("StyleBoxFlat_g2l13")
+Tree/styles/title_button_normal = SubResource("StyleBoxFlat_g2l13")
+Tree/styles/title_button_pressed = SubResource("StyleBoxFlat_g2l13")
+
+[sub_resource type="SystemFont" id="SystemFont_g2l13"]
+font_names = PackedStringArray("Arial")
+font_weight = 600
+
+[node name="GeneratePropertyTranslations" type="Control" unique_id=745919819]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_x8suf")
+script = ExtResource("1_generator")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=2096591614]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=1360072116]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=982415643]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=467435182]
+layout_mode = 2
+theme_override_fonts/font = SubResource("SystemFont_g2l13")
+theme_override_font_sizes/font_size = 32
+text = "FMOD Property Translation Generator"
+
+[node name="CSVLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=260461912]
+unique_name_in_owner = true
+layout_mode = 2
+text = "CSV"
+
+[node name="CSVEditTree" type="Tree" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=430379667]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+column_titles_visible = true
+hide_root = true
+
+[node name="OutputLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=373731399]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Output"
+
+[node name="StatusLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1753339380]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Status"
+
+[node name="GenerateButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=517527042]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Save & Generate"
+
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/GenerateButton" to="." method="_on_generate_button_pressed"]

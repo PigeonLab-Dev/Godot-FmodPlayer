@@ -2,7 +2,7 @@
 
 entry_symbol = "fmod_player_init"
 compatibility_minimum = "4.1"
-reloadable = true
+reloadable = false
 
 [libraries]
 
