@@ -105,14 +105,38 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v62he"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.75)
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+corner_detail = 5
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w6a20"]
 content_margin_left = 4.0
 content_margin_top = 4.0
 content_margin_right = 4.0
 content_margin_bottom = 4.0
 bg_color = Color(0.1, 0.1, 0.1, 0.6)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
 border_width_bottom = 2
 border_color = Color(1, 1, 1, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yrcs3"]
 bg_color = Color(0.101960786, 0.101960786, 0.101960786, 1)
@@ -144,6 +168,7 @@ Button/styles/normal = SubResource("StyleBoxFlat_x8suf")
 Button/styles/pressed = SubResource("StyleBoxFlat_2skom")
 Label/fonts/font = SubResource("SystemFont_yrcs3")
 LineEdit/fonts/font = SubResource("SystemFont_yrcs3")
+LineEdit/styles/focus = SubResource("StyleBoxFlat_v62he")
 LineEdit/styles/normal = SubResource("StyleBoxFlat_w6a20")
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_yrcs3")
 Tree/fonts/font = SubResource("SystemFont_w6a20")
@@ -195,29 +220,29 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "CSV"
 
-[node name="CSVToolbar" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+[node name="CSVToolbar" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=882781108]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="AddRowButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar"]
+[node name="AddRowButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar" unique_id=166043344]
 layout_mode = 2
 text = "Insert Row"
 
-[node name="LocaleLineEdit" type="LineEdit" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar"]
+[node name="LocaleLineEdit" type="LineEdit" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar" unique_id=17046578]
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "Locale, e.g. ja or zh_TW"
 text = "new_locale"
+placeholder_text = "Locale, e.g. ja or zh_TW"
 
-[node name="AddColumnButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar"]
+[node name="AddColumnButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar" unique_id=2119259823]
 layout_mode = 2
 text = "Add Column"
 
-[node name="DeleteRowButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar"]
+[node name="DeleteRowButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar" unique_id=357052768]
 layout_mode = 2
 text = "Delete Row"
 
-[node name="DeleteColumnButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar"]
+[node name="DeleteColumnButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar" unique_id=1125527835]
 layout_mode = 2
 text = "Delete Last Column"
 
