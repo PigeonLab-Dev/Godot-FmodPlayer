@@ -1,0 +1,52 @@
+source,zh_Hans,zh_CN,zh
+Fmod,FMOD,FMOD,FMOD
+3d,3D,3D,3D
+3D,3D,3D,3D
+Init Flags,初始化标志,初始化标志,初始化标志
+Show Startup Banner,显示启动横幅,显示启动横幅,显示启动横幅
+Max Channels,最大通道数,最大通道数,最大通道数
+Software Channels,软件通道数,软件通道数,软件通道数
+Output Type,输出类型,输出类型,输出类型
+Software Sample Rate,软件采样率,软件采样率,软件采样率
+Speaker Mode,扬声器模式,扬声器模式,扬声器模式
+Num Raw Speakers,原始扬声器数量,原始扬声器数量,原始扬声器数量
+Dsp Buffer Size,DSP 缓冲区大小,DSP 缓冲区大小,DSP 缓冲区大小
+Dsp Buffer Count,DSP 缓冲区数量,DSP 缓冲区数量,DSP 缓冲区数量
+Stream Buffer Size,流缓冲区大小,流缓冲区大小,流缓冲区大小
+Stream From Update,在更新线程中流式读取,在更新线程中流式读取,在更新线程中流式读取
+Mix From Update,在更新线程中混音,在更新线程中混音,在更新线程中混音
+3d Right Handed,3D 右手坐标系,3D 右手坐标系,3D 右手坐标系
+3D Right Handed,3D 右手坐标系,3D 右手坐标系,3D 右手坐标系
+Clip Output,裁剪输出,裁剪输出,裁剪输出
+Channel Lowpass,通道低通,通道低通,通道低通
+Channel Distance Filter,通道距离滤波,通道距离滤波,通道距离滤波
+Vol0 Becomes Virtual,音量为零时虚拟化,音量为零时虚拟化,音量为零时虚拟化
+Geometry Use Closest,几何体使用最近面,几何体使用最近面,几何体使用最近面
+Prefer Dolby Downmix,优先 Dolby 下混,优先 Dolby 下混,优先 Dolby 下混
+Thread Unsafe,非线程安全,非线程安全,非线程安全
+Profile Meter All,统计全部 Profile 指标,统计全部 Profile 指标,统计全部 Profile 指标
+Memory Tracking,内存跟踪,内存跟踪,内存跟踪
+Enable Profile,启用 Profile,启用 Profile,启用 Profile
+Profile Port,Profile 端口,Profile 端口,Profile 端口
+Network Proxy,网络代理,网络代理,网络代理
+Network Timeout,网络超时,网络超时,网络超时
+Doppler Scale,多普勒缩放,多普勒缩放,多普勒缩放
+Distance Factor,距离系数,距离系数,距离系数
+Rolloff Scale,衰减缩放,衰减缩放,衰减缩放
+Num Listeners,监听器数量,监听器数量,监听器数量
+Geometry Max Fade Time,几何遮挡最大淡化时间,几何遮挡最大淡化时间,几何遮挡最大淡化时间
+Distance Filter Center Freq,距离滤波中心频率,距离滤波中心频率,距离滤波中心频率
+Default Decode Buffer Size,默认解码缓冲区大小,默认解码缓冲区大小,默认解码缓冲区大小
+Dsp Buffer Pool Size,DSP 缓冲池大小,DSP 缓冲池大小,DSP 缓冲池大小
+Resampler Method,重采样方法,重采样方法,重采样方法
+Random Seed,随机种子,随机种子,随机种子
+Max Convolution Threads,最大卷积线程数,最大卷积线程数,最大卷积线程数
+Max Spatial Objects,最大空间对象数,最大空间对象数,最大空间对象数
+Vol0 Virtual Vol,音量为零时虚拟音量,音量为零时虚拟音量,音量为零时虚拟音量
+Max Mpeg Codecs,最大 MPEG 解码器数,最大 MPEG 解码器数,最大 MPEG 解码器数
+Max Adpcm Codecs,最大 ADPCM 解码器数,最大 ADPCM 解码器数,最大 ADPCM 解码器数
+Max Xma Codecs,最大 XMA 解码器数,最大 XMA 解码器数,最大 XMA 解码器数
+Max Vorbis Codecs,最大 Vorbis 解码器数,最大 Vorbis 解码器数,最大 Vorbis 解码器数
+Max At9 Codecs,最大 AT9 解码器数,最大 AT9 解码器数,最大 AT9 解码器数
+Max Fadpcm Codecs,最大 FADPCM 解码器数,最大 FADPCM 解码器数,最大 FADPCM 解码器数
+Max Opus Codecs,最大 Opus 解码器数,最大 Opus 解码器数,最大 Opus 解码器数
