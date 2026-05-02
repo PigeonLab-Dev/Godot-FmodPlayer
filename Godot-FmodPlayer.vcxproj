@@ -138,7 +138,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\audio\fmod_audio_steam_flac.h" />
     <ClInclude Include="src\audio\fmod_sound_lock.h" />
     <ClInclude Include="src\dsp\fmod_audio_effect_amplify.h" />
     <ClInclude Include="src\dsp\fmod_audio_effect_capture.h" />
@@ -187,7 +186,6 @@
     <ClInclude Include="src\nodes\fmod_reverb_zone_3d.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\audio\fmod_audio_stream_flac.cpp" />
     <ClCompile Include="src\audio\fmod_sound_lock.cpp" />
     <ClCompile Include="src\dsp\fmod_audio_effect_amplify.cpp" />
     <ClCompile Include="src\dsp\fmod_audio_effect_capture.cpp" />
