@@ -195,6 +195,32 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "CSV"
 
+[node name="CSVToolbar" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AddRowButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar"]
+layout_mode = 2
+text = "Insert Row"
+
+[node name="LocaleLineEdit" type="LineEdit" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Locale, e.g. ja or zh_TW"
+text = "new_locale"
+
+[node name="AddColumnButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar"]
+layout_mode = 2
+text = "Add Column"
+
+[node name="DeleteRowButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar"]
+layout_mode = 2
+text = "Delete Row"
+
+[node name="DeleteColumnButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar"]
+layout_mode = 2
+text = "Delete Last Column"
+
 [node name="CSVEditTree" type="Tree" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=430379667]
 unique_name_in_owner = true
 layout_mode = 2
@@ -217,4 +243,8 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Save & Generate"
 
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar/AddRowButton" to="." method="_on_add_row_button_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar/AddColumnButton" to="." method="_on_add_column_button_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar/DeleteRowButton" to="." method="_on_delete_row_button_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/CSVToolbar/DeleteColumnButton" to="." method="_on_delete_column_button_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/GenerateButton" to="." method="_on_generate_button_pressed"]

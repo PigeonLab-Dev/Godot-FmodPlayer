@@ -19,27 +19,34 @@ static func generate(csv_path: String = DEFAULT_CSV_PATH, output_path: String = 
 		print("  Output: %s" % _to_absolute_path(output_path))
 	return true
 
-static func _write_translation_csv(path: String, data: Dictionary) -> void:
+static func _write_translation_csv(path: String, data: Dictionary) -> bool:
 	var locales: PackedStringArray = data.get("locales", PackedStringArray())
 	var messages: Array[Dictionary] = data.get("messages", [])
-	
-	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
+
+	var absolute_path: String = _to_absolute_path(path)
+	var directory: String = absolute_path.get_base_dir()
+	if DirAccess.make_dir_recursive_absolute(directory) != OK:
+		push_error("Unable to create CSV output directory: %s" % directory)
+		return false
+
+	var file: FileAccess = FileAccess.open(absolute_path, FileAccess.WRITE)
 	if file == null:
 		push_error("Cannot write CSV: %s" % FileAccess.get_open_error())
-		return
-	
+		return false
+
 	var header: PackedStringArray = PackedStringArray(["source"])
 	header.append_array(locales)
 	file.store_csv_line(header)
-	
+
 	for message: Dictionary in messages:
 		var row: PackedStringArray = PackedStringArray([message.get("source", "")])
 		var translations: Dictionary = message.get("translations", {})
 		for locale: String in locales:
 			row.append(translations.get(locale, ""))
 		file.store_csv_line(row)
-	
+
 	file.close()
+	return true
 
 static func _read_translation_csv(path: String) -> Dictionary:
 	var absolute_path := _to_absolute_path(path)
