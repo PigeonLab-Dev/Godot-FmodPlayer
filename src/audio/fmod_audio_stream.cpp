@@ -18,11 +18,9 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_audio_data", "data"), &FmodAudioStream::set_audio_data);
 		ClassDB::bind_method(D_METHOD("get_audio_data"), &FmodAudioStream::get_audio_data);
-		ADD_PROPERTY(PropertyInfo(Variant::PACKED_BYTE_ARRAY, "audio_data", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_STORAGE), "set_audio_data", "get_audio_data");
 
 		ClassDB::bind_method(D_METHOD("set_mode_flags", "flags"), &FmodAudioStream::set_mode_flags);
 		ClassDB::bind_method(D_METHOD("get_mode_flags"), &FmodAudioStream::get_mode_flags);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "mode_flags", PROPERTY_HINT_FLAGS, "Stream,Sample,Loop,Loop Bidi,2D,3D"), "set_mode_flags", "get_mode_flags");
 
 		ClassDB::bind_method(D_METHOD("set_length_override", "length"), &FmodAudioStream::set_length_override);
 		ClassDB::bind_method(D_METHOD("get_length_override"), &FmodAudioStream::get_length_override);
@@ -65,6 +63,9 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("clear"), &FmodAudioStream::clear);
 
 		ClassDB::bind_static_method("FmodAudioStream", D_METHOD("load_from_file", "path", "flags"), &FmodAudioStream::load_from_file, DEFVAL(MODE_STREAM));
+
+		ADD_PROPERTY(PropertyInfo(Variant::PACKED_BYTE_ARRAY, "audio_data", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_STORAGE), "set_audio_data", "get_audio_data");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "mode_flags", PROPERTY_HINT_FLAGS, "Stream,Sample,Loop,Loop Bidi,2D,3D"), "set_mode_flags", "get_mode_flags");
 
 		ADD_GROUP("Create Info", "");
 		ADD_PROPERTY(PropertyInfo(Variant::INT, "length_override", PROPERTY_HINT_RANGE, "0,2147483647,1,or_greater,suffix:bytes"), "set_length_override", "get_length_override");

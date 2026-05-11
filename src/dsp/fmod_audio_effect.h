@@ -56,7 +56,6 @@ namespace godot {
 	};
 }
 
-// C 回调函数 - 转发到 C++ 虚函数
 extern "C" {
 	FMOD_RESULT F_CALL fmod_custom_dsp_create_callback(FMOD_DSP_STATE* dsp_state);
 	FMOD_RESULT F_CALL fmod_custom_dsp_process_callback(

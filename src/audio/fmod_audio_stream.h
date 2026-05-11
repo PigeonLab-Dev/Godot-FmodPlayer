@@ -12,7 +12,6 @@ namespace godot {
 		GDCLASS(FmodAudioStream, Resource)
 
 	public:
-		// FMOD 创建模式标志
 		enum CreateMode {
 			MODE_DEFAULT = 0,
 			MODE_STREAM = 1 << 0,       // 流式加载（从磁盘流式播放）

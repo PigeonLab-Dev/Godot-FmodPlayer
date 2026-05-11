@@ -31,63 +31,75 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_active", "active"), &FmodReverbZone3D::set_active);
 		ClassDB::bind_method(D_METHOD("get_active"), &FmodReverbZone3D::get_active);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "active"), "set_active", "get_active");
 
 		ClassDB::bind_method(D_METHOD("set_sync_transform", "sync"), &FmodReverbZone3D::set_sync_transform);
 		ClassDB::bind_method(D_METHOD("get_sync_transform"), &FmodReverbZone3D::get_sync_transform);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "sync_transform"), "set_sync_transform", "get_sync_transform");
 
 		ClassDB::bind_method(D_METHOD("set_min_distance", "distance"), &FmodReverbZone3D::set_min_distance);
 		ClassDB::bind_method(D_METHOD("get_min_distance"), &FmodReverbZone3D::get_min_distance);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "min_distance", PROPERTY_HINT_RANGE, "0,1000,0.01,or_greater,suffix:m"), "set_min_distance", "get_min_distance");
 
 		ClassDB::bind_method(D_METHOD("set_max_distance", "distance"), &FmodReverbZone3D::set_max_distance);
 		ClassDB::bind_method(D_METHOD("get_max_distance"), &FmodReverbZone3D::get_max_distance);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "max_distance", PROPERTY_HINT_RANGE, "0.001,1000,0.01,or_greater,suffix:m"), "set_max_distance", "get_max_distance");
 
 		ClassDB::bind_method(D_METHOD("set_preset", "preset"), &FmodReverbZone3D::set_preset);
 		ClassDB::bind_method(D_METHOD("get_preset"), &FmodReverbZone3D::get_preset);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "preset", PROPERTY_HINT_ENUM, "Custom,Off,Generic,Padded Cell,Room,Bathroom,Living Room,Stone Room,Auditorium,Concert Hall,Cave,Arena,Hangar,Hallway,Stone Corridor,Alley,Forest,City,Mountains,Underwater"), "set_preset", "get_preset");
 
-		ADD_GROUP("Reverb Properties", "");
 		ClassDB::bind_method(D_METHOD("set_decay_time", "value"), &FmodReverbZone3D::set_decay_time);
 		ClassDB::bind_method(D_METHOD("get_decay_time"), &FmodReverbZone3D::get_decay_time);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "decay_time", PROPERTY_HINT_RANGE, "100,20000,0.1,suffix:ms"), "set_decay_time", "get_decay_time");
+		
 		ClassDB::bind_method(D_METHOD("set_early_delay", "value"), &FmodReverbZone3D::set_early_delay);
 		ClassDB::bind_method(D_METHOD("get_early_delay"), &FmodReverbZone3D::get_early_delay);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "early_delay", PROPERTY_HINT_RANGE, "0,300,0.1,suffix:ms"), "set_early_delay", "get_early_delay");
+		
 		ClassDB::bind_method(D_METHOD("set_late_delay", "value"), &FmodReverbZone3D::set_late_delay);
 		ClassDB::bind_method(D_METHOD("get_late_delay"), &FmodReverbZone3D::get_late_delay);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "late_delay", PROPERTY_HINT_RANGE, "0,100,0.1,suffix:ms"), "set_late_delay", "get_late_delay");
+		
 		ClassDB::bind_method(D_METHOD("set_hf_reference", "value"), &FmodReverbZone3D::set_hf_reference);
 		ClassDB::bind_method(D_METHOD("get_hf_reference"), &FmodReverbZone3D::get_hf_reference);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "hf_reference", PROPERTY_HINT_RANGE, "20,20000,1,suffix:Hz"), "set_hf_reference", "get_hf_reference");
+		
 		ClassDB::bind_method(D_METHOD("set_hf_decay_ratio", "value"), &FmodReverbZone3D::set_hf_decay_ratio);
 		ClassDB::bind_method(D_METHOD("get_hf_decay_ratio"), &FmodReverbZone3D::get_hf_decay_ratio);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "hf_decay_ratio", PROPERTY_HINT_RANGE, "10,200,0.1,suffix:%"), "set_hf_decay_ratio", "get_hf_decay_ratio");
+		
 		ClassDB::bind_method(D_METHOD("set_diffusion", "value"), &FmodReverbZone3D::set_diffusion);
 		ClassDB::bind_method(D_METHOD("get_diffusion"), &FmodReverbZone3D::get_diffusion);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "diffusion", PROPERTY_HINT_RANGE, "0,100,0.1,suffix:%"), "set_diffusion", "get_diffusion");
+		
 		ClassDB::bind_method(D_METHOD("set_density", "value"), &FmodReverbZone3D::set_density);
 		ClassDB::bind_method(D_METHOD("get_density"), &FmodReverbZone3D::get_density);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "density", PROPERTY_HINT_RANGE, "0,100,0.1,suffix:%"), "set_density", "get_density");
+		
 		ClassDB::bind_method(D_METHOD("set_low_shelf_frequency", "value"), &FmodReverbZone3D::set_low_shelf_frequency);
 		ClassDB::bind_method(D_METHOD("get_low_shelf_frequency"), &FmodReverbZone3D::get_low_shelf_frequency);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "low_shelf_frequency", PROPERTY_HINT_RANGE, "20,1000,1,suffix:Hz"), "set_low_shelf_frequency", "get_low_shelf_frequency");
+		
 		ClassDB::bind_method(D_METHOD("set_low_shelf_gain", "value"), &FmodReverbZone3D::set_low_shelf_gain);
 		ClassDB::bind_method(D_METHOD("get_low_shelf_gain"), &FmodReverbZone3D::get_low_shelf_gain);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "low_shelf_gain", PROPERTY_HINT_RANGE, "-36,12,0.1,suffix:dB"), "set_low_shelf_gain", "get_low_shelf_gain");
+		
 		ClassDB::bind_method(D_METHOD("set_high_cut", "value"), &FmodReverbZone3D::set_high_cut);
 		ClassDB::bind_method(D_METHOD("get_high_cut"), &FmodReverbZone3D::get_high_cut);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "high_cut", PROPERTY_HINT_RANGE, "20,20000,1,suffix:Hz"), "set_high_cut", "get_high_cut");
+		
 		ClassDB::bind_method(D_METHOD("set_early_late_mix", "value"), &FmodReverbZone3D::set_early_late_mix);
 		ClassDB::bind_method(D_METHOD("get_early_late_mix"), &FmodReverbZone3D::get_early_late_mix);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "early_late_mix", PROPERTY_HINT_RANGE, "0,100,0.1,suffix:%"), "set_early_late_mix", "get_early_late_mix");
+		
 		ClassDB::bind_method(D_METHOD("set_wet_level", "value"), &FmodReverbZone3D::set_wet_level);
 		ClassDB::bind_method(D_METHOD("get_wet_level"), &FmodReverbZone3D::get_wet_level);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "wet_level", PROPERTY_HINT_RANGE, "-80,20,0.1,suffix:dB"), "set_wet_level", "get_wet_level");
-
+		
 		ClassDB::bind_method(D_METHOD("get_reverb"), &FmodReverbZone3D::get_reverb);
+
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "active"), "set_active", "get_active");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "sync_transform"), "set_sync_transform", "get_sync_transform");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "min_distance", PROPERTY_HINT_RANGE, "0,1000,0.01,or_greater,suffix:m"), "set_min_distance", "get_min_distance");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "max_distance", PROPERTY_HINT_RANGE, "0.001,1000,0.01,or_greater,suffix:m"), "set_max_distance", "get_max_distance");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "preset", PROPERTY_HINT_ENUM, "Custom,Off,Generic,Padded Cell,Room,Bathroom,Living Room,Stone Room,Auditorium,Concert Hall,Cave,Arena,Hangar,Hallway,Stone Corridor,Alley,Forest,City,Mountains,Underwater"), "set_preset", "get_preset");
+		ADD_GROUP("Reverb Properties", "");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "decay_time", PROPERTY_HINT_RANGE, "100,20000,0.1,suffix:ms"), "set_decay_time", "get_decay_time");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "early_delay", PROPERTY_HINT_RANGE, "0,300,0.1,suffix:ms"), "set_early_delay", "get_early_delay");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "late_delay", PROPERTY_HINT_RANGE, "0,100,0.1,suffix:ms"), "set_late_delay", "get_late_delay");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "hf_reference", PROPERTY_HINT_RANGE, "20,20000,1,suffix:Hz"), "set_hf_reference", "get_hf_reference");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "hf_decay_ratio", PROPERTY_HINT_RANGE, "10,200,0.1,suffix:%"), "set_hf_decay_ratio", "get_hf_decay_ratio");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "diffusion", PROPERTY_HINT_RANGE, "0,100,0.1,suffix:%"), "set_diffusion", "get_diffusion");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "density", PROPERTY_HINT_RANGE, "0,100,0.1,suffix:%"), "set_density", "get_density");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "low_shelf_frequency", PROPERTY_HINT_RANGE, "20,1000,1,suffix:Hz"), "set_low_shelf_frequency", "get_low_shelf_frequency");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "low_shelf_gain", PROPERTY_HINT_RANGE, "-36,12,0.1,suffix:dB"), "set_low_shelf_gain", "get_low_shelf_gain");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "high_cut", PROPERTY_HINT_RANGE, "20,20000,1,suffix:Hz"), "set_high_cut", "get_high_cut");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "early_late_mix", PROPERTY_HINT_RANGE, "0,100,0.1,suffix:%"), "set_early_late_mix", "get_early_late_mix");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "wet_level", PROPERTY_HINT_RANGE, "-80,20,0.1,suffix:dB"), "set_wet_level", "get_wet_level");
 	}
 
 	FmodReverbZone3D::FmodReverbZone3D() {

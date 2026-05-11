@@ -211,26 +211,27 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_mode", "mode"), &FmodAudioEffectDistortion::set_mode);
 		ClassDB::bind_method(D_METHOD("get_mode"), &FmodAudioEffectDistortion::get_mode);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "mode", PROPERTY_HINT_ENUM, "Clip,ATan,LoFi,Overdrive,Wave Shape,BitCrush"), "set_mode", "get_mode");
 
 		ClassDB::bind_method(D_METHOD("set_pre_gain", "gain"), &FmodAudioEffectDistortion::set_pre_gain);
 		ClassDB::bind_method(D_METHOD("get_pre_gain"), &FmodAudioEffectDistortion::get_pre_gain);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pre_gain", PROPERTY_HINT_RANGE, "-60,60,0.01,suffix:dB"), "set_pre_gain", "get_pre_gain");
 
 		ClassDB::bind_method(D_METHOD("set_drive", "drive"), &FmodAudioEffectDistortion::set_drive);
 		ClassDB::bind_method(D_METHOD("get_drive"), &FmodAudioEffectDistortion::get_drive);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "drive", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_drive", "get_drive");
 
 		ClassDB::bind_method(D_METHOD("set_post_gain", "gain"), &FmodAudioEffectDistortion::set_post_gain);
 		ClassDB::bind_method(D_METHOD("get_post_gain"), &FmodAudioEffectDistortion::get_post_gain);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "post_gain", PROPERTY_HINT_RANGE, "-80,24,0.01,suffix:dB"), "set_post_gain", "get_post_gain");
 
 		ClassDB::bind_method(D_METHOD("set_keep_hf_hz", "hz"), &FmodAudioEffectDistortion::set_keep_hf_hz);
 		ClassDB::bind_method(D_METHOD("get_keep_hf_hz"), &FmodAudioEffectDistortion::get_keep_hf_hz);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "keep_hf_hz", PROPERTY_HINT_RANGE, "1,20500,1,suffix:Hz"), "set_keep_hf_hz", "get_keep_hf_hz");
 
 		ClassDB::bind_method(D_METHOD("set_oversample", "oversample"), &FmodAudioEffectDistortion::set_oversample);
 		ClassDB::bind_method(D_METHOD("get_oversample"), &FmodAudioEffectDistortion::get_oversample);
+		
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "mode", PROPERTY_HINT_ENUM, "Clip,ATan,LoFi,Overdrive,Wave Shape,BitCrush"), "set_mode", "get_mode");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pre_gain", PROPERTY_HINT_RANGE, "-60,60,0.01,suffix:dB"), "set_pre_gain", "get_pre_gain");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "drive", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_drive", "get_drive");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "post_gain", PROPERTY_HINT_RANGE, "-80,24,0.01,suffix:dB"), "set_post_gain", "get_post_gain");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "keep_hf_hz", PROPERTY_HINT_RANGE, "1,20500,1,suffix:Hz"), "set_keep_hf_hz", "get_keep_hf_hz");
 		ADD_PROPERTY(PropertyInfo(Variant::INT, "oversample", PROPERTY_HINT_RANGE, "1,16,1", PROPERTY_USAGE_NO_EDITOR), "set_oversample", "get_oversample");
 	}
 

@@ -8,7 +8,6 @@ namespace godot {
 	void FmodAudioStreamPlayer2D::_bind_methods() {
 		ClassDB::bind_method(D_METHOD("set_stream", "stream"), &FmodAudioStreamPlayer2D::set_stream);
 		ClassDB::bind_method(D_METHOD("get_stream"), &FmodAudioStreamPlayer2D::get_stream);
-		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "stream", PROPERTY_HINT_RESOURCE_TYPE, "FmodAudioStream"), "set_stream", "get_stream");
 
 		ClassDB::bind_method(D_METHOD("preload_stream"), &FmodAudioStreamPlayer2D::preload_stream);
 		ClassDB::bind_method(D_METHOD("play", "from_position"), &FmodAudioStreamPlayer2D::play, DEFVAL(0.0));
@@ -17,59 +16,61 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_playing", "playing"), &FmodAudioStreamPlayer2D::set_playing);
 		ClassDB::bind_method(D_METHOD("is_playing"), &FmodAudioStreamPlayer2D::is_playing);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "set_playing", "is_playing");
 
 		ClassDB::bind_method(D_METHOD("set_stream_paused", "paused"), &FmodAudioStreamPlayer2D::set_stream_paused);
 		ClassDB::bind_method(D_METHOD("get_stream_paused"), &FmodAudioStreamPlayer2D::get_stream_paused);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "stream_paused"), "set_stream_paused", "get_stream_paused");
 
 		ClassDB::bind_method(D_METHOD("get_playback_position"), &FmodAudioStreamPlayer2D::get_playback_position);
 
 		ClassDB::bind_method(D_METHOD("set_volume_db", "volume_db"), &FmodAudioStreamPlayer2D::set_volume_db);
 		ClassDB::bind_method(D_METHOD("get_volume_db"), &FmodAudioStreamPlayer2D::get_volume_db);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "volume_db", PROPERTY_HINT_RANGE, "-80,24,suffix:dB"), "set_volume_db", "get_volume_db");
 
 		ClassDB::bind_method(D_METHOD("set_volume_linear", "volume_linear"), &FmodAudioStreamPlayer2D::set_volume_linear);
 		ClassDB::bind_method(D_METHOD("get_volume_linear"), &FmodAudioStreamPlayer2D::get_volume_linear);
 
 		ClassDB::bind_method(D_METHOD("set_pitch_scale", "pitch_scale"), &FmodAudioStreamPlayer2D::set_pitch_scale);
 		ClassDB::bind_method(D_METHOD("get_pitch_scale"), &FmodAudioStreamPlayer2D::get_pitch_scale);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pitch_scale", PROPERTY_HINT_RANGE, "0.01,4,0.01,or_greater"), "set_pitch_scale", "get_pitch_scale");
 
 		ClassDB::bind_method(D_METHOD("set_autoplay", "enable"), &FmodAudioStreamPlayer2D::set_autoplay);
 		ClassDB::bind_method(D_METHOD("is_autoplay_enabled"), &FmodAudioStreamPlayer2D::is_autoplay_enabled);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "autoplay"), "set_autoplay", "is_autoplay_enabled");
 
 		ClassDB::bind_method(D_METHOD("set_preload_on_set_stream", "enable"), &FmodAudioStreamPlayer2D::set_preload_on_set_stream);
 		ClassDB::bind_method(D_METHOD("is_preload_on_set_stream_enabled"), &FmodAudioStreamPlayer2D::is_preload_on_set_stream_enabled);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "preload_on_set_stream"), "set_preload_on_set_stream", "is_preload_on_set_stream_enabled");
 
 		ClassDB::bind_method(D_METHOD("set_max_distance", "pixels"), &FmodAudioStreamPlayer2D::set_max_distance);
 		ClassDB::bind_method(D_METHOD("get_max_distance"), &FmodAudioStreamPlayer2D::get_max_distance);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "max_distance", PROPERTY_HINT_RANGE, "1,4096,1,or_greater,exp,suffix:px"), "set_max_distance", "get_max_distance");
 
 		ClassDB::bind_method(D_METHOD("set_attenuation", "curve"), &FmodAudioStreamPlayer2D::set_attenuation);
 		ClassDB::bind_method(D_METHOD("get_attenuation"), &FmodAudioStreamPlayer2D::get_attenuation);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "attenuation", PROPERTY_HINT_EXP_EASING, "attenuation"), "set_attenuation", "get_attenuation");
 
 		ClassDB::bind_method(D_METHOD("set_panning_strength", "panning_strength"), &FmodAudioStreamPlayer2D::set_panning_strength);
 		ClassDB::bind_method(D_METHOD("get_panning_strength"), &FmodAudioStreamPlayer2D::get_panning_strength);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "panning_strength", PROPERTY_HINT_RANGE, "0,3,0.01,or_greater"), "set_panning_strength", "get_panning_strength");
 
 		ClassDB::bind_method(D_METHOD("set_bus", "bus"), &FmodAudioStreamPlayer2D::set_bus);
 		ClassDB::bind_method(D_METHOD("get_bus"), &FmodAudioStreamPlayer2D::get_bus);
-		ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "bus", PROPERTY_HINT_ENUM), "set_bus", "get_bus");
 
 		ClassDB::bind_method(D_METHOD("set_area_mask", "mask"), &FmodAudioStreamPlayer2D::set_area_mask);
 		ClassDB::bind_method(D_METHOD("get_area_mask"), &FmodAudioStreamPlayer2D::get_area_mask);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "area_mask", PROPERTY_HINT_LAYERS_2D_PHYSICS), "set_area_mask", "get_area_mask");
 
 		ClassDB::bind_method(D_METHOD("set_max_polyphony", "max_polyphony"), &FmodAudioStreamPlayer2D::set_max_polyphony);
 		ClassDB::bind_method(D_METHOD("get_max_polyphony"), &FmodAudioStreamPlayer2D::get_max_polyphony);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_polyphony"), "set_max_polyphony", "get_max_polyphony");
 
 		ClassDB::bind_method(D_METHOD("has_stream_playback"), &FmodAudioStreamPlayer2D::has_stream_playback);
 		ClassDB::bind_method(D_METHOD("get_stream_playback"), &FmodAudioStreamPlayer2D::get_stream_playback);
+		
+		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "stream", PROPERTY_HINT_RESOURCE_TYPE, "FmodAudioStream"), "set_stream", "get_stream");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "set_playing", "is_playing");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "stream_paused"), "set_stream_paused", "get_stream_paused");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "volume_db", PROPERTY_HINT_RANGE, "-80,24,suffix:dB"), "set_volume_db", "get_volume_db");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pitch_scale", PROPERTY_HINT_RANGE, "0.01,4,0.01,or_greater"), "set_pitch_scale", "get_pitch_scale");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "autoplay"), "set_autoplay", "is_autoplay_enabled");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "preload_on_set_stream"), "set_preload_on_set_stream", "is_preload_on_set_stream_enabled");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "max_distance", PROPERTY_HINT_RANGE, "1,4096,1,or_greater,exp,suffix:px"), "set_max_distance", "get_max_distance");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "attenuation", PROPERTY_HINT_EXP_EASING, "attenuation"), "set_attenuation", "get_attenuation");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "panning_strength", PROPERTY_HINT_RANGE, "0,3,0.01,or_greater"), "set_panning_strength", "get_panning_strength");
+		ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "bus", PROPERTY_HINT_ENUM), "set_bus", "get_bus");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "area_mask", PROPERTY_HINT_LAYERS_2D_PHYSICS), "set_area_mask", "get_area_mask");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_polyphony"), "set_max_polyphony", "get_max_polyphony");
 
 		ADD_SIGNAL(MethodInfo("finished"));
 	}

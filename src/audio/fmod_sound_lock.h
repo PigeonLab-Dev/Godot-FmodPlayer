@@ -21,8 +21,7 @@ namespace godot {
 
 	public:
 		FmodSoundLock() : sound(nullptr), ptr1(nullptr), ptr2(nullptr),
-			len1(0), len2(0), locked(false) {
-		}
+			len1(0), len2(0), locked(false) {}
 
 		~FmodSoundLock() {
 			unlock();

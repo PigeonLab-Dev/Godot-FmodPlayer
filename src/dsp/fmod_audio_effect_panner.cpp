@@ -118,6 +118,7 @@ namespace godot {
 	void FmodAudioEffectPanner::_bind_methods() {
 		ClassDB::bind_method(D_METHOD("set_pan", "pan"), &FmodAudioEffectPanner::set_pan);
 		ClassDB::bind_method(D_METHOD("get_pan"), &FmodAudioEffectPanner::get_pan);
+
 		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pan", PROPERTY_HINT_RANGE, "-1,1,0.01"), "set_pan", "get_pan");
 	}
 

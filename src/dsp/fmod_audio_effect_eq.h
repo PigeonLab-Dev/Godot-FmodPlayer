@@ -5,23 +5,16 @@
 #include <godot_cpp/templates/vector.hpp>
 
 namespace godot {
-	// 模拟 Godot 的 AudioEffectEQ
-	// 使用 FMOD 的 MULTIBAND_EQ DSP 实现
-	// FMOD 的 MULTIBAND_EQ 支持 5 个频段 (A, B, C, D, E)，每个频段可独立设置滤波器类型、频率、Q值和增益
-	// 对于超过 5 个频段的需求，使用多个 MULTIBAND_EQ DSP 串联
 	class FmodAudioEffectEQ : public FmodAudioEffect {
 		GDCLASS(FmodAudioEffectEQ, FmodAudioEffect)
 
 	public:
-		// EQ 预设类型，对应 Godot 的 AudioEffectEQ6/10/21
 		enum Preset {
-			PRESET_6_BANDS = 0,     						// 6 频段均衡器 (32Hz - 10000Hz)
-			PRESET_10_BANDS = 1,    						// 10 频段均衡器 (31Hz - 16000Hz)
-			PRESET_21_BANDS = 2,    						// 21 频段均衡器 (22Hz - 22000Hz)
+			PRESET_6_BANDS = 0,     										// 6 频段均衡器 (32Hz - 10000Hz)
+			PRESET_10_BANDS = 1,    										// 10 频段均衡器 (31Hz - 16000Hz)
+			PRESET_21_BANDS = 2,    										// 21 频段均衡器 (22Hz - 22000Hz)
 		};
 
-		// 滤波器类型，对应 FMOD_DSP_MULTIBAND_EQ_FILTER_TYPE
-		// 但只暴露必要的类型给 Godot 脚本
 		enum FilterType {
 			FILTER_DISABLED = 0,
 			FILTER_LOWPASS_12DB,
@@ -30,9 +23,9 @@ namespace godot {
 			FILTER_HIGHPASS_12DB,
 			FILTER_HIGHPASS_24DB,
 			FILTER_HIGHPASS_48DB,
-			FILTER_LOWSHELF,        						// 低频搁架 - 用于 EQ 增益调节
-			FILTER_HIGHSHELF,      							// 高频搁架 - 用于 EQ 增益调节
-			FILTER_PEAKING,         						// 峰值滤波 - 用于 EQ 增益调节（默认）
+			FILTER_LOWSHELF,        										// 低频搁架 - 用于 EQ 增益调节
+			FILTER_HIGHSHELF,      											// 高频搁架 - 用于 EQ 增益调节
+			FILTER_PEAKING,         										// 峰值滤波 - 用于 EQ 增益调节（默认）
 			FILTER_BANDPASS,
 			FILTER_NOTCH,
 			FILTER_ALLPASS,
@@ -42,30 +35,32 @@ namespace godot {
 
 		// 频段信息结构
 		struct BandInfo {
-			float frequency = 1000.0f;      				// 中心频率 (Hz)
-			float gain_db = 0.0f;           				// 增益 (dB), 范围 -60 ~ +24
-			FilterType filter_type = FILTER_PEAKING;  		// 默认使用峰值滤波器
-			float q = 1.0f;                 				// Q值 (带宽)，默认 1.0
+			float frequency = 1000.0f;      								// 中心频率 (Hz)
+			float gain_db = 0.0f;           								// 增益 (dB), 范围 -60 ~ +24
+			FilterType filter_type = FILTER_PEAKING;  						// 默认使用峰值滤波器
+			float q = 1.0f;                 								// Q值 (带宽)，默认 1.0
 		};
 
 	protected:
 		static void _bind_methods();
 
 	private:
-		Preset preset = PRESET_6_BANDS;    					 // EQ 预设
-		Vector<BandInfo> bands;             				 // 频段配置
-		Vector<String> band_names;          				 // 频段名称（用于属性显示）
+		Preset preset = PRESET_6_BANDS;    									// EQ 预设
+		Vector<BandInfo> bands;             								// 频段配置
+		Vector<String> band_names;          								// 频段名称
 
-		// 初始化频段配置
-		void _init_bands();
-		// 根据预设获取默认频段频率
-		void _get_preset_frequencies(Preset p_preset, Vector<float>& r_frequencies) const;
-		// 计算需要多少个 MULTIBAND_EQ DSP (每个支持 5 个频段)
-		int _get_required_dsp_count() const;
-		// 获取指定频段对应的 DSP 索引和频段字母索引 (0-4 对应 A-E)
-		void _get_dsp_band_indices(int p_band_idx, int& r_dsp_idx, int& r_band_letter_idx) const;
-		// 更新指定频段的 DSP 参数
-		void _update_band_dsp(int p_band_idx);
+		void _init_bands();													// 初始化频段配置
+		void _get_preset_frequencies(
+			Preset p_preset,
+			Vector<float>& r_frequencies
+		) const;															// 根据预设获取默认频段频率
+		int _get_required_dsp_count() const;								// 计算需要多少个 MULTIBAND_EQ DSP (每个支持 5 个频段)
+		void _get_dsp_band_indices(
+			int p_band_idx,
+			int& r_dsp_idx,
+			int& r_band_letter_idx
+		) const;															// 获取指定频段对应的 DSP 索引和频段字母索引 (0-4 对应 A-E)
+		void _update_band_dsp(int p_band_idx);								// 更新指定频段的 DSP 参数
 
 	public:
 		FmodAudioEffectEQ();
@@ -74,26 +69,26 @@ namespace godot {
 
 		virtual void apply_to(Ref<FmodChannelGroup> p_bus) override;
 
-		// 设置/获取预设
+		// 预设
 		void set_preset(Preset p_preset);
 		Preset get_preset() const;
 
 		// 获取频段数量
 		int get_band_count() const;
 
-		// 设置/获取指定频段的增益 (dB, 范围 -60 ~ +24)
+		// 指定频段的增益 (dB, 范围 -60 ~ +24)
 		void set_band_gain_db(int p_band_idx, float p_gain_db);
 		float get_band_gain_db(int p_band_idx) const;
 
-		// 设置/获取指定频段的频率 (Hz)
+		// 指定频段的频率
 		void set_band_frequency(int p_band_idx, float p_frequency);
 		float get_band_frequency(int p_band_idx) const;
 
-		// 设置/获取指定频段的滤波器类型
+		// 指定频段的滤波器类型
 		void set_band_filter_type(int p_band_idx, FilterType p_type);
 		FilterType get_band_filter_type(int p_band_idx) const;
 
-		// 设置/获取指定频段的 Q 值
+		// 指定频段的 Q 值
 		void set_band_q(int p_band_idx, float p_q);
 		float get_band_q(int p_band_idx) const;
 
@@ -104,7 +99,6 @@ namespace godot {
 		void _get_property_list(List<PropertyInfo>* p_list) const;
 	};
 
-	// 预设子类，类似于 Godot 的 AudioEffectEQ6/10/21
 	class FmodAudioEffectEQ6 : public FmodAudioEffectEQ {
 		GDCLASS(FmodAudioEffectEQ6, FmodAudioEffectEQ)
 	protected:

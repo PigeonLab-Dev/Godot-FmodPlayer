@@ -419,7 +419,7 @@ namespace godot {
 		void lock_dsp();																		// 互斥函数，将 DSP 引擎 (异步运行于另一线程中) 锁定，使其无法执行
 		void unlock_dsp();																		// 互斥函数，用于解锁 DSP 引擎 (异步运行于另一线程) ，并让它继续执行
 
-		void set_3d_rolloff_callback(const Callable &p_callback);
+		void set_3d_rolloff_callback(const Callable& p_callback);
 		Callable get_3d_rolloff_callback() const;
 		float _handle_3d_rolloff_callback(float distance) const;
 	};

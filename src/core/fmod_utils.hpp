@@ -39,8 +39,8 @@
 	} while(0)
 
 namespace FmodUtils {
-	inline static constexpr double MIN_DB = -60.0;         // 静音阈值
-	inline static constexpr double MIN_LINEAR = 0.001;     // 10^(-60/20)
+	inline static constexpr double MIN_DB = -60.0;							// 静音阈值
+	inline static constexpr double MIN_LINEAR = 0.001;						// 10^(-60/20)
 
 	// 线性值转 dB
 	// 输入: 0.0 ~ +∞, 输出: -144.0 dB ~ +∞ dB（0 返回 -144dB 而非 -inf）
@@ -69,7 +69,7 @@ namespace FmodUtils {
 	// 1.0 = 0 dBFS, 0.5 = -6 dBFS, 0.0 = -inf
 	inline double sample_to_dbfs(double sample) {
 		double absSample = std::abs(sample);
-		if (absSample < 1.0e-10) return -144.0;     // 噪声底
+		if (absSample < 1.0e-10) return -144.0;								// 噪声底
 		return 20.0 * std::log10(absSample);
 	}
 
@@ -112,8 +112,8 @@ namespace FmodUtils {
 	// 将 FMOD 方向向量转换为 Godot 的旋转矩阵
 	inline godot::Basis fmod_vectors_to_godot_basis(const FMOD_VECTOR& forward, const FMOD_VECTOR& up) {
 		// FMOD (左手系 Y-up) -> Godot (右手系 Y-up) 转换
-		godot::Vector3 f(-forward.x, forward.y, forward.z);   // X 取反
-		godot::Vector3 u(-up.x, up.y, up.z);                  // X 取反
+		godot::Vector3 f(-forward.x, forward.y, forward.z);					// X 取反
+		godot::Vector3 u(-up.x, up.y, up.z);								// X 取反
 		
 		godot::Vector3 r = u.cross(f).normalized();
 		f.normalize();
@@ -126,8 +126,8 @@ namespace FmodUtils {
 		// FMOD (左手系 Y-up) -> Godot (右手系 Y-up) 转换
 		// 关键：翻转 X 轴来改变手性
 		
-		godot::Vector3 f(-forward.x, forward.y, forward.z);   // X 取反
-		godot::Vector3 u(-up.x, up.y, up.z);                  // X 取反
+		godot::Vector3 f(-forward.x, forward.y, forward.z);					// X 取反
+		godot::Vector3 u(-up.x, up.y, up.z);								// X 取反
 		
 		// 计算右向量（右手系叉乘：up × forward）
 		godot::Vector3 r = u.cross(f).normalized();
@@ -152,8 +152,8 @@ namespace FmodUtils {
 		godot::Basis basis = godot::Basis::from_euler(euler);
 		
 		// 提取轴向量（Godot 右手系）
-		godot::Vector3 u = basis.get_column(1);  // 上
-		godot::Vector3 f = basis.get_column(2);  // 前
+		godot::Vector3 u = basis.get_column(1);								// 上
+		godot::Vector3 f = basis.get_column(2);								// 前
 		
 		// X 取反转换为左手系
 		if (out_forward) {

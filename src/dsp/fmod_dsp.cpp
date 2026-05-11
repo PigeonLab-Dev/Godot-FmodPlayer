@@ -85,11 +85,11 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_num_outputs"), &FmodDSP::get_num_outputs);
 		ClassDB::bind_method(D_METHOD("disconnect_all", "inputs", "outputs"), &FmodDSP::disconnect_all);
 		ClassDB::bind_method(D_METHOD("disconnect_from", "target", "connection"), &FmodDSP::disconnect_from, DEFVAL(Ref<FmodDSPConnection>()));
-		
+
 		ClassDB::bind_method(D_METHOD("set_channel_format", "numchannels", "speakermode"), &FmodDSP::set_channel_format);
 		ClassDB::bind_method(D_METHOD("get_channel_format"), &FmodDSP::get_channel_format);
 		ClassDB::bind_method(D_METHOD("get_output_channel_format", "inchannels", "inspeakermode"), &FmodDSP::get_output_channel_format);
-		
+
 		ClassDB::bind_method(D_METHOD("get_metering_info"), &FmodDSP::get_metering_info);
 		ClassDB::bind_method(D_METHOD("set_metering_enabled", "input_enabled", "output_enabled"), &FmodDSP::set_metering_enabled);
 		ClassDB::bind_method(D_METHOD("get_metering_enabled"), &FmodDSP::get_metering_enabled);
@@ -108,11 +108,9 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_active", "active"), &FmodDSP::set_active);
 		ClassDB::bind_method(D_METHOD("get_active"), &FmodDSP::get_active);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "active"), "set_active", "get_active");
 
 		ClassDB::bind_method(D_METHOD("set_bypass", "bypass"), &FmodDSP::set_bypass);
 		ClassDB::bind_method(D_METHOD("get_bypass"), &FmodDSP::get_bypass);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bypass"), "set_bypass", "get_bypass");
 
 		ClassDB::bind_method(D_METHOD("set_wet_dry_mix", "prewet", "postwet", "dry"), &FmodDSP::set_wet_dry_mix);
 		ClassDB::bind_method(D_METHOD("get_wet_dry_mix"), &FmodDSP::get_wet_dry_mix);
@@ -155,10 +153,12 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_getparam_data_callback"), &FmodDSP::get_getparam_data_callback);
 		ClassDB::bind_method(D_METHOD("set_shouldiprocess_callback", "callback"), &FmodDSP::set_shouldiprocess_callback);
 		ClassDB::bind_method(D_METHOD("get_shouldiprocess_callback"), &FmodDSP::get_shouldiprocess_callback);
+
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "active"), "set_active", "get_active");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bypass"), "set_bypass", "get_bypass");
 	}
 
-	FmodDSP::FmodDSP() {
-	}
+	FmodDSP::FmodDSP() {}
 
 	FmodDSP::~FmodDSP() {
 		if (dsp) {
@@ -183,11 +183,11 @@ namespace godot {
 		}
 		dsp = p_dsp;
 		dsp->setUserData(this);
-		
+
 		if (p_desc) {
 			dsp_description = p_desc;
 		}
-		
+
 		FMOD_DSP_TYPE dsp_type;
 		if (dsp->getType(&dsp_type) == FMOD_OK) {
 			if (dsp_type == FMOD_DSP_TYPE_UNKNOWN) {
@@ -392,7 +392,7 @@ namespace godot {
 				dict["max_peak_db"] = FmodUtils::linear_to_db(max_peak);
 			}
 			return dict;
-		};
+			};
 
 		Dictionary info;
 		info["input"] = metering_info_to_dict(input_info);
@@ -551,7 +551,7 @@ namespace godot {
 
 				// 安全地访问指针，只有当 numpoints > 0 且指针不为 nullptr 时才访问
 				// 添加上限检查防止垃圾值
-				if (numpoints > 0 && numpoints <= 256) {  
+				if (numpoints > 0 && numpoints <= 256) {
 					float* pointparamvalues = desc->floatdesc.mapping.piecewiselinearmapping.pointparamvalues;
 					float* pointpositions = desc->floatdesc.mapping.piecewiselinearmapping.pointpositions;
 
@@ -717,7 +717,7 @@ namespace godot {
 	}
 
 	// GDScript 回调设置方法实现
-	void FmodDSP::set_create_callback(const Callable &p_callback) {
+	void FmodDSP::set_create_callback(const Callable& p_callback) {
 		_create_callback = p_callback;
 	}
 
@@ -725,7 +725,7 @@ namespace godot {
 		return _create_callback;
 	}
 
-	void FmodDSP::set_release_callback(const Callable &p_callback) {
+	void FmodDSP::set_release_callback(const Callable& p_callback) {
 		_release_callback = p_callback;
 	}
 
@@ -733,7 +733,7 @@ namespace godot {
 		return _release_callback;
 	}
 
-	void FmodDSP::set_reset_callback(const Callable &p_callback) {
+	void FmodDSP::set_reset_callback(const Callable& p_callback) {
 		_reset_callback = p_callback;
 	}
 
@@ -741,7 +741,7 @@ namespace godot {
 		return _reset_callback;
 	}
 
-	void FmodDSP::set_read_callback(const Callable &p_callback) {
+	void FmodDSP::set_read_callback(const Callable& p_callback) {
 		_read_callback = p_callback;
 	}
 
@@ -749,7 +749,7 @@ namespace godot {
 		return _read_callback;
 	}
 
-	void FmodDSP::set_process_callback(const Callable &p_callback) {
+	void FmodDSP::set_process_callback(const Callable& p_callback) {
 		_process_callback = p_callback;
 	}
 
@@ -757,7 +757,7 @@ namespace godot {
 		return _process_callback;
 	}
 
-	void FmodDSP::set_setposition_callback(const Callable &p_callback) {
+	void FmodDSP::set_setposition_callback(const Callable& p_callback) {
 		_setposition_callback = p_callback;
 	}
 
@@ -765,7 +765,7 @@ namespace godot {
 		return _setposition_callback;
 	}
 
-	void FmodDSP::set_setparam_float_callback(const Callable &p_callback) {
+	void FmodDSP::set_setparam_float_callback(const Callable& p_callback) {
 		_setparam_float_callback = p_callback;
 	}
 
@@ -773,7 +773,7 @@ namespace godot {
 		return _setparam_float_callback;
 	}
 
-	void FmodDSP::set_setparam_int_callback(const Callable &p_callback) {
+	void FmodDSP::set_setparam_int_callback(const Callable& p_callback) {
 		_setparam_int_callback = p_callback;
 	}
 
@@ -781,7 +781,7 @@ namespace godot {
 		return _setparam_int_callback;
 	}
 
-	void FmodDSP::set_setparam_bool_callback(const Callable &p_callback) {
+	void FmodDSP::set_setparam_bool_callback(const Callable& p_callback) {
 		_setparam_bool_callback = p_callback;
 	}
 
@@ -789,7 +789,7 @@ namespace godot {
 		return _setparam_bool_callback;
 	}
 
-	void FmodDSP::set_setparam_data_callback(const Callable &p_callback) {
+	void FmodDSP::set_setparam_data_callback(const Callable& p_callback) {
 		_setparam_data_callback = p_callback;
 	}
 
@@ -797,7 +797,7 @@ namespace godot {
 		return _setparam_data_callback;
 	}
 
-	void FmodDSP::set_getparam_float_callback(const Callable &p_callback) {
+	void FmodDSP::set_getparam_float_callback(const Callable& p_callback) {
 		_getparam_float_callback = p_callback;
 	}
 
@@ -805,7 +805,7 @@ namespace godot {
 		return _getparam_float_callback;
 	}
 
-	void FmodDSP::set_getparam_int_callback(const Callable &p_callback) {
+	void FmodDSP::set_getparam_int_callback(const Callable& p_callback) {
 		_getparam_int_callback = p_callback;
 	}
 
@@ -813,7 +813,7 @@ namespace godot {
 		return _getparam_int_callback;
 	}
 
-	void FmodDSP::set_getparam_bool_callback(const Callable &p_callback) {
+	void FmodDSP::set_getparam_bool_callback(const Callable& p_callback) {
 		_getparam_bool_callback = p_callback;
 	}
 
@@ -821,7 +821,7 @@ namespace godot {
 		return _getparam_bool_callback;
 	}
 
-	void FmodDSP::set_getparam_data_callback(const Callable &p_callback) {
+	void FmodDSP::set_getparam_data_callback(const Callable& p_callback) {
 		_getparam_data_callback = p_callback;
 	}
 
@@ -829,7 +829,7 @@ namespace godot {
 		return _getparam_data_callback;
 	}
 
-	void FmodDSP::set_shouldiprocess_callback(const Callable &p_callback) {
+	void FmodDSP::set_shouldiprocess_callback(const Callable& p_callback) {
 		_shouldiprocess_callback = p_callback;
 	}
 
@@ -1133,22 +1133,22 @@ FMOD_RESULT F_CALL GD_FMOD_DSP_CALLBACK(
 ) {
 	// 通用回调分发
 	if (!dsp) return FMOD_ERR_INVALID_PARAM;
-	
+
 	void* user_data = nullptr;
 	FMOD::DSP* dsp_cpp = reinterpret_cast<FMOD::DSP*>(dsp);
 	FMOD_RESULT result = dsp_cpp->getUserData(&user_data);
 	if (result != FMOD_OK || !user_data) return FMOD_OK;
-	
+
 	godot::FmodDSP* fmod_dsp = static_cast<godot::FmodDSP*>(user_data);
-	
+
 	// FMOD_DSP_CALLBACK_TYPE 只包含 DATAPARAMETERRELEASE 类型
 	// CREATE/RELEASE 等回调是通过 DSP 描述符中的独立函数指针设置的
 	switch (type) {
-		case FMOD_DSP_CALLBACK_DATAPARAMETERRELEASE:
-			// 数据参数释放回调
-			return FMOD_OK;
-		default:
-			return FMOD_OK;
+	case FMOD_DSP_CALLBACK_DATAPARAMETERRELEASE:
+		// 数据参数释放回调
+		return FMOD_OK;
+	default:
+		return FMOD_OK;
 	}
 }
 
@@ -1219,12 +1219,12 @@ FMOD_RESULT F_CALL GD_FMOD_DSP_PROCESS_CALLBACK(
 	FMOD_DSP_BUFFER_ARRAY* outbufferarray,
 	FMOD_BOOL inputsidle,
 	FMOD_DSP_PROCESS_OPERATION op) {
-	
+
 	godot::FmodDSP* dsp = get_dsp_from_state(dsp_state);
 	if (dsp) {
 		return dsp->_handle_process(dsp_state, length, inbufferarray, outbufferarray, inputsidle, op);
 	}
-	
+
 	// 默认处理
 	if (!inbufferarray || !outbufferarray || inbufferarray->numbuffers <= 0 || outbufferarray->numbuffers <= 0) {
 		return FMOD_ERR_INVALID_PARAM;

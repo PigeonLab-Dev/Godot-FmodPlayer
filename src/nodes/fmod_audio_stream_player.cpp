@@ -11,7 +11,6 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_stream", "stream"), &FmodAudioStreamPlayer::set_stream);
 		ClassDB::bind_method(D_METHOD("get_stream"), &FmodAudioStreamPlayer::get_stream);
-		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "stream", PROPERTY_HINT_RESOURCE_TYPE, "FmodAudioStream"), "set_stream", "get_stream");
 
 		ClassDB::bind_method(D_METHOD("preload_stream"), &FmodAudioStreamPlayer::preload_stream);
 		ClassDB::bind_method(D_METHOD("play", "from_position"), &FmodAudioStreamPlayer::play, DEFVAL(0.0f));
@@ -20,36 +19,38 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_playing", "playing"), &FmodAudioStreamPlayer::set_playing);
 		ClassDB::bind_method(D_METHOD("is_playing"), &FmodAudioStreamPlayer::is_playing);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "set_playing", "is_playing");
 
 		ClassDB::bind_method(D_METHOD("set_stream_paused", "paused"), &FmodAudioStreamPlayer::set_stream_paused);
 		ClassDB::bind_method(D_METHOD("get_stream_paused"), &FmodAudioStreamPlayer::get_stream_paused);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "stream_paused"), "set_stream_paused", "get_stream_paused");
 
 		ClassDB::bind_method(D_METHOD("get_playback_position"), &FmodAudioStreamPlayer::get_playback_position);
 
 		ClassDB::bind_method(D_METHOD("set_volume_db", "volume_db"), &FmodAudioStreamPlayer::set_volume_db);
 		ClassDB::bind_method(D_METHOD("get_volume_db"), &FmodAudioStreamPlayer::get_volume_db);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "volume_db", PROPERTY_HINT_RANGE, "-80,24,0.1,suffix:dB"), "set_volume_db", "get_volume_db");
 
 		ClassDB::bind_method(D_METHOD("set_pitch_scale", "pitch_scale"), &FmodAudioStreamPlayer::set_pitch_scale);
 		ClassDB::bind_method(D_METHOD("get_pitch_scale"), &FmodAudioStreamPlayer::get_pitch_scale);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pitch_scale", PROPERTY_HINT_RANGE, "0.01,4,0.01,or_greater"), "set_pitch_scale", "get_pitch_scale");
 
 		ClassDB::bind_method(D_METHOD("set_mix_target", "mix_target"), &FmodAudioStreamPlayer::set_mix_target);
 		ClassDB::bind_method(D_METHOD("get_mix_target"), &FmodAudioStreamPlayer::get_mix_target);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "mix_target", PROPERTY_HINT_ENUM, "Stereo,Surround,Center"), "set_mix_target", "get_mix_target");
 
 		ClassDB::bind_method(D_METHOD("set_auto_play", "enable"), &FmodAudioStreamPlayer::set_auto_play);
 		ClassDB::bind_method(D_METHOD("is_autoplay_enabled"), &FmodAudioStreamPlayer::is_autoplay_enabled);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_play"), "set_auto_play", "is_autoplay_enabled");
 
 		ClassDB::bind_method(D_METHOD("set_preload_on_set_stream", "enable"), &FmodAudioStreamPlayer::set_preload_on_set_stream);
 		ClassDB::bind_method(D_METHOD("is_preload_on_set_stream_enabled"), &FmodAudioStreamPlayer::is_preload_on_set_stream_enabled);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "preload_on_set_stream"), "set_preload_on_set_stream", "is_preload_on_set_stream_enabled");
 
 		ClassDB::bind_method(D_METHOD("set_bus", "bus"), &FmodAudioStreamPlayer::set_bus);
 		ClassDB::bind_method(D_METHOD("get_bus"), &FmodAudioStreamPlayer::get_bus);
+		
+		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "stream", PROPERTY_HINT_RESOURCE_TYPE, "FmodAudioStream"), "set_stream", "get_stream");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "set_playing", "is_playing");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "stream_paused"), "set_stream_paused", "get_stream_paused");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "volume_db", PROPERTY_HINT_RANGE, "-80,24,0.1,suffix:dB"), "set_volume_db", "get_volume_db");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pitch_scale", PROPERTY_HINT_RANGE, "0.01,4,0.01,or_greater"), "set_pitch_scale", "get_pitch_scale");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "mix_target", PROPERTY_HINT_ENUM, "Stereo,Surround,Center"), "set_mix_target", "get_mix_target");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_play"), "set_auto_play", "is_autoplay_enabled");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "preload_on_set_stream"), "set_preload_on_set_stream", "is_preload_on_set_stream_enabled");
 		ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "bus", PROPERTY_HINT_ENUM), "set_bus", "get_bus");
 
 		ADD_SIGNAL(MethodInfo("finished"));

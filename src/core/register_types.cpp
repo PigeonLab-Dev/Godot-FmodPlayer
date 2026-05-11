@@ -144,7 +144,7 @@ void initialize_fmod_player_module(ModuleInitializationLevel p_level) {
 		GDREGISTER_CLASS(ModifyAndroidBuildTemplatePlugin);
 		return;
 	}
-	
+
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}

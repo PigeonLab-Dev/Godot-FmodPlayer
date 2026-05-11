@@ -98,7 +98,6 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_sync_point_info", "point", "time_unit"), &FmodSound::get_sync_point_info, DEFVAL(FmodSystem::FMOD_TIME_UNIT_MS));
 		ClassDB::bind_method(D_METHOD("get_num_sub_sounds"), &FmodSound::get_num_sub_sounds);
 
-		// Callback setters/getters
 		ClassDB::bind_method(D_METHOD("set_pcmread_callback", "callback"), &FmodSound::set_pcmread_callback);
 		ClassDB::bind_method(D_METHOD("get_pcmread_callback"), &FmodSound::get_pcmread_callback);
 		ClassDB::bind_method(D_METHOD("set_pcmsetpos_callback", "callback"), &FmodSound::set_pcmsetpos_callback);
@@ -401,7 +400,7 @@ namespace godot {
 	}
 
 	// Callback implementations
-	void FmodSound::set_pcmread_callback(const Callable &p_callback) {
+	void FmodSound::set_pcmread_callback(const Callable& p_callback) {
 		_pcmread_callback = p_callback;
 	}
 
@@ -409,13 +408,13 @@ namespace godot {
 		return _pcmread_callback;
 	}
 
-	FMOD_RESULT FmodSound::_handle_pcmread_callback(void *data, unsigned int datalen) const {
+	FMOD_RESULT FmodSound::_handle_pcmread_callback(void* data, unsigned int datalen) const {
 		if (_pcmread_callback.is_valid()) {
 			// 将 PCM 数据包装为 PackedByteArray
 			PackedByteArray pcm_data;
 			pcm_data.resize(datalen);
 			memcpy(pcm_data.ptrw(), data, datalen);
-			
+
 			const Variant ret = _pcmread_callback.call(pcm_data);
 			if (ret.get_type() == Variant::INT) {
 				return static_cast<FMOD_RESULT>(int(ret));
@@ -424,7 +423,7 @@ namespace godot {
 		return FMOD_OK;
 	}
 
-	void FmodSound::set_pcmsetpos_callback(const Callable &p_callback) {
+	void FmodSound::set_pcmsetpos_callback(const Callable& p_callback) {
 		_pcmsetpos_callback = p_callback;
 	}
 
@@ -442,7 +441,7 @@ namespace godot {
 		return FMOD_OK;
 	}
 
-	void FmodSound::set_nonblock_callback(const Callable &p_callback) {
+	void FmodSound::set_nonblock_callback(const Callable& p_callback) {
 		_nonblock_callback = p_callback;
 	}
 
@@ -471,16 +470,16 @@ FMOD_RESULT F_CALL GD_FMOD_SOUND_PCMREAD_CALLBACK(
 	if (!sound || !data) {
 		return FMOD_ERR_INVALID_PARAM;
 	}
-	
+
 	// 将 FMOD_SOUND* 转换为 FMOD::Sound*
 	FMOD::Sound* fmod_sound = reinterpret_cast<FMOD::Sound*>(sound);
-	
+
 	void* user_data = nullptr;
 	FMOD_RESULT result = fmod_sound->getUserData(&user_data);
 	if (result != FMOD_OK || !user_data) {
 		return FMOD_OK;
 	}
-	
+
 	return static_cast<godot::FmodSound*>(user_data)->_handle_pcmread_callback(data, datalen);
 }
 
@@ -493,16 +492,16 @@ FMOD_RESULT F_CALL GD_FMOD_SOUND_PCMSETPOS_CALLBACK(
 	if (!sound) {
 		return FMOD_ERR_INVALID_PARAM;
 	}
-	
+
 	// 将 FMOD_SOUND* 转换为 FMOD::Sound*
 	FMOD::Sound* fmod_sound = reinterpret_cast<FMOD::Sound*>(sound);
-	
+
 	void* user_data = nullptr;
 	FMOD_RESULT result = fmod_sound->getUserData(&user_data);
 	if (result != FMOD_OK || !user_data) {
 		return FMOD_OK;
 	}
-	
+
 	return static_cast<godot::FmodSound*>(user_data)->_handle_pcmsetpos_callback(subsound, position, postype);
 }
 
@@ -513,15 +512,15 @@ FMOD_RESULT F_CALL GD_FMOD_SOUND_NONBLOCK_CALLBACK(
 	if (!sound) {
 		return FMOD_ERR_INVALID_PARAM;
 	}
-	
+
 	// 将 FMOD_SOUND* 转换为 FMOD::Sound*
 	FMOD::Sound* fmod_sound = reinterpret_cast<FMOD::Sound*>(sound);
-	
+
 	void* user_data = nullptr;
 	FMOD_RESULT get_result = fmod_sound->getUserData(&user_data);
 	if (get_result != FMOD_OK || !user_data) {
 		return FMOD_OK;
 	}
-	
+
 	return static_cast<godot::FmodSound*>(user_data)->_handle_nonblock_callback(result);
 }

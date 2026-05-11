@@ -23,51 +23,39 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_source_mode", "mode"), &FmodGeometryInstance3D::set_source_mode);
 		ClassDB::bind_method(D_METHOD("get_source_mode"), &FmodGeometryInstance3D::get_source_mode);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "source_mode", PROPERTY_HINT_ENUM, "Auto,Collision Shapes,Mesh Instance,Mesh Resource"), "set_source_mode", "get_source_mode");
 
 		ClassDB::bind_method(D_METHOD("set_source_node_path", "path"), &FmodGeometryInstance3D::set_source_node_path);
 		ClassDB::bind_method(D_METHOD("get_source_node_path"), &FmodGeometryInstance3D::get_source_node_path);
-		ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "source_node_path", PROPERTY_HINT_NODE_PATH_VALID_TYPES, "Node3D,MeshInstance3D,CollisionShape3D"), "set_source_node_path", "get_source_node_path");
 
 		ClassDB::bind_method(D_METHOD("set_mesh", "mesh"), &FmodGeometryInstance3D::set_mesh);
 		ClassDB::bind_method(D_METHOD("get_mesh"), &FmodGeometryInstance3D::get_mesh);
-		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "mesh", PROPERTY_HINT_RESOURCE_TYPE, "Mesh"), "set_mesh", "get_mesh");
 
 		ClassDB::bind_method(D_METHOD("set_direct_occlusion", "value"), &FmodGeometryInstance3D::set_direct_occlusion);
 		ClassDB::bind_method(D_METHOD("get_direct_occlusion"), &FmodGeometryInstance3D::get_direct_occlusion);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "direct_occlusion", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_direct_occlusion", "get_direct_occlusion");
 
 		ClassDB::bind_method(D_METHOD("set_reverb_occlusion", "value"), &FmodGeometryInstance3D::set_reverb_occlusion);
 		ClassDB::bind_method(D_METHOD("get_reverb_occlusion"), &FmodGeometryInstance3D::get_reverb_occlusion);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "reverb_occlusion", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_reverb_occlusion", "get_reverb_occlusion");
 
 		ClassDB::bind_method(D_METHOD("set_double_sided", "value"), &FmodGeometryInstance3D::set_double_sided);
 		ClassDB::bind_method(D_METHOD("get_double_sided"), &FmodGeometryInstance3D::get_double_sided);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "double_sided"), "set_double_sided", "get_double_sided");
 
 		ClassDB::bind_method(D_METHOD("set_active", "value"), &FmodGeometryInstance3D::set_active);
 		ClassDB::bind_method(D_METHOD("get_active"), &FmodGeometryInstance3D::get_active);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "active"), "set_active", "get_active");
 
 		ClassDB::bind_method(D_METHOD("set_auto_rebuild", "value"), &FmodGeometryInstance3D::set_auto_rebuild);
 		ClassDB::bind_method(D_METHOD("get_auto_rebuild"), &FmodGeometryInstance3D::get_auto_rebuild);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_rebuild"), "set_auto_rebuild", "get_auto_rebuild");
 
 		ClassDB::bind_method(D_METHOD("set_sync_transform", "value"), &FmodGeometryInstance3D::set_sync_transform);
 		ClassDB::bind_method(D_METHOD("get_sync_transform"), &FmodGeometryInstance3D::get_sync_transform);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "sync_transform"), "set_sync_transform", "get_sync_transform");
 
 		ClassDB::bind_method(D_METHOD("set_recursive_source_scan", "value"), &FmodGeometryInstance3D::set_recursive_source_scan);
 		ClassDB::bind_method(D_METHOD("get_recursive_source_scan"), &FmodGeometryInstance3D::get_recursive_source_scan);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "recursive_source_scan"), "set_recursive_source_scan", "get_recursive_source_scan");
 
 		ClassDB::bind_method(D_METHOD("set_primitive_segments", "segments"), &FmodGeometryInstance3D::set_primitive_segments);
 		ClassDB::bind_method(D_METHOD("get_primitive_segments"), &FmodGeometryInstance3D::get_primitive_segments);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "primitive_segments", PROPERTY_HINT_RANGE, "6,64,1"), "set_primitive_segments", "get_primitive_segments");
 
 		ClassDB::bind_method(D_METHOD("set_show_debug_gizmo", "value"), &FmodGeometryInstance3D::set_show_debug_gizmo);
 		ClassDB::bind_method(D_METHOD("get_show_debug_gizmo"), &FmodGeometryInstance3D::get_show_debug_gizmo);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "show_debug_gizmo"), "set_show_debug_gizmo", "get_show_debug_gizmo");
 
 		ClassDB::bind_method(D_METHOD("rebuild_geometry"), &FmodGeometryInstance3D::rebuild_geometry);
 		ClassDB::bind_method(D_METHOD("clear_geometry"), &FmodGeometryInstance3D::clear_geometry);
@@ -76,6 +64,19 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_polygon_count"), &FmodGeometryInstance3D::get_polygon_count);
 		ClassDB::bind_method(D_METHOD("get_vertex_count"), &FmodGeometryInstance3D::get_vertex_count);
 		ClassDB::bind_method(D_METHOD("get_geometry"), &FmodGeometryInstance3D::get_geometry);
+
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "source_mode", PROPERTY_HINT_ENUM, "Auto,Collision Shapes,Mesh Instance,Mesh Resource"), "set_source_mode", "get_source_mode");
+		ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "source_node_path", PROPERTY_HINT_NODE_PATH_VALID_TYPES, "Node3D,MeshInstance3D,CollisionShape3D"), "set_source_node_path", "get_source_node_path");
+		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "mesh", PROPERTY_HINT_RESOURCE_TYPE, "Mesh"), "set_mesh", "get_mesh");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "direct_occlusion", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_direct_occlusion", "get_direct_occlusion");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "reverb_occlusion", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_reverb_occlusion", "get_reverb_occlusion");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "double_sided"), "set_double_sided", "get_double_sided");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "active"), "set_active", "get_active");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_rebuild"), "set_auto_rebuild", "get_auto_rebuild");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "sync_transform"), "set_sync_transform", "get_sync_transform");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "recursive_source_scan"), "set_recursive_source_scan", "get_recursive_source_scan");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "primitive_segments", PROPERTY_HINT_RANGE, "6,64,1"), "set_primitive_segments", "get_primitive_segments");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "show_debug_gizmo"), "set_show_debug_gizmo", "get_show_debug_gizmo");
 
 		ADD_SIGNAL(MethodInfo("geometry_created"));
 		ADD_SIGNAL(MethodInfo("geometry_cleared"));
@@ -92,29 +93,29 @@ namespace godot {
 
 	void FmodGeometryInstance3D::_notification(int p_what) {
 		switch (p_what) {
-			case NOTIFICATION_READY: {
-				if (auto_rebuild) {
-					call_deferred("rebuild_geometry");
-				}
-			} break;
+		case NOTIFICATION_READY: {
+			if (auto_rebuild) {
+				call_deferred("rebuild_geometry");
+			}
+		} break;
 
-			case NOTIFICATION_PROCESS: {
-				if (sync_transform && has_valid_geometry()) {
-					sync_geometry_transform();
-				}
-			} break;
+		case NOTIFICATION_PROCESS: {
+			if (sync_transform && has_valid_geometry()) {
+				sync_geometry_transform();
+			}
+		} break;
 
-			case NOTIFICATION_EXIT_TREE: {
-				clear_geometry();
-			} break;
+		case NOTIFICATION_EXIT_TREE: {
+			clear_geometry();
+		} break;
 
-			#ifdef TOOLS_ENABLED
-			case NOTIFICATION_EDITOR_PRE_SAVE: {
-				if (auto_rebuild && is_inside_tree() && !has_valid_geometry()) {
-					rebuild_geometry();
-				}
-			} break;
-			#endif
+#ifdef TOOLS_ENABLED
+		case NOTIFICATION_EDITOR_PRE_SAVE: {
+			if (auto_rebuild && is_inside_tree() && !has_valid_geometry()) {
+				rebuild_geometry();
+			}
+		} break;
+#endif
 		}
 	}
 
@@ -128,37 +129,42 @@ namespace godot {
 		std::vector<PackedVector3Array> polygons;
 		bool success = false;
 
-		Node *configured_source = _get_configured_source_node();
+		Node* configured_source = _get_configured_source_node();
 		SourceMode effective_mode = source_mode;
 
 		if (effective_mode == SOURCE_AUTO) {
 			if (configured_source) {
 				if (Object::cast_to<MeshInstance3D>(configured_source)) {
 					effective_mode = SOURCE_MESH_INSTANCE;
-				} else {
+				}
+				else {
 					effective_mode = SOURCE_COLLISION_SHAPES;
 				}
-			} else if (mesh.is_valid()) {
+			}
+			else if (mesh.is_valid()) {
 				effective_mode = SOURCE_MESH_RESOURCE;
-			} else {
+			}
+			else {
 				effective_mode = SOURCE_COLLISION_SHAPES;
 			}
 		}
 
 		if (effective_mode == SOURCE_MESH_RESOURCE) {
 			success = _build_from_mesh(mesh, Transform3D(), polygons);
-		} else if (effective_mode == SOURCE_MESH_INSTANCE) {
-			MeshInstance3D *mesh_instance = Object::cast_to<MeshInstance3D>(configured_source);
+		}
+		else if (effective_mode == SOURCE_MESH_INSTANCE) {
+			MeshInstance3D* mesh_instance = Object::cast_to<MeshInstance3D>(configured_source);
 			if (!mesh_instance && source_node_path.is_empty()) {
 				mesh_instance = Object::cast_to<MeshInstance3D>(get_parent());
 			}
 			success = _build_from_mesh_instance(mesh_instance, polygons);
-		} else {
-			Node *root = configured_source ? configured_source : this;
+		}
+		else {
+			Node* root = configured_source ? configured_source : this;
 			success = _build_from_collision_shapes(root, polygons);
 
 			if (!success && source_mode == SOURCE_AUTO) {
-				MeshInstance3D *mesh_instance = Object::cast_to<MeshInstance3D>(get_parent());
+				MeshInstance3D* mesh_instance = Object::cast_to<MeshInstance3D>(get_parent());
 				success = _build_from_mesh_instance(mesh_instance, polygons);
 			}
 		}
@@ -172,14 +178,14 @@ namespace godot {
 		ERR_FAIL_COND_MSG(system.is_null(), "FMOD system not initialized.");
 
 		int max_vertices = 0;
-		for (const PackedVector3Array &polygon : polygons) {
+		for (const PackedVector3Array& polygon : polygons) {
 			max_vertices += polygon.size();
 		}
 
 		geometry = system->create_geometry((int)polygons.size(), max_vertices);
 		ERR_FAIL_COND_MSG(geometry.is_null(), "Failed to create FMOD geometry.");
 
-		for (const PackedVector3Array &polygon : polygons) {
+		for (const PackedVector3Array& polygon : polygons) {
 			int index = geometry->add_polygon(direct_occlusion, reverb_occlusion, double_sided, polygon);
 			if (index >= 0) {
 				polygon_count++;
@@ -193,9 +199,9 @@ namespace godot {
 		emit_signal("geometry_created");
 		emit_signal("geometry_rebuilt");
 
-		#ifdef TOOLS_ENABLED
+#ifdef TOOLS_ENABLED
 		update_gizmos();
-		#endif
+#endif
 	}
 
 	void FmodGeometryInstance3D::clear_geometry() {
@@ -246,7 +252,8 @@ namespace godot {
 					result.append(vertices[i + 1]);
 					result.append(vertices[i + 2]);
 				}
-			} else {
+			}
+			else {
 				for (int i = 0; i + 2 < indices.size(); i += 3) {
 					result.append(vertices[indices[i]]);
 					result.append(vertices[indices[i + 1]]);
@@ -258,19 +265,19 @@ namespace godot {
 		return result;
 	}
 
-	Node *FmodGeometryInstance3D::_get_configured_source_node() const {
+	Node* FmodGeometryInstance3D::_get_configured_source_node() const {
 		if (source_node_path.is_empty() || !is_inside_tree()) {
 			return nullptr;
 		}
 		return get_node_or_null(source_node_path);
 	}
 
-	void FmodGeometryInstance3D::_collect_collision_shapes(Node *p_root, std::vector<CollisionShape3D *> &r_shapes) const {
+	void FmodGeometryInstance3D::_collect_collision_shapes(Node* p_root, std::vector<CollisionShape3D*>& r_shapes) const {
 		if (!p_root) {
 			return;
 		}
 
-		CollisionShape3D *shape = Object::cast_to<CollisionShape3D>(p_root);
+		CollisionShape3D* shape = Object::cast_to<CollisionShape3D>(p_root);
 		if (shape && !shape->is_disabled()) {
 			r_shapes.push_back(shape);
 			if (!recursive_source_scan) {
@@ -279,15 +286,16 @@ namespace godot {
 		}
 
 		for (int i = 0; i < p_root->get_child_count(); i++) {
-			Node *child = p_root->get_child(i);
+			Node* child = p_root->get_child(i);
 			if (!child) {
 				continue;
 			}
 
 			if (recursive_source_scan) {
 				_collect_collision_shapes(child, r_shapes);
-			} else {
-				CollisionShape3D *child_shape = Object::cast_to<CollisionShape3D>(child);
+			}
+			else {
+				CollisionShape3D* child_shape = Object::cast_to<CollisionShape3D>(child);
 				if (child_shape && !child_shape->is_disabled()) {
 					r_shapes.push_back(child_shape);
 				}
@@ -295,18 +303,18 @@ namespace godot {
 		}
 	}
 
-	bool FmodGeometryInstance3D::_build_from_collision_shapes(Node *p_root, std::vector<PackedVector3Array> &r_polygons) const {
-		std::vector<CollisionShape3D *> shapes;
+	bool FmodGeometryInstance3D::_build_from_collision_shapes(Node* p_root, std::vector<PackedVector3Array>& r_polygons) const {
+		std::vector<CollisionShape3D*> shapes;
 		_collect_collision_shapes(p_root, shapes);
 
-		for (CollisionShape3D *shape : shapes) {
+		for (CollisionShape3D* shape : shapes) {
 			_build_from_collision_shape(shape, r_polygons);
 		}
 
 		return !r_polygons.empty();
 	}
 
-	bool FmodGeometryInstance3D::_build_from_collision_shape(CollisionShape3D *p_collision_shape, std::vector<PackedVector3Array> &r_polygons) const {
+	bool FmodGeometryInstance3D::_build_from_collision_shape(CollisionShape3D* p_collision_shape, std::vector<PackedVector3Array>& r_polygons) const {
 		if (!p_collision_shape) {
 			return false;
 		}
@@ -324,7 +332,7 @@ namespace godot {
 		return _build_from_shape(shape, to_geometry_local, r_polygons);
 	}
 
-	bool FmodGeometryInstance3D::_build_from_mesh_instance(MeshInstance3D *p_mesh_instance, std::vector<PackedVector3Array> &r_polygons) const {
+	bool FmodGeometryInstance3D::_build_from_mesh_instance(MeshInstance3D* p_mesh_instance, std::vector<PackedVector3Array>& r_polygons) const {
 		if (!p_mesh_instance) {
 			return false;
 		}
@@ -342,7 +350,7 @@ namespace godot {
 		return _build_from_mesh(source_mesh, to_geometry_local, r_polygons);
 	}
 
-	bool FmodGeometryInstance3D::_build_from_mesh(const Ref<Mesh> &p_mesh, const Transform3D &p_to_geometry_local, std::vector<PackedVector3Array> &r_polygons) const {
+	bool FmodGeometryInstance3D::_build_from_mesh(const Ref<Mesh>& p_mesh, const Transform3D& p_to_geometry_local, std::vector<PackedVector3Array>& r_polygons) const {
 		PackedVector3Array triangles = get_mesh_triangles(p_mesh);
 		if (triangles.size() < 3) {
 			return false;
@@ -355,30 +363,30 @@ namespace godot {
 		return true;
 	}
 
-	bool FmodGeometryInstance3D::_build_from_shape(const Ref<Shape3D> &p_shape, const Transform3D &p_to_geometry_local, std::vector<PackedVector3Array> &r_polygons) const {
+	bool FmodGeometryInstance3D::_build_from_shape(const Ref<Shape3D>& p_shape, const Transform3D& p_to_geometry_local, std::vector<PackedVector3Array>& r_polygons) const {
 		if (!p_shape.is_valid()) {
 			return false;
 		}
 
-		BoxShape3D *box = Object::cast_to<BoxShape3D>(p_shape.ptr());
+		BoxShape3D* box = Object::cast_to<BoxShape3D>(p_shape.ptr());
 		if (box) {
 			_append_box(box->get_size(), p_to_geometry_local, r_polygons);
 			return true;
 		}
 
-		SphereShape3D *sphere = Object::cast_to<SphereShape3D>(p_shape.ptr());
+		SphereShape3D* sphere = Object::cast_to<SphereShape3D>(p_shape.ptr());
 		if (sphere) {
 			_append_sphere(sphere->get_radius(), p_to_geometry_local, r_polygons);
 			return true;
 		}
 
-		CylinderShape3D *cylinder = Object::cast_to<CylinderShape3D>(p_shape.ptr());
+		CylinderShape3D* cylinder = Object::cast_to<CylinderShape3D>(p_shape.ptr());
 		if (cylinder) {
 			_append_cylinder(cylinder->get_radius(), cylinder->get_height(), p_to_geometry_local, r_polygons);
 			return true;
 		}
 
-		ConcavePolygonShape3D *concave = Object::cast_to<ConcavePolygonShape3D>(p_shape.ptr());
+		ConcavePolygonShape3D* concave = Object::cast_to<ConcavePolygonShape3D>(p_shape.ptr());
 		if (concave) {
 			PackedVector3Array faces = concave->get_faces();
 			for (int i = 0; i + 2 < faces.size(); i += 3) {
@@ -387,7 +395,7 @@ namespace godot {
 			return faces.size() >= 3;
 		}
 
-		ConvexPolygonShape3D *convex = Object::cast_to<ConvexPolygonShape3D>(p_shape.ptr());
+		ConvexPolygonShape3D* convex = Object::cast_to<ConvexPolygonShape3D>(p_shape.ptr());
 		if (convex) {
 			Ref<ArrayMesh> debug_mesh = p_shape->get_debug_mesh();
 			if (debug_mesh.is_valid()) {
@@ -422,7 +430,7 @@ namespace godot {
 		return false;
 	}
 
-	void FmodGeometryInstance3D::_append_box(const Vector3 &p_size, const Transform3D &p_xform, std::vector<PackedVector3Array> &r_polygons) const {
+	void FmodGeometryInstance3D::_append_box(const Vector3& p_size, const Transform3D& p_xform, std::vector<PackedVector3Array>& r_polygons) const {
 		Vector3 h = p_size * 0.5f;
 		Vector3 v[8] = {
 			Vector3(-h.x, -h.y, -h.z),
@@ -449,7 +457,7 @@ namespace godot {
 		_append_triangle(v[4], v[1], v[0], p_xform, r_polygons);
 	}
 
-	void FmodGeometryInstance3D::_append_sphere(float p_radius, const Transform3D &p_xform, std::vector<PackedVector3Array> &r_polygons) const {
+	void FmodGeometryInstance3D::_append_sphere(float p_radius, const Transform3D& p_xform, std::vector<PackedVector3Array>& r_polygons) const {
 		int segments = CLAMP(primitive_segments, 6, 64);
 		int rings = MAX(3, segments / 2);
 
@@ -472,7 +480,7 @@ namespace godot {
 		}
 	}
 
-	void FmodGeometryInstance3D::_append_cylinder(float p_radius, float p_height, const Transform3D &p_xform, std::vector<PackedVector3Array> &r_polygons) const {
+	void FmodGeometryInstance3D::_append_cylinder(float p_radius, float p_height, const Transform3D& p_xform, std::vector<PackedVector3Array>& r_polygons) const {
 		int segments = CLAMP(primitive_segments, 6, 64);
 		float half_height = p_height * 0.5f;
 		Vector3 top_center(0.0f, half_height, 0.0f);
@@ -493,7 +501,7 @@ namespace godot {
 		}
 	}
 
-	void FmodGeometryInstance3D::_append_triangle(const Vector3 &p_a, const Vector3 &p_b, const Vector3 &p_c, const Transform3D &p_xform, std::vector<PackedVector3Array> &r_polygons) const {
+	void FmodGeometryInstance3D::_append_triangle(const Vector3& p_a, const Vector3& p_b, const Vector3& p_c, const Transform3D& p_xform, std::vector<PackedVector3Array>& r_polygons) const {
 		Vector3 a = p_xform.xform(p_a);
 		Vector3 b = p_xform.xform(p_b);
 		Vector3 c = p_xform.xform(p_c);
@@ -527,7 +535,7 @@ namespace godot {
 		return source_mode;
 	}
 
-	void FmodGeometryInstance3D::set_source_node_path(const NodePath &p_path) {
+	void FmodGeometryInstance3D::set_source_node_path(const NodePath& p_path) {
 		source_node_path = p_path;
 		_rebuild_if_live();
 	}
@@ -536,7 +544,7 @@ namespace godot {
 		return source_node_path;
 	}
 
-	void FmodGeometryInstance3D::set_mesh(const Ref<Mesh> &p_mesh) {
+	void FmodGeometryInstance3D::set_mesh(const Ref<Mesh>& p_mesh) {
 		mesh = p_mesh;
 		_rebuild_if_live();
 	}
@@ -623,9 +631,9 @@ namespace godot {
 
 	void FmodGeometryInstance3D::set_show_debug_gizmo(bool p_value) {
 		show_debug_gizmo = p_value;
-		#ifdef TOOLS_ENABLED
+#ifdef TOOLS_ENABLED
 		update_gizmos();
-		#endif
+#endif
 	}
 
 	bool FmodGeometryInstance3D::get_show_debug_gizmo() const {

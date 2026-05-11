@@ -13,14 +13,15 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_mix", "volume_db"), &FmodDSPConnection::set_mix);
 		ClassDB::bind_method(D_METHOD("get_mix"), &FmodDSPConnection::get_mix);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "mix"), "set_mix", "get_mix");
 
 		ClassDB::bind_method(D_METHOD("set_mix_matrix", "matrix", "outchannels", "inchannels", "inchannel_hop"), &FmodDSPConnection::set_mix_matrix, DEFVAL(0));
 		ClassDB::bind_method(D_METHOD("get_mix_matrix", "outchannels", "inchannels", "inchannel_hop"), &FmodDSPConnection::get_mix_matrix, DEFVAL(0));
-		
+
 		ClassDB::bind_method(D_METHOD("get_input"), &FmodDSPConnection::get_input);
 		ClassDB::bind_method(D_METHOD("get_output"), &FmodDSPConnection::get_output);
 		ClassDB::bind_method(D_METHOD("get_type"), &FmodDSPConnection::get_type);
+
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "mix"), "set_mix", "get_mix");
 	}
 
 	FmodDSPConnection::FmodDSPConnection() {
@@ -37,14 +38,11 @@ namespace godot {
 	void FmodDSPConnection::setup(FMOD::DSPConnection* p_connection) {
 		ERR_FAIL_COND_MSG(!p_connection, "DSPConnection pointer is null");
 
-		// 如果已经有 DSPConnection，先清理旧的
 		if (dsp_connection) {
 			dsp_connection->setUserData(nullptr);
 		}
 
 		dsp_connection = p_connection;
-
-		// 设置 userdata，用于反向查找
 		dsp_connection->setUserData(this);
 	}
 

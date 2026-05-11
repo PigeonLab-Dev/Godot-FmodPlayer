@@ -42,56 +42,57 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_active", "active"), &FmodReverb3D::set_active);
 		ClassDB::bind_method(D_METHOD("get_active"), &FmodReverb3D::get_active);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "active"), "set_active", "get_active");
 
 		ClassDB::bind_method(D_METHOD("release"), &FmodReverb3D::release);
 
 		ClassDB::bind_method(D_METHOD("set_decay_time", "decay_time"), &FmodReverb3D::set_decay_time);
 		ClassDB::bind_method(D_METHOD("get_decay_time"), &FmodReverb3D::get_decay_time);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "decay_time", PROPERTY_HINT_RANGE, "100,20000,0.1,suffix:ms"), "set_decay_time", "get_decay_time");
 
 		ClassDB::bind_method(D_METHOD("set_early_delay", "early_delay"), &FmodReverb3D::set_early_delay);
 		ClassDB::bind_method(D_METHOD("get_early_delay"), &FmodReverb3D::get_early_delay);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "early_delay", PROPERTY_HINT_RANGE, "0,300,0.1,suffix:ms"), "set_early_delay", "get_early_delay");
 
 		ClassDB::bind_method(D_METHOD("set_late_delay", "late_delay"), &FmodReverb3D::set_late_delay);
 		ClassDB::bind_method(D_METHOD("get_late_delay"), &FmodReverb3D::get_late_delay);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "late_delay", PROPERTY_HINT_RANGE, "0,100,0.1,suffix:ms"), "set_late_delay", "get_late_delay");
 
 		ClassDB::bind_method(D_METHOD("set_hf_reference", "hf_reference"), &FmodReverb3D::set_hf_reference);
 		ClassDB::bind_method(D_METHOD("get_hf_reference"), &FmodReverb3D::get_hf_reference);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "hf_reference", PROPERTY_HINT_RANGE, "20,20000,0.1,suffix:Hz"), "set_hf_reference", "get_hf_reference");
 
 		ClassDB::bind_method(D_METHOD("set_hf_decay_ratio", "hf_decay_ratio"), &FmodReverb3D::set_hf_decay_ratio);
 		ClassDB::bind_method(D_METHOD("get_hf_decay_ratio"), &FmodReverb3D::get_hf_decay_ratio);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "hf_decay_ratio", PROPERTY_HINT_RANGE, "10,200,0.1"), "set_hf_decay_ratio", "get_hf_decay_ratio");
 
 		ClassDB::bind_method(D_METHOD("set_diffusion", "diffusion"), &FmodReverb3D::set_diffusion);
 		ClassDB::bind_method(D_METHOD("get_diffusion"), &FmodReverb3D::get_diffusion);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "diffusion", PROPERTY_HINT_RANGE, "0,100,0.1"), "set_diffusion", "get_diffusion");
 
 		ClassDB::bind_method(D_METHOD("set_density", "density"), &FmodReverb3D::set_density);
 		ClassDB::bind_method(D_METHOD("get_density"), &FmodReverb3D::get_density);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "density", PROPERTY_HINT_RANGE, "0,100,0.1"), "set_density", "get_density");
 
 		ClassDB::bind_method(D_METHOD("set_low_shelf_frequency", "low_shelf_frequency"), &FmodReverb3D::set_low_shelf_frequency);
 		ClassDB::bind_method(D_METHOD("get_low_shelf_frequency"), &FmodReverb3D::get_low_shelf_frequency);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "low_shelf_frequency", PROPERTY_HINT_RANGE, "20,1000,0.1,suffix:Hz"), "set_low_shelf_frequency", "get_low_shelf_frequency");
 
 		ClassDB::bind_method(D_METHOD("set_low_shelf_gain", "low_shelf_gain"), &FmodReverb3D::set_low_shelf_gain);
 		ClassDB::bind_method(D_METHOD("get_low_shelf_gain"), &FmodReverb3D::get_low_shelf_gain);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "low_shelf_gain", PROPERTY_HINT_RANGE, "-36,12,0.1,suffix:dB"), "set_low_shelf_gain", "get_low_shelf_gain");
 
 		ClassDB::bind_method(D_METHOD("set_high_cut", "high_cut"), &FmodReverb3D::set_high_cut);
 		ClassDB::bind_method(D_METHOD("get_high_cut"), &FmodReverb3D::get_high_cut);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "high_cut", PROPERTY_HINT_RANGE, "20,20000,0.1,suffix:Hz"), "set_high_cut", "get_high_cut");
 
 		ClassDB::bind_method(D_METHOD("set_early_late_mix", "early_late_mix"), &FmodReverb3D::set_early_late_mix);
 		ClassDB::bind_method(D_METHOD("get_early_late_mix"), &FmodReverb3D::get_early_late_mix);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "early_late_mix", PROPERTY_HINT_RANGE, "0,100,0.1"), "set_early_late_mix", "get_early_late_mix");
 
 		ClassDB::bind_method(D_METHOD("set_wet_level", "wet_level"), &FmodReverb3D::set_wet_level);
 		ClassDB::bind_method(D_METHOD("get_wet_level"), &FmodReverb3D::get_wet_level);
+		
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "active"), "set_active", "get_active");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "decay_time", PROPERTY_HINT_RANGE, "100,20000,0.1,suffix:ms"), "set_decay_time", "get_decay_time");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "early_delay", PROPERTY_HINT_RANGE, "0,300,0.1,suffix:ms"), "set_early_delay", "get_early_delay");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "late_delay", PROPERTY_HINT_RANGE, "0,100,0.1,suffix:ms"), "set_late_delay", "get_late_delay");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "hf_reference", PROPERTY_HINT_RANGE, "20,20000,0.1,suffix:Hz"), "set_hf_reference", "get_hf_reference");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "hf_decay_ratio", PROPERTY_HINT_RANGE, "10,200,0.1"), "set_hf_decay_ratio", "get_hf_decay_ratio");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "diffusion", PROPERTY_HINT_RANGE, "0,100,0.1"), "set_diffusion", "get_diffusion");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "density", PROPERTY_HINT_RANGE, "0,100,0.1"), "set_density", "get_density");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "low_shelf_frequency", PROPERTY_HINT_RANGE, "20,1000,0.1,suffix:Hz"), "set_low_shelf_frequency", "get_low_shelf_frequency");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "low_shelf_gain", PROPERTY_HINT_RANGE, "-36,12,0.1,suffix:dB"), "set_low_shelf_gain", "get_low_shelf_gain");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "high_cut", PROPERTY_HINT_RANGE, "20,20000,0.1,suffix:Hz"), "set_high_cut", "get_high_cut");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "early_late_mix", PROPERTY_HINT_RANGE, "0,100,0.1"), "set_early_late_mix", "get_early_late_mix");
 		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "wet_level", PROPERTY_HINT_RANGE, "-80,20,0.1,suffix:dB"), "set_wet_level", "get_wet_level");
 	}
 

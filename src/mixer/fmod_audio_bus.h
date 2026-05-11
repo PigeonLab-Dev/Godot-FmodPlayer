@@ -17,7 +17,7 @@ namespace godot {
 		Vector<Ref<FmodAudioEffect>> audio_effects;
 
 		bool solo = false;
-		bool user_mute = false;						// 用户设置的静音 (独立于 solo)
+		bool user_mute = false;												// 用户设置的静音 (独立于 solo)
 		bool bypass = false;
 	protected:
 		static void _bind_methods();

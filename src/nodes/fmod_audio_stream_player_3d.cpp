@@ -10,94 +10,98 @@
 namespace godot {
 	void FmodAudioStreamPlayer3D::_bind_methods() {
 		BIND_ENUM_CONSTANT(ATTENUATION_INVERSE_DISTANCE)
-		BIND_ENUM_CONSTANT(ATTENUATION_INVERSE_SQUARE_DISTANCE)
-		BIND_ENUM_CONSTANT(ATTENUATION_LOGARITHMIC)
-		BIND_ENUM_CONSTANT(ATTENUATION_DISABLED)
+			BIND_ENUM_CONSTANT(ATTENUATION_INVERSE_SQUARE_DISTANCE)
+			BIND_ENUM_CONSTANT(ATTENUATION_LOGARITHMIC)
+			BIND_ENUM_CONSTANT(ATTENUATION_DISABLED)
 
-		BIND_ENUM_CONSTANT(DOPPLER_TRACKING_DISABLED)
-		BIND_ENUM_CONSTANT(DOPPLER_TRACKING_IDLE_STEP)
-		BIND_ENUM_CONSTANT(DOPPLER_TRACKING_PHYSICS_STEP)
+			BIND_ENUM_CONSTANT(DOPPLER_TRACKING_DISABLED)
+			BIND_ENUM_CONSTANT(DOPPLER_TRACKING_IDLE_STEP)
+			BIND_ENUM_CONSTANT(DOPPLER_TRACKING_PHYSICS_STEP)
 
-		ClassDB::bind_method(D_METHOD("play", "from_position"), &FmodAudioStreamPlayer3D::play, DEFVAL(0.0));
+			ClassDB::bind_method(D_METHOD("play", "from_position"), &FmodAudioStreamPlayer3D::play, DEFVAL(0.0));
 		ClassDB::bind_method(D_METHOD("seek", "to_position"), &FmodAudioStreamPlayer3D::seek);
 		ClassDB::bind_method(D_METHOD("get_playback_position"), &FmodAudioStreamPlayer3D::get_playback_position);
 		ClassDB::bind_method(D_METHOD("stop"), &FmodAudioStreamPlayer3D::stop);
 
 		ClassDB::bind_method(D_METHOD("set_stream", "stream"), &FmodAudioStreamPlayer3D::set_stream);
 		ClassDB::bind_method(D_METHOD("get_stream"), &FmodAudioStreamPlayer3D::get_stream);
-		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "stream", PROPERTY_HINT_RESOURCE_TYPE, "FmodAudioStream"), "set_stream", "get_stream");
 
 		ClassDB::bind_method(D_METHOD("preload_stream"), &FmodAudioStreamPlayer3D::preload_stream);
 
 		ClassDB::bind_method(D_METHOD("set_attenuation_model", "model"), &FmodAudioStreamPlayer3D::set_attenuation_model);
 		ClassDB::bind_method(D_METHOD("get_attenuation_model"), &FmodAudioStreamPlayer3D::get_attenuation_model);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "attenuation_model", PROPERTY_HINT_ENUM, "Inverse,Inverse Square,Linear (Silent at Max),Disabled"), "set_attenuation_model", "get_attenuation_model");
 
 		ClassDB::bind_method(D_METHOD("set_volume_db", "volume_db"), &FmodAudioStreamPlayer3D::set_volume_db);
 		ClassDB::bind_method(D_METHOD("get_volume_db"), &FmodAudioStreamPlayer3D::get_volume_db);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "volume_db", PROPERTY_HINT_RANGE, "-80,24,0.1,suffix:dB"), "set_volume_db", "get_volume_db");
 
 		ClassDB::bind_method(D_METHOD("set_unit_size", "size"), &FmodAudioStreamPlayer3D::set_unit_size);
 		ClassDB::bind_method(D_METHOD("get_unit_size"), &FmodAudioStreamPlayer3D::get_unit_size);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "unit_size", PROPERTY_HINT_RANGE, "0.001,100,0.001,or_greater"), "set_unit_size", "get_unit_size");
 
 		ClassDB::bind_method(D_METHOD("set_pitch_scale", "pitch_scale"), &FmodAudioStreamPlayer3D::set_pitch_scale);
 		ClassDB::bind_method(D_METHOD("get_pitch_scale"), &FmodAudioStreamPlayer3D::get_pitch_scale);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pitch_scale", PROPERTY_HINT_RANGE, "0.01,4,0.01,or_greater"), "set_pitch_scale", "get_pitch_scale");
 
 		ClassDB::bind_method(D_METHOD("set_playing", "playing"), &FmodAudioStreamPlayer3D::set_playing);
 		ClassDB::bind_method(D_METHOD("is_playing"), &FmodAudioStreamPlayer3D::is_playing);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "set_playing", "is_playing");
 
 		ClassDB::bind_method(D_METHOD("set_auto_play", "enable"), &FmodAudioStreamPlayer3D::set_auto_play);
 		ClassDB::bind_method(D_METHOD("is_autoplay_enabled"), &FmodAudioStreamPlayer3D::is_autoplay_enabled);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_play"), "set_auto_play", "is_autoplay_enabled");
 
 		ClassDB::bind_method(D_METHOD("set_preload_on_set_stream", "enable"), &FmodAudioStreamPlayer3D::set_preload_on_set_stream);
 		ClassDB::bind_method(D_METHOD("is_preload_on_set_stream_enabled"), &FmodAudioStreamPlayer3D::is_preload_on_set_stream_enabled);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "preload_on_set_stream"), "set_preload_on_set_stream", "is_preload_on_set_stream_enabled");
 
 		ClassDB::bind_method(D_METHOD("set_stream_paused", "paused"), &FmodAudioStreamPlayer3D::set_stream_paused);
 		ClassDB::bind_method(D_METHOD("get_stream_paused"), &FmodAudioStreamPlayer3D::get_stream_paused);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "stream_paused"), "set_stream_paused", "get_stream_paused");
 
 		ClassDB::bind_method(D_METHOD("set_max_distance", "distance"), &FmodAudioStreamPlayer3D::set_max_distance);
 		ClassDB::bind_method(D_METHOD("get_max_distance"), &FmodAudioStreamPlayer3D::get_max_distance);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "max_distance", PROPERTY_HINT_RANGE, "0.1,1000,0.01,or_greater,suffix:m"), "set_max_distance", "get_max_distance");
 
 		ClassDB::bind_method(D_METHOD("set_bus", "bus"), &FmodAudioStreamPlayer3D::set_bus);
 		ClassDB::bind_method(D_METHOD("get_bus"), &FmodAudioStreamPlayer3D::get_bus);
-		ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "bus", PROPERTY_HINT_ENUM), "set_bus", "get_bus");
 
 		ClassDB::bind_method(D_METHOD("set_area_mask", "mask"), &FmodAudioStreamPlayer3D::set_area_mask);
 		ClassDB::bind_method(D_METHOD("get_area_mask"), &FmodAudioStreamPlayer3D::get_area_mask);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "area_mask", PROPERTY_HINT_LAYERS_2D_PHYSICS), "set_area_mask", "get_area_mask");
 
-		ADD_GROUP("Emission Angle", "emission_angle");
 		ClassDB::bind_method(D_METHOD("set_emission_angle_enabled", "enabled"), &FmodAudioStreamPlayer3D::set_emission_angle_enabled);
 		ClassDB::bind_method(D_METHOD("is_emission_angle_enabled"), &FmodAudioStreamPlayer3D::is_emission_angle_enabled);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "emission_angle_enabled"), "set_emission_angle_enabled", "is_emission_angle_enabled");
 
 		ClassDB::bind_method(D_METHOD("set_emission_angle", "angle"), &FmodAudioStreamPlayer3D::set_emission_angle);
 		ClassDB::bind_method(D_METHOD("get_emission_angle"), &FmodAudioStreamPlayer3D::get_emission_angle);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "emission_angle", PROPERTY_HINT_RANGE, "0,180,0.1,radians_as_degrees"), "set_emission_angle", "get_emission_angle");
 
 		ClassDB::bind_method(D_METHOD("set_emission_angle_filter_attenuation_db", "db"), &FmodAudioStreamPlayer3D::set_emission_angle_filter_attenuation_db);
 		ClassDB::bind_method(D_METHOD("get_emission_angle_filter_attenuation_db"), &FmodAudioStreamPlayer3D::get_emission_angle_filter_attenuation_db);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "emission_angle_filter_attenuation_db", PROPERTY_HINT_RANGE, "-80,80,suffix:dB"), "set_emission_angle_filter_attenuation_db", "get_emission_angle_filter_attenuation_db");
 
-		ADD_GROUP("Attenuation Filter", "attenuation_filter_");
 		ClassDB::bind_method(D_METHOD("set_attenuation_filter_cutoff_hz", "freq"), &FmodAudioStreamPlayer3D::set_attenuation_filter_cutoff_hz);
 		ClassDB::bind_method(D_METHOD("get_attenuation_filter_cutoff_hz"), &FmodAudioStreamPlayer3D::get_attenuation_filter_cutoff_hz);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "attenuation_filter_cutoff_hz", PROPERTY_HINT_RANGE, "10,22050,1,suffix:Hz"), "set_attenuation_filter_cutoff_hz", "get_attenuation_filter_cutoff_hz");
 
 		ClassDB::bind_method(D_METHOD("set_attenuation_filter_db", "db"), &FmodAudioStreamPlayer3D::set_attenuation_filter_db);
 		ClassDB::bind_method(D_METHOD("get_attenuation_filter_db"), &FmodAudioStreamPlayer3D::get_attenuation_filter_db);
+
+		ClassDB::bind_method(D_METHOD("set_doppler_tracking", "tracking"), &FmodAudioStreamPlayer3D::set_doppler_tracking);
+		ClassDB::bind_method(D_METHOD("get_doppler_tracking"), &FmodAudioStreamPlayer3D::get_doppler_tracking);
+
+		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "stream", PROPERTY_HINT_RESOURCE_TYPE, "FmodAudioStream"), "set_stream", "get_stream");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "attenuation_model", PROPERTY_HINT_ENUM, "Inverse,Inverse Square,Linear (Silent at Max),Disabled"), "set_attenuation_model", "get_attenuation_model");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "volume_db", PROPERTY_HINT_RANGE, "-80,24,0.1,suffix:dB"), "set_volume_db", "get_volume_db");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "unit_size", PROPERTY_HINT_RANGE, "0.001,100,0.001,or_greater"), "set_unit_size", "get_unit_size");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pitch_scale", PROPERTY_HINT_RANGE, "0.01,4,0.01,or_greater"), "set_pitch_scale", "get_pitch_scale");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "set_playing", "is_playing");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_play"), "set_auto_play", "is_autoplay_enabled");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "preload_on_set_stream"), "set_preload_on_set_stream", "is_preload_on_set_stream_enabled");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "stream_paused"), "set_stream_paused", "get_stream_paused");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "max_distance", PROPERTY_HINT_RANGE, "0.1,1000,0.01,or_greater,suffix:m"), "set_max_distance", "get_max_distance");
+		ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "bus", PROPERTY_HINT_ENUM), "set_bus", "get_bus");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "area_mask", PROPERTY_HINT_LAYERS_2D_PHYSICS), "set_area_mask", "get_area_mask");
+
+		ADD_GROUP("Emission Angle", "emission_angle");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "emission_angle_enabled"), "set_emission_angle_enabled", "is_emission_angle_enabled");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "emission_angle", PROPERTY_HINT_RANGE, "0,180,0.1,radians_as_degrees"), "set_emission_angle", "get_emission_angle");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "emission_angle_filter_attenuation_db", PROPERTY_HINT_RANGE, "-80,80,suffix:dB"), "set_emission_angle_filter_attenuation_db", "get_emission_angle_filter_attenuation_db");
+
+		ADD_GROUP("Attenuation Filter", "attenuation_filter_");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "attenuation_filter_cutoff_hz", PROPERTY_HINT_RANGE, "10,22050,1,suffix:Hz"), "set_attenuation_filter_cutoff_hz", "get_attenuation_filter_cutoff_hz");
 		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "attenuation_filter_db", PROPERTY_HINT_RANGE, "-80,0,0.1,suffix:dB"), "set_attenuation_filter_db", "get_attenuation_filter_db");
 
 		ADD_GROUP("Doppler", "doppler_");
-		ClassDB::bind_method(D_METHOD("set_doppler_tracking", "tracking"), &FmodAudioStreamPlayer3D::set_doppler_tracking);
-		ClassDB::bind_method(D_METHOD("get_doppler_tracking"), &FmodAudioStreamPlayer3D::get_doppler_tracking);
 		ADD_PROPERTY(PropertyInfo(Variant::INT, "doppler_tracking", PROPERTY_HINT_ENUM, "Disabled,Idle Step,Physics Step"), "set_doppler_tracking", "get_doppler_tracking");
 
 		ADD_SIGNAL(MethodInfo("finished"));
@@ -121,40 +125,40 @@ namespace godot {
 
 	void FmodAudioStreamPlayer3D::_notification(int p_what) {
 		switch (p_what) {
-			case NOTIFICATION_READY: {
-				if (internal_player->is_autoplay_enabled() && internal_player->get_stream().is_valid() && !Engine::get_singleton()->is_editor_hint()) {
-					call_deferred("play");
-				}
-				last_position = get_global_position();
-				last_process_time = Time::get_singleton()->get_ticks_usec();
-			} break;
+		case NOTIFICATION_READY: {
+			if (internal_player->is_autoplay_enabled() && internal_player->get_stream().is_valid() && !Engine::get_singleton()->is_editor_hint()) {
+				call_deferred("play");
+			}
+			last_position = get_global_position();
+			last_process_time = Time::get_singleton()->get_ticks_usec();
+		} break;
 
-			case NOTIFICATION_PROCESS: {
-				if (!is_inside_tree()) {
-					break;
-				}
-				if (doppler_tracking == DOPPLER_TRACKING_IDLE_STEP) {
-					_update_velocity(get_process_delta_time());
-				}
-				if (internal_player->is_playing()) {
-					_update_3d_attributes();
-				}
-			} break;
+		case NOTIFICATION_PROCESS: {
+			if (!is_inside_tree()) {
+				break;
+			}
+			if (doppler_tracking == DOPPLER_TRACKING_IDLE_STEP) {
+				_update_velocity(get_process_delta_time());
+			}
+			if (internal_player->is_playing()) {
+				_update_3d_attributes();
+			}
+		} break;
 
-			case NOTIFICATION_PHYSICS_PROCESS: {
-				if (!is_inside_tree()) {
-					break;
-				}
-				if (doppler_tracking == DOPPLER_TRACKING_PHYSICS_STEP) {
-					_update_velocity(get_physics_process_delta_time());
-				}
-			} break;
+		case NOTIFICATION_PHYSICS_PROCESS: {
+			if (!is_inside_tree()) {
+				break;
+			}
+			if (doppler_tracking == DOPPLER_TRACKING_PHYSICS_STEP) {
+				_update_velocity(get_physics_process_delta_time());
+			}
+		} break;
 
-			case NOTIFICATION_EXIT_TREE: {
-				if (internal_player) {
-					internal_player->stop();
-				}
-			} break;
+		case NOTIFICATION_EXIT_TREE: {
+			if (internal_player) {
+				internal_player->stop();
+			}
+		} break;
 		}
 	}
 
@@ -195,7 +199,8 @@ namespace godot {
 				emission_angle * 2.0f,
 				emission_angle_filter_attenuation_db
 			);
-		} else {
+		}
+		else {
 			channel->set_3d_cone_settings(360.0f, 360.0f, 0.0f);
 		}
 	}
@@ -225,19 +230,19 @@ namespace godot {
 
 		unsigned int mode = FmodSystem::FMOD_MODE_3D;
 		switch (attenuation_model) {
-			case ATTENUATION_INVERSE_DISTANCE:
-				mode |= FmodSystem::FMOD_MODE_3D_INVERSEROLLOFF;
-				break;
-			case ATTENUATION_INVERSE_SQUARE_DISTANCE:
-				mode |= FmodSystem::FMOD_MODE_3D_INVERSETAPEREDROLLOFF;
-				break;
-			case ATTENUATION_LOGARITHMIC:
-				mode |= FmodSystem::FMOD_MODE_3D_LINEARROLLOFF;
-				break;
-			case ATTENUATION_DISABLED:
-				channel->set_3d_max_distance(3.402823e+38f);
-				mode |= FmodSystem::FMOD_MODE_3D_INVERSEROLLOFF;
-				break;
+		case ATTENUATION_INVERSE_DISTANCE:
+			mode |= FmodSystem::FMOD_MODE_3D_INVERSEROLLOFF;
+			break;
+		case ATTENUATION_INVERSE_SQUARE_DISTANCE:
+			mode |= FmodSystem::FMOD_MODE_3D_INVERSETAPEREDROLLOFF;
+			break;
+		case ATTENUATION_LOGARITHMIC:
+			mode |= FmodSystem::FMOD_MODE_3D_LINEARROLLOFF;
+			break;
+		case ATTENUATION_DISABLED:
+			channel->set_3d_max_distance(3.402823e+38f);
+			mode |= FmodSystem::FMOD_MODE_3D_INVERSEROLLOFF;
+			break;
 		}
 
 		channel->set_mode(static_cast<FmodSystem::FmodMode>(mode));
@@ -279,7 +284,8 @@ namespace godot {
 	void FmodAudioStreamPlayer3D::set_playing(const bool p_playing) {
 		if (p_playing) {
 			play();
-		} else {
+		}
+		else {
 			stop();
 		}
 	}

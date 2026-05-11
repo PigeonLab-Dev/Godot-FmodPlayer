@@ -10,7 +10,7 @@ namespace godot {
 
 	class FmodServer : public Object {
 		GDCLASS(FmodServer, Object)
-		static FmodServer* singleton;
+			static FmodServer* singleton;
 
 	private:
 		bool update_connected = false;
@@ -52,7 +52,7 @@ namespace godot {
 		static Ref<FmodSystem> get_main_system();
 		static Ref<FmodChannelGroup> get_master_channel_group();
 		static Ref<FmodAudioBusLayout> get_audio_bus_layout();
-		
+
 		static void generate_bus_layout();								// 构建总线布局
 		static void reset_main_system(Ref<FmodSystem> p_system);		// 重新设置 FMOD System
 	};

@@ -160,7 +160,6 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_software_channels", "num_software_channels"), &FmodSystem::set_software_channels);
 		ClassDB::bind_method(D_METHOD("get_software_channels"), &FmodSystem::get_software_channels);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_software_channels"), "set_software_channels", "get_software_channels");
 
 		ClassDB::bind_method(D_METHOD("set_software_format", "sample_rate", "speaker_mode", "num_raw_speakers"), &FmodSystem::set_software_format);
 		ClassDB::bind_method(D_METHOD("get_software_format"), &FmodSystem::get_software_format);
@@ -173,95 +172,72 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_doppler_scale", "doppler_scale"), &FmodSystem::set_doppler_scale);
 		ClassDB::bind_method(D_METHOD("get_doppler_scale"), &FmodSystem::get_doppler_scale);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "doppler_scale"), "set_doppler_scale", "get_doppler_scale");
 
 		ClassDB::bind_method(D_METHOD("set_distance_factor", "distance_factor"), &FmodSystem::set_distance_factor);
 		ClassDB::bind_method(D_METHOD("get_distance_factor"), &FmodSystem::get_distance_factor);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "distance_factor"), "set_distance_factor", "get_distance_factor");
 
 		ClassDB::bind_method(D_METHOD("set_rolloff_scale", "rolloff_scale"), &FmodSystem::set_rolloff_scale);
 		ClassDB::bind_method(D_METHOD("get_rolloff_scale"), &FmodSystem::get_rolloff_scale);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "rolloff_scale"), "set_rolloff_scale", "get_rolloff_scale");
 
 		ClassDB::bind_method(D_METHOD("set_3d_num_listeners", "num_listeners"), &FmodSystem::set_3d_num_listeners);
 		ClassDB::bind_method(D_METHOD("get_3d_num_listeners"), &FmodSystem::get_3d_num_listeners);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "3d_num_listeners"), "set_3d_num_listeners", "get_3d_num_listeners");
 
 		ClassDB::bind_method(D_METHOD("set_max_mpeg_codecs", "max_codecs"), &FmodSystem::set_max_mpeg_codecs);
 		ClassDB::bind_method(D_METHOD("get_max_mpeg_codecs"), &FmodSystem::get_max_mpeg_codecs);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_mpeg_codecs"), "set_max_mpeg_codecs", "get_max_mpeg_codecs");
 
 		ClassDB::bind_method(D_METHOD("set_max_adpcm_codecs", "max_codecs"), &FmodSystem::set_max_adpcm_codecs);
 		ClassDB::bind_method(D_METHOD("get_max_adpcm_codecs"), &FmodSystem::get_max_adpcm_codecs);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_adpcm_codecs"), "set_max_adpcm_codecs", "get_max_adpcm_codecs");
 
 		ClassDB::bind_method(D_METHOD("set_max_xma_codecs", "max_codecs"), &FmodSystem::set_max_xma_codecs);
 		ClassDB::bind_method(D_METHOD("get_max_xma_codecs"), &FmodSystem::get_max_xma_codecs);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_xma_codecs"), "set_max_xma_codecs", "get_max_xma_codecs");
 
 		ClassDB::bind_method(D_METHOD("set_max_vorbis_codecs", "max_codecs"), &FmodSystem::set_max_vorbis_codecs);
 		ClassDB::bind_method(D_METHOD("get_max_vorbis_codecs"), &FmodSystem::get_max_vorbis_codecs);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_vorbis_codecs"), "set_max_vorbis_codecs", "get_max_vorbis_codecs");
 
 		ClassDB::bind_method(D_METHOD("set_max_at9_codecs", "max_codecs"), &FmodSystem::set_max_at9_codecs);
 		ClassDB::bind_method(D_METHOD("get_max_at9_codecs"), &FmodSystem::get_max_at9_codecs);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_at9_codecs"), "set_max_at9_codecs", "get_max_at9_codecs");
 
 		ClassDB::bind_method(D_METHOD("set_max_fadpcm_codecs", "max_codecs"), &FmodSystem::set_max_fadpcm_codecs);
 		ClassDB::bind_method(D_METHOD("get_max_fadpcm_codecs"), &FmodSystem::get_max_fadpcm_codecs);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_fadpcm_codecs"), "set_max_fadpcm_codecs", "get_max_fadpcm_codecs");
 
 		ClassDB::bind_method(D_METHOD("set_max_opus_codecs", "max_codecs"), &FmodSystem::set_max_opus_codecs);
 		ClassDB::bind_method(D_METHOD("get_max_opus_codecs"), &FmodSystem::get_max_opus_codecs);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_opus_codecs"), "set_max_opus_codecs", "get_max_opus_codecs");
 
 		ClassDB::bind_method(D_METHOD("set_asio_num_channels", "num_channels"), &FmodSystem::set_asio_num_channels);
 		ClassDB::bind_method(D_METHOD("get_asio_num_channels"), &FmodSystem::get_asio_num_channels);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "asio_num_channels"), "set_asio_num_channels", "get_asio_num_channels");
 
 		ClassDB::bind_method(D_METHOD("set_vol0_virtual_vol", "vol"), &FmodSystem::set_vol0_virtual_vol);
 		ClassDB::bind_method(D_METHOD("get_vol0_virtual_vol"), &FmodSystem::get_vol0_virtual_vol);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "vol0_virtual_vol"), "set_vol0_virtual_vol", "get_vol0_virtual_vol");
 
 		ClassDB::bind_method(D_METHOD("set_default_decode_buffer_size", "size"), &FmodSystem::set_default_decode_buffer_size);
 		ClassDB::bind_method(D_METHOD("get_default_decode_buffer_size"), &FmodSystem::get_default_decode_buffer_size);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "default_decode_buffer_size"), "set_default_decode_buffer_size", "get_default_decode_buffer_size");
 
 		ClassDB::bind_method(D_METHOD("set_profile_port", "port"), &FmodSystem::set_profile_port);
 		ClassDB::bind_method(D_METHOD("get_profile_port"), &FmodSystem::get_profile_port);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "profile_port"), "set_profile_port", "get_profile_port");
 
 		ClassDB::bind_method(D_METHOD("set_geometry_max_fade_time", "time"), &FmodSystem::set_geometry_max_fade_time);
 		ClassDB::bind_method(D_METHOD("get_geometry_max_fade_time"), &FmodSystem::get_geometry_max_fade_time);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "geometry_max_fade_time"), "set_geometry_max_fade_time", "get_geometry_max_fade_time");
 
 		ClassDB::bind_method(D_METHOD("set_distance_filter_center_freq", "freq"), &FmodSystem::set_distance_filter_center_freq);
 		ClassDB::bind_method(D_METHOD("get_distance_filter_center_freq"), &FmodSystem::get_distance_filter_center_freq);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "distance_filter_center_freq"), "set_distance_filter_center_freq", "get_distance_filter_center_freq");
 
 		ClassDB::bind_method(D_METHOD("set_reverb_3d_instance", "instance"), &FmodSystem::set_reverb_3d_instance);
 		ClassDB::bind_method(D_METHOD("get_reverb_3d_instance"), &FmodSystem::get_reverb_3d_instance);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "reverb_3d_instance"), "set_reverb_3d_instance", "get_reverb_3d_instance");
 
 		ClassDB::bind_method(D_METHOD("set_dsp_buffer_pool_size", "size"), &FmodSystem::set_dsp_buffer_pool_size);
 		ClassDB::bind_method(D_METHOD("get_dsp_buffer_pool_size"), &FmodSystem::get_dsp_buffer_pool_size);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "dsp_buffer_pool_size"), "set_dsp_buffer_pool_size", "get_dsp_buffer_pool_size");
 
 		ClassDB::bind_method(D_METHOD("set_resampler_method", "method"), &FmodSystem::set_resampler_method);
 		ClassDB::bind_method(D_METHOD("get_resampler_method"), &FmodSystem::get_resampler_method);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "resampler_method", PROPERTY_HINT_ENUM, "Default,No Interp,Linear,Cubic,Spline"), "set_resampler_method", "get_resampler_method");
 
 		ClassDB::bind_method(D_METHOD("set_random_seed", "seed"), &FmodSystem::set_random_seed);
 		ClassDB::bind_method(D_METHOD("get_random_seed"), &FmodSystem::get_random_seed);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "random_seed"), "set_random_seed", "get_random_seed");
 
 		ClassDB::bind_method(D_METHOD("set_max_convolution_threads", "max_threads"), &FmodSystem::set_max_convolution_threads);
 		ClassDB::bind_method(D_METHOD("get_max_convolution_threads"), &FmodSystem::get_max_convolution_threads);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_convolution_threads"), "set_max_convolution_threads", "get_max_convolution_threads");
 
 		ClassDB::bind_method(D_METHOD("set_max_spatial_objects", "max_objects"), &FmodSystem::set_max_spatial_objects);
 		ClassDB::bind_method(D_METHOD("get_max_spatial_objects"), &FmodSystem::get_max_spatial_objects);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_spatial_objects"), "set_max_spatial_objects", "get_max_spatial_objects");
 
 		ClassDB::bind_method(D_METHOD("set_3d_rolloff_callback", "callback"), &FmodSystem::set_3d_rolloff_callback);
 		ClassDB::bind_method(D_METHOD("get_3d_rolloff_callback"), &FmodSystem::get_3d_rolloff_callback);
@@ -327,13 +303,38 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_3d_max_world_size", "max_world_size"), &FmodSystem::set_3d_max_world_size);
 		ClassDB::bind_method(D_METHOD("get_3d_max_world_size"), &FmodSystem::get_3d_max_world_size);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_max_world_size", PROPERTY_HINT_RANGE, "0,999999,1"), "set_3d_max_world_size", "get_3d_max_world_size");
-		
+
 		ClassDB::bind_method(D_METHOD("load_geometry", "data"), &FmodSystem::load_geometry);
 		ClassDB::bind_method(D_METHOD("get_geometry_occlusion", "listener", "source"), &FmodSystem::get_geometry_occlusion);
 
 		ClassDB::bind_method(D_METHOD("lock_dsp"), &FmodSystem::lock_dsp);
 		ClassDB::bind_method(D_METHOD("unlock_dsp"), &FmodSystem::unlock_dsp);
+
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_software_channels"), "set_software_channels", "get_software_channels");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "doppler_scale"), "set_doppler_scale", "get_doppler_scale");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "distance_factor"), "set_distance_factor", "get_distance_factor");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "rolloff_scale"), "set_rolloff_scale", "get_rolloff_scale");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "3d_num_listeners"), "set_3d_num_listeners", "get_3d_num_listeners");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_mpeg_codecs"), "set_max_mpeg_codecs", "get_max_mpeg_codecs");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_adpcm_codecs"), "set_max_adpcm_codecs", "get_max_adpcm_codecs");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_xma_codecs"), "set_max_xma_codecs", "get_max_xma_codecs");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_vorbis_codecs"), "set_max_vorbis_codecs", "get_max_vorbis_codecs");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_at9_codecs"), "set_max_at9_codecs", "get_max_at9_codecs");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_fadpcm_codecs"), "set_max_fadpcm_codecs", "get_max_fadpcm_codecs");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_opus_codecs"), "set_max_opus_codecs", "get_max_opus_codecs");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "asio_num_channels"), "set_asio_num_channels", "get_asio_num_channels");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "vol0_virtual_vol"), "set_vol0_virtual_vol", "get_vol0_virtual_vol");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "default_decode_buffer_size"), "set_default_decode_buffer_size", "get_default_decode_buffer_size");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "profile_port"), "set_profile_port", "get_profile_port");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "geometry_max_fade_time"), "set_geometry_max_fade_time", "get_geometry_max_fade_time");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "distance_filter_center_freq"), "set_distance_filter_center_freq", "get_distance_filter_center_freq");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "reverb_3d_instance"), "set_reverb_3d_instance", "get_reverb_3d_instance");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "dsp_buffer_pool_size"), "set_dsp_buffer_pool_size", "get_dsp_buffer_pool_size");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "resampler_method", PROPERTY_HINT_ENUM, "Default,No Interp,Linear,Cubic,Spline"), "set_resampler_method", "get_resampler_method");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "random_seed"), "set_random_seed", "get_random_seed");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_convolution_threads"), "set_max_convolution_threads", "get_max_convolution_threads");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_spatial_objects"), "set_max_spatial_objects", "get_max_spatial_objects");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_max_world_size", PROPERTY_HINT_RANGE, "0,999999,1"), "set_3d_max_world_size", "get_3d_max_world_size");
 	}
 
 	FmodSystem::FmodSystem() {
@@ -580,7 +581,7 @@ namespace godot {
 		result["file_buffer_size_type"] = static_cast<FmodTimeUnit>(filebuffersizetype);
 		return result;
 	}
-	
+
 	void FmodSystem::set_speaker_position(FmodSpeaker speaker, const float x, const float y, const bool active) {
 		ERR_FAIL_COND(!system);
 		FMOD_SPEAKER fmod_speaker = static_cast<FMOD_SPEAKER>(speaker);
@@ -1115,12 +1116,12 @@ namespace godot {
 		// 我们将描述存储在 FmodDSP 对象中，以便自动管理生命周期
 		FMOD_DSP_DESCRIPTION* desc = memnew(FMOD_DSP_DESCRIPTION);
 		memset(desc, 0, sizeof(FMOD_DSP_DESCRIPTION));
-		
+
 		desc->pluginsdkversion = FMOD_PLUGIN_SDK_VERSION;
 		strncpy(desc->name, name.utf8().get_data(), sizeof(desc->name) - 1);
 		desc->numinputbuffers = 1;
 		desc->numoutputbuffers = 1;
-		
+
 		// 使用 fmod_dsp.cpp 中定义的回调函数
 		// 这些回调会通过 userdata 找到 FmodDSP 实例并调用 GDScript Callable
 		desc->create = GD_FMOD_DSP_CREATE_CALLBACK;
@@ -1547,14 +1548,15 @@ namespace godot {
 	// 静态成员变量定义
 	FmodSystem* FmodSystem::current_callback_system = nullptr;
 
-	void FmodSystem::set_3d_rolloff_callback(const Callable &p_callback) {
+	void FmodSystem::set_3d_rolloff_callback(const Callable& p_callback) {
 		ERR_FAIL_COND(!system);
 		_3d_rolloff_callback = p_callback;
 		if (p_callback.is_valid()) {
 			// 设置当前实例为回调目标
 			current_callback_system = this;
 			FMOD_ERR_CHECK(system->set3DRolloffCallback(GD_3D_ROLLOFF_CALLBACK));
-		} else {
+		}
+		else {
 			// 如果当前实例是回调目标，则移除回调
 			if (current_callback_system == this) {
 				current_callback_system = nullptr;

@@ -151,17 +151,17 @@ namespace godot {
 		int get_num_sub_sounds() const;									// 获取一个声音内的子声音数量
 
 		// PCM 读取回调 - 用于用户创建的声音或拦截解码器
-		void set_pcmread_callback(const Callable &p_callback);
+		void set_pcmread_callback(const Callable& p_callback);
 		Callable get_pcmread_callback() const;
-		FMOD_RESULT _handle_pcmread_callback(void *data, unsigned int datalen) const;
+		FMOD_RESULT _handle_pcmread_callback(void* data, unsigned int datalen) const;
 
 		// PCM 设置位置回调 - 用于用户创建的声音或拦截 setPosition
-		void set_pcmsetpos_callback(const Callable &p_callback);
+		void set_pcmsetpos_callback(const Callable& p_callback);
 		Callable get_pcmsetpos_callback() const;
 		FMOD_RESULT _handle_pcmsetpos_callback(int subsound, unsigned int position, FMOD_TIMEUNIT postype) const;
 
 		// 非阻塞加载完成回调
-		void set_nonblock_callback(const Callable &p_callback);
+		void set_nonblock_callback(const Callable& p_callback);
 		Callable get_nonblock_callback() const;
 		FMOD_RESULT _handle_nonblock_callback(FMOD_RESULT result) const;
 	};

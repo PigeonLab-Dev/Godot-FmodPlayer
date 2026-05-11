@@ -9,30 +9,31 @@ namespace godot {
 	void FmodAudioEffectCompressor::_bind_methods() {
 		ClassDB::bind_method(D_METHOD("set_threshold", "threshold_db"), &FmodAudioEffectCompressor::set_threshold);
 		ClassDB::bind_method(D_METHOD("get_threshold"), &FmodAudioEffectCompressor::get_threshold);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "threshold_db", PROPERTY_HINT_RANGE, "-60,0,0.1,suffix:dB"), "set_threshold", "get_threshold");
 
 		ClassDB::bind_method(D_METHOD("set_ratio", "ratio"), &FmodAudioEffectCompressor::set_ratio);
 		ClassDB::bind_method(D_METHOD("get_ratio"), &FmodAudioEffectCompressor::get_ratio);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "ratio", PROPERTY_HINT_RANGE, "1,48,0.1"), "set_ratio", "get_ratio");
 
 		ClassDB::bind_method(D_METHOD("set_gain", "gain_db"), &FmodAudioEffectCompressor::set_gain);
 		ClassDB::bind_method(D_METHOD("get_gain"), &FmodAudioEffectCompressor::get_gain);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "gain_db", PROPERTY_HINT_RANGE, "-20,20,0.1,suffix:dB"), "set_gain", "get_gain");
 
 		ClassDB::bind_method(D_METHOD("set_attack_us", "attack_us"), &FmodAudioEffectCompressor::set_attack_us);
 		ClassDB::bind_method(D_METHOD("get_attack_us"), &FmodAudioEffectCompressor::get_attack_us);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "attack_us", PROPERTY_HINT_RANGE, "20,2000,1,suffix:us"), "set_attack_us", "get_attack_us");
 
 		ClassDB::bind_method(D_METHOD("set_release_ms", "release_ms"), &FmodAudioEffectCompressor::set_release_ms);
 		ClassDB::bind_method(D_METHOD("get_release_ms"), &FmodAudioEffectCompressor::get_release_ms);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "release_ms", PROPERTY_HINT_RANGE, "20,2000,1,suffix:ms"), "set_release_ms", "get_release_ms");
 
 		ClassDB::bind_method(D_METHOD("set_mix", "mix"), &FmodAudioEffectCompressor::set_mix);
 		ClassDB::bind_method(D_METHOD("get_mix"), &FmodAudioEffectCompressor::get_mix);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "mix", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_mix", "get_mix");
 
 		ClassDB::bind_method(D_METHOD("set_sidechain", "sidechain"), &FmodAudioEffectCompressor::set_sidechain);
 		ClassDB::bind_method(D_METHOD("get_sidechain"), &FmodAudioEffectCompressor::get_sidechain);
+		
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "threshold_db", PROPERTY_HINT_RANGE, "-60,0,0.1,suffix:dB"), "set_threshold", "get_threshold");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "ratio", PROPERTY_HINT_RANGE, "1,48,0.1"), "set_ratio", "get_ratio");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "gain_db", PROPERTY_HINT_RANGE, "-20,20,0.1,suffix:dB"), "set_gain", "get_gain");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "attack_us", PROPERTY_HINT_RANGE, "20,2000,1,suffix:us"), "set_attack_us", "get_attack_us");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "release_ms", PROPERTY_HINT_RANGE, "20,2000,1,suffix:ms"), "set_release_ms", "get_release_ms");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "mix", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_mix", "get_mix");
 		ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "sidechain", PROPERTY_HINT_ENUM), "set_sidechain", "get_sidechain");
 	}
 

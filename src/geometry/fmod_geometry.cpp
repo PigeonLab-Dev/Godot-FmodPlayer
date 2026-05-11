@@ -34,27 +34,28 @@ namespace godot {
 		
 		ClassDB::bind_method(D_METHOD("set_position", "position"), &FmodGeometry::set_position);
 		ClassDB::bind_method(D_METHOD("get_position"), &FmodGeometry::get_position);
-		ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "position", PROPERTY_HINT_RANGE, "-99999,99999,or_greater,or_less,hide_control,suffix:m", PROPERTY_USAGE_EDITOR), "set_position", "get_position");
 
 		ClassDB::bind_method(D_METHOD("set_rotation", "rotation"), &FmodGeometry::set_rotation);
 		ClassDB::bind_method(D_METHOD("get_rotation"), &FmodGeometry::get_rotation);
-		ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "rotation", PROPERTY_HINT_RANGE, "-360,360,0.1,or_less,or_greater,radians_as_degrees", PROPERTY_USAGE_EDITOR), "set_rotation", "get_rotation");
 
 		ClassDB::bind_method(D_METHOD("set_scale", "scale"), &FmodGeometry::set_scale);
 		ClassDB::bind_method(D_METHOD("get_scale"), &FmodGeometry::get_scale);
-		ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "scale", PROPERTY_HINT_LINK, "", PROPERTY_USAGE_EDITOR), "set_scale", "get_scale");
 	
 		ClassDB::bind_method(D_METHOD("set_transform", "transform"), &FmodGeometry::set_transform);
 		ClassDB::bind_method(D_METHOD("add_polygon", "direct_occlusion", "reverb_occlusion", "double_sided", "vertices"), &FmodGeometry::add_polygon);
 		
 		ClassDB::bind_method(D_METHOD("set_active", "active"), &FmodGeometry::set_active);
 		ClassDB::bind_method(D_METHOD("get_active"), &FmodGeometry::get_active);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "active"), "set_active", "get_active");
 
 		ClassDB::bind_method(D_METHOD("get_max_polygons"), &FmodGeometry::get_max_polygons);
 		ClassDB::bind_method(D_METHOD("save"), &FmodGeometry::save);
 		ClassDB::bind_method(D_METHOD("get_save_size"), &FmodGeometry::get_save_size);
 		ClassDB::bind_method(D_METHOD("release"), &FmodGeometry::release);
+		
+		ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "position", PROPERTY_HINT_RANGE, "-99999,99999,or_greater,or_less,hide_control,suffix:m", PROPERTY_USAGE_EDITOR), "set_position", "get_position");
+		ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "rotation", PROPERTY_HINT_RANGE, "-360,360,0.1,or_less,or_greater,radians_as_degrees", PROPERTY_USAGE_EDITOR), "set_rotation", "get_rotation");
+		ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "scale", PROPERTY_HINT_LINK, "", PROPERTY_USAGE_EDITOR), "set_scale", "get_scale");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "active"), "set_active", "get_active");
 	}
 
 	FmodGeometry::FmodGeometry() {

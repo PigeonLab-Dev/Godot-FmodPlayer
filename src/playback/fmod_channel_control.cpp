@@ -10,28 +10,23 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_paused", "paused"), &FmodChannelControl::set_paused);
 		ClassDB::bind_method(D_METHOD("get_paused"), &FmodChannelControl::get_paused);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "paused"), "set_paused", "get_paused");
 
 		ClassDB::bind_method(D_METHOD("set_mode", "mode"), &FmodChannelControl::set_mode);
 		ClassDB::bind_method(D_METHOD("get_mode"), &FmodChannelControl::get_mode);
 
 		ClassDB::bind_method(D_METHOD("set_pitch", "pitch"), &FmodChannelControl::set_pitch);
 		ClassDB::bind_method(D_METHOD("get_pitch"), &FmodChannelControl::get_pitch);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pitch"), "set_pitch", "get_pitch");
 
 		ClassDB::bind_method(D_METHOD("get_audibility"), &FmodChannelControl::get_audibility);
 
 		ClassDB::bind_method(D_METHOD("set_volume_db", "volume"), &FmodChannelControl::set_volume_db);
 		ClassDB::bind_method(D_METHOD("get_volume_db"), &FmodChannelControl::get_volume_db);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "volume_db", PROPERTY_HINT_RANGE, "-80,24,0.1,suffix:dB"), "set_volume_db", "get_volume_db");
 
 		ClassDB::bind_method(D_METHOD("set_volume_ramp", "volume_ramp"), &FmodChannelControl::set_volume_ramp);
 		ClassDB::bind_method(D_METHOD("get_volume_ramp"), &FmodChannelControl::get_volume_ramp);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "volume_ramp"), "set_volume_ramp", "get_volume_ramp");
 
 		ClassDB::bind_method(D_METHOD("set_mute", "mute"), &FmodChannelControl::set_mute);
 		ClassDB::bind_method(D_METHOD("get_mute"), &FmodChannelControl::get_mute);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "mute"), "set_mute", "get_mute");
 
 		ClassDB::bind_method(D_METHOD("set_3d_attributes", "pos", "vel"), &FmodChannelControl::set_3d_attributes);
 		ClassDB::bind_method(D_METHOD("get_3d_attributes"), &FmodChannelControl::get_3d_attributes);
@@ -42,33 +37,27 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_3d_custom_rolloff", "3d_custom_rolloff"), &FmodChannelControl::set_3d_custom_rolloff);
 		ClassDB::bind_method(D_METHOD("get_3d_custom_rolloff"), &FmodChannelControl::get_3d_custom_rolloff);
-		ADD_PROPERTY(PropertyInfo(Variant::PACKED_VECTOR3_ARRAY, "3d_custom_rolloff"), "set_3d_custom_rolloff", "get_3d_custom_rolloff");
 
 		ClassDB::bind_method(D_METHOD("set_3d_distance_filter", "custom", "custom_level", "center_freq"), &FmodChannelControl::set_3d_distance_filter);
 		ClassDB::bind_method(D_METHOD("get_3d_distance_filter"), &FmodChannelControl::get_3d_distance_filter);
 
 		ClassDB::bind_method(D_METHOD("set_3d_doppler_level", "level"), &FmodChannelControl::set_3d_doppler_level);
 		ClassDB::bind_method(D_METHOD("get_3d_doppler_level"), &FmodChannelControl::get_3d_doppler_level);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_doppler_level", PROPERTY_HINT_RANGE, "0.00,5.00,0.01"), "set_3d_doppler_level", "get_3d_doppler_level");
 
 		ClassDB::bind_method(D_METHOD("set_3d_level", "level"), &FmodChannelControl::set_3d_level);
 		ClassDB::bind_method(D_METHOD("get_3d_level"), &FmodChannelControl::get_3d_level);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_level", PROPERTY_HINT_RANGE, "0.0,1.0,0.1"), "set_3d_level", "get_3d_level");
 		
 		ClassDB::bind_method(D_METHOD("set_3d_min_distance", "min_distance"), &FmodChannelControl::set_3d_min_distance);
 		ClassDB::bind_method(D_METHOD("get_3d_min_distance"), &FmodChannelControl::get_3d_min_distance);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_min_distance", PROPERTY_HINT_RANGE, "1,100000,1"), "set_3d_min_distance", "get_3d_min_distance");
 		
 		ClassDB::bind_method(D_METHOD("set_3d_max_distance", "max_distance"), &FmodChannelControl::set_3d_max_distance);
 		ClassDB::bind_method(D_METHOD("get_3d_max_distance"), &FmodChannelControl::get_3d_max_distance);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_max_distance", PROPERTY_HINT_RANGE, "1,100000,1"), "set_3d_max_distance", "get_3d_max_distance");
 		
 		ClassDB::bind_method(D_METHOD("set_3d_occlusion", "direct_occlusion", "reverb_occlusion"), &FmodChannelControl::set_3d_occlusion);
 		ClassDB::bind_method(D_METHOD("get_3d_occlusion"), &FmodChannelControl::get_3d_occlusion);
 
 		ClassDB::bind_method(D_METHOD("set_3d_spread", "angle"), &FmodChannelControl::set_3d_spread);
 		ClassDB::bind_method(D_METHOD("get_3d_spread"), &FmodChannelControl::get_3d_spread);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_spread", PROPERTY_HINT_RANGE, "0,360,0.1"), "set_3d_spread", "get_3d_spread");
 
 		ClassDB::bind_method(D_METHOD("set_pan", "pan"), &FmodChannelControl::set_pan);
 		ClassDB::bind_method(D_METHOD("set_mix_levels_input", "levels"), &FmodChannelControl::set_mix_levels_input);
@@ -80,7 +69,6 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("get_reverb_properties", "instance"), &FmodChannelControl::get_reverb_properties);
 		ClassDB::bind_method(D_METHOD("set_low_pass_gain", "gain"), &FmodChannelControl::set_low_pass_gain);
 		ClassDB::bind_method(D_METHOD("get_low_pass_gain"), &FmodChannelControl::get_low_pass_gain);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "gain", PROPERTY_HINT_RANGE, "0.00,1.00,0.01"), "set_low_pass_gain", "get_low_pass_gain");
 
 		ClassDB::bind_method(D_METHOD("add_dsp", "index", "dsp"), &FmodChannelControl::add_dsp);
 		ClassDB::bind_method(D_METHOD("remove_dsp", "dsp"), &FmodChannelControl::remove_dsp);
@@ -99,6 +87,19 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_callback"), &FmodChannelControl::set_callback);
 		ClassDB::bind_method(D_METHOD("clear_callback"), &FmodChannelControl::clear_callback);
+
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "paused"), "set_paused", "get_paused");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "pitch"), "set_pitch", "get_pitch");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "volume_db", PROPERTY_HINT_RANGE, "-80,24,0.1,suffix:dB"), "set_volume_db", "get_volume_db");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "volume_ramp"), "set_volume_ramp", "get_volume_ramp");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "mute"), "set_mute", "get_mute");
+		ADD_PROPERTY(PropertyInfo(Variant::PACKED_VECTOR3_ARRAY, "3d_custom_rolloff"), "set_3d_custom_rolloff", "get_3d_custom_rolloff");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_doppler_level", PROPERTY_HINT_RANGE, "0.00,5.00,0.01"), "set_3d_doppler_level", "get_3d_doppler_level");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_level", PROPERTY_HINT_RANGE, "0.0,1.0,0.1"), "set_3d_level", "get_3d_level");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_min_distance", PROPERTY_HINT_RANGE, "1,100000,1"), "set_3d_min_distance", "get_3d_min_distance");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_max_distance", PROPERTY_HINT_RANGE, "1,100000,1"), "set_3d_max_distance", "get_3d_max_distance");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "3d_spread", PROPERTY_HINT_RANGE, "0,360,0.1"), "set_3d_spread", "get_3d_spread");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "gain", PROPERTY_HINT_RANGE, "0.00,1.00,0.01"), "set_low_pass_gain", "get_low_pass_gain");
 
 		ADD_SIGNAL(MethodInfo("callback_received", PropertyInfo(Variant::INT, "type")));
 	}

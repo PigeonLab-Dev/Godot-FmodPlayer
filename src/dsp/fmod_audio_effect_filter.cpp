@@ -31,18 +31,19 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_cutoff_hz", "cutoff_hz"), &FmodAudioEffectFilter::set_cutoff_hz);
 		ClassDB::bind_method(D_METHOD("get_cutoff_hz"), &FmodAudioEffectFilter::get_cutoff_hz);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "cutoff_hz", PROPERTY_HINT_RANGE, "1,20500,1,suffix:Hz"), "set_cutoff_hz", "get_cutoff_hz");
 
 		ClassDB::bind_method(D_METHOD("set_db", "db"), &FmodAudioEffectFilter::set_db);
 		ClassDB::bind_method(D_METHOD("get_db"), &FmodAudioEffectFilter::get_db);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "db", PROPERTY_HINT_ENUM, "6 dB,12 dB,18 dB,24 dB"), "set_db", "get_db");
 
 		ClassDB::bind_method(D_METHOD("set_gain", "gain"), &FmodAudioEffectFilter::set_gain);
 		ClassDB::bind_method(D_METHOD("get_gain"), &FmodAudioEffectFilter::get_gain);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "gain", PROPERTY_HINT_RANGE, "0,4,0.01"), "set_gain", "get_gain");
 
 		ClassDB::bind_method(D_METHOD("set_resonance", "resonance"), &FmodAudioEffectFilter::set_resonance);
 		ClassDB::bind_method(D_METHOD("get_resonance"), &FmodAudioEffectFilter::get_resonance);
+		
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "cutoff_hz", PROPERTY_HINT_RANGE, "1,20500,1,suffix:Hz"), "set_cutoff_hz", "get_cutoff_hz");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "db", PROPERTY_HINT_ENUM, "6 dB,12 dB,18 dB,24 dB"), "set_db", "get_db");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "gain", PROPERTY_HINT_RANGE, "0,4,0.01"), "set_gain", "get_gain");
 		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "resonance", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_resonance", "get_resonance");
 	}
 

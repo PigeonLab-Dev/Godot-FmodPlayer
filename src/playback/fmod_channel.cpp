@@ -7,22 +7,18 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_frequency", "frequency"), &FmodChannel::set_frequency);
 		ClassDB::bind_method(D_METHOD("get_frequency"), &FmodChannel::get_frequency);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "frequency"), "set_frequency", "get_frequency");
 
 		ClassDB::bind_method(D_METHOD("set_priority", "priority"), &FmodChannel::set_priority);
 		ClassDB::bind_method(D_METHOD("get_priority"), &FmodChannel::get_priority);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "priority"), "set_priority", "get_priority");
 
 		ClassDB::bind_method(D_METHOD("set_position", "position", "timeunit"), &FmodChannel::set_position, DEFVAL(FmodSystem::FMOD_TIME_UNIT_MS));
 		ClassDB::bind_method(D_METHOD("get_position", "timeunit"), &FmodChannel::get_position, DEFVAL(FmodSystem::FMOD_TIME_UNIT_MS));
 
 		ClassDB::bind_method(D_METHOD("set_channel_group", "channel_group"), &FmodChannel::set_channel_group);
 		ClassDB::bind_method(D_METHOD("get_channel_group"), &FmodChannel::get_channel_group);
-		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "channel_group", PROPERTY_HINT_OBJECT_ID, "FmodChannelGroup"), "set_channel_group", "get_channel_group");
 
 		ClassDB::bind_method(D_METHOD("set_loop_count", "loop_count"), &FmodChannel::set_loop_count);
 		ClassDB::bind_method(D_METHOD("get_loop_count"), &FmodChannel::get_loop_count);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "loop_count"), "set_loop_count", "get_loop_count");
 
 		ClassDB::bind_method(D_METHOD("set_loop_points", "start", "end", "timeunit"), &FmodChannel::set_loop_points, DEFVAL(FmodSystem::FMOD_TIME_UNIT_MS));
 		ClassDB::bind_method(D_METHOD("get_loop_points"), &FmodChannel::get_loop_points);
@@ -30,6 +26,11 @@ namespace godot {
 		ClassDB::bind_method(D_METHOD("is_virtual"), &FmodChannel::is_virtual);
 		ClassDB::bind_method(D_METHOD("get_current_sound"), &FmodChannel::get_current_sound);
 		ClassDB::bind_method(D_METHOD("get_index"), &FmodChannel::get_index);
+
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "frequency"), "set_frequency", "get_frequency");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "priority"), "set_priority", "get_priority");
+		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "channel_group", PROPERTY_HINT_OBJECT_ID, "FmodChannelGroup"), "set_channel_group", "get_channel_group");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "loop_count"), "set_loop_count", "get_loop_count");
 
 		ADD_SIGNAL(MethodInfo("ended"));
 		ADD_SIGNAL(MethodInfo("virtualvoice", PropertyInfo(Variant::BOOL, "is_becoming_virtual")));

@@ -18,20 +18,21 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_volume_db", "volume_db"), &FmodAudioBus::set_volume_db);
 		ClassDB::bind_method(D_METHOD("get_volume_db"), &FmodAudioBus::get_volume_db);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "volume"), "set_volume_db", "get_volume_db");
 
 		ClassDB::bind_method(D_METHOD("set_mute", "mute"), &FmodAudioBus::set_mute);
 		ClassDB::bind_method(D_METHOD("is_mute"), &FmodAudioBus::is_mute);
 		ClassDB::bind_method(D_METHOD("apply_mute", "mute"), &FmodAudioBus::apply_mute);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "mute"), "set_mute", "is_mute");
 
 		ClassDB::bind_method(D_METHOD("set_solo", "solo"), &FmodAudioBus::set_solo);
 		ClassDB::bind_method(D_METHOD("is_solo"), &FmodAudioBus::is_mute);
-		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "solo"), "set_solo", "is_solo");
 
 		ClassDB::bind_method(D_METHOD("set_bypass", "bypass"), &FmodAudioBus::set_bypass);
 		ClassDB::bind_method(D_METHOD("is_bypass"), &FmodAudioBus::is_bypass);
 		ClassDB::bind_method(D_METHOD("sync_bypass"), &FmodAudioBus::sync_bypass);
+		
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "volume"), "set_volume_db", "get_volume_db");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "solo"), "set_solo", "is_solo");
+		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "mute"), "set_mute", "is_mute");
 		ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bypass"), "set_bypass", "is_bypass");
 	}
 

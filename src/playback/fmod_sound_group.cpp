@@ -13,19 +13,15 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("set_max_audible", "max_audible"), &FmodSoundGroup::set_max_audible);
 		ClassDB::bind_method(D_METHOD("get_max_audible"), &FmodSoundGroup::get_max_audible);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_audible"), "set_max_audible", "get_max_audible");
 
 		ClassDB::bind_method(D_METHOD("set_max_audible_behavior", "behavior"), &FmodSoundGroup::set_max_audible_behavior);
 		ClassDB::bind_method(D_METHOD("get_max_audible_behavior"), &FmodSoundGroup::get_max_audible_behavior);
-		ADD_PROPERTY(PropertyInfo(Variant::INT, "behavior", PROPERTY_HINT_ENUM, "Fail,Mute,StealLowest,Max"), "set_max_audible_behavior", "get_max_audible_behavior");
 		
 		ClassDB::bind_method(D_METHOD("set_mute_fade_speed", "speed"), &FmodSoundGroup::set_mute_fade_speed);
 		ClassDB::bind_method(D_METHOD("get_mute_fade_speed"), &FmodSoundGroup::get_mute_fade_speed);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "mute_fade_speed"), "set_mute_fade_speed", "get_mute_fade_speed");
 
 		ClassDB::bind_method(D_METHOD("set_volume_db", "volume_db"), &FmodSoundGroup::set_volume_db);
 		ClassDB::bind_method(D_METHOD("get_volume_db"), &FmodSoundGroup::get_volume_db);
-		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "volume_db", PROPERTY_HINT_RANGE, "-80,24,0.1,suffix:dB"), "set_volume_db", "get_volume_db");
 	
 		ClassDB::bind_method(D_METHOD("get_num_sounds"), &FmodSoundGroup::get_num_sounds);
 		ClassDB::bind_method(D_METHOD("get_sound", "index"), &FmodSoundGroup::get_sound);
@@ -34,6 +30,11 @@ namespace godot {
 
 		ClassDB::bind_method(D_METHOD("get_name"), &FmodSoundGroup::get_name);
 		ClassDB::bind_method(D_METHOD("release"), &FmodSoundGroup::release);
+
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "max_audible"), "set_max_audible", "get_max_audible");
+		ADD_PROPERTY(PropertyInfo(Variant::INT, "behavior", PROPERTY_HINT_ENUM, "Fail,Mute,StealLowest,Max"), "set_max_audible_behavior", "get_max_audible_behavior");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "mute_fade_speed"), "set_mute_fade_speed", "get_mute_fade_speed");
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "volume_db", PROPERTY_HINT_RANGE, "-80,24,0.1,suffix:dB"), "set_volume_db", "get_volume_db");
 	}
 
 	FmodSoundGroup::FmodSoundGroup() {
